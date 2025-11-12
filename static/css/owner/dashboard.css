@@ -1,0 +1,125 @@
+/* ==============================
+   店舗ダッシュボード画面
+   ============================== */
+
+body {
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  background: #f2f5fa;
+  margin: 0;
+  padding: 0;
+  color: #333;
+}
+
+/* --- ヘッダー --- */
+header {
+  background: linear-gradient(90deg, #A7CEE6 0%, #89BDDE 100%);
+  color: #fff;
+  text-align: center;
+  padding: 18px 0;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+header h1 {
+  margin: 0;
+  font-size: 1.8rem;
+  letter-spacing: 0.03em;
+}
+
+/* --- メインコンテンツ --- */
+main {
+  max-width: 1000px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+/* --- 店舗リスト --- */
+.store-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+/* --- 店舗カード --- */
+.store-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+  padding: 20px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.store-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
+}
+
+.store-card h2 {
+  margin: 0 0 8px;
+  color: #0078d7;
+  font-size: 1.4rem;
+}
+
+.store-card p {
+  margin: 5px 0;
+  font-size: 0.95rem;
+  color: #555;
+}
+
+/* --- ステータス表示 --- */
+.approved {
+  color: #27ae60; /* 緑 */
+  font-weight: bold;
+}
+
+.pending {
+  color: #f39c12; /* ゴールド */
+  font-weight: bold;
+}
+
+.rejected {
+  color: #e74c3c; /* 赤 */
+  font-weight: bold;
+}
+
+/* --- ボタン --- */
+.btn {
+  display: inline-block;
+  text-align: center;
+  background: #0078d7;
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 6px;
+  margin-top: 12px;
+  font-size: 1rem;
+  text-decoration: none;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.btn:hover {
+  background: #005ea8;
+  transform: translateY(-1px);
+}
+
+/* --- 空リスト時 --- */
+main p {
+  text-align: center;
+  color: #777;
+  font-size: 1rem;
+  margin-top: 60px;
+}
+
+/* --- レスポンシブ --- */
+@media (max-width: 600px) {
+  header h1 {
+    font-size: 1.4rem;
+  }
+  .store-card {
+    padding: 16px;
+  }
+  .btn {
+    font-size: 0.9rem;
+  }
+}

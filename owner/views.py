@@ -1,0 +1,78 @@
+from django.shortcuts import render, get_object_or_404, redirect
+from ciquest_model.models import Store, StoreOwner,Challenge, Coupon
+from django.contrib.auth import logout
+from django.contrib import messages
+from .forms import ChallengeForm
+
+
+
+def login_view(request):
+    """店舗オーナーログイン処理"""
+    if request.method == "POST":
+        email = request.POST.get("email")
+        password = request.POST.get("password")
+
+        try:
+            owner = StoreOwner.objects.get(email=email)
+            if owner.password == password and owner.approved:
+                request.session["owner_id"] = owner.owner_id
+                return redirect("owner_dashboard")
+            else:
+                return render(request, "owner/login.html", {"error": "認証に失敗しました。"})
+        except StoreOwner.DoesNotExist:
+            return render(request, "owner/login.html", {"error": "登録されていないメールアドレスです。"})
+    return render(request, "owner/login.html")
+
+
+def dashboard(request):
+    """オーナーダッシュボード"""
+    owner_id = request.session.get("owner_id")
+    if not owner_id:
+        return redirect("login")
+
+    owner = get_object_or_404(StoreOwner, pk=owner_id)
+    stores = Store.objects.filter(owner=owner)
+    return render(request, "owner/dashboard.html", {"owner": owner, "stores": stores})
+
+
+def store_home(request, store_id):
+    """店舗ごとのホーム画面"""
+    owner_id = request.session.get("owner_id")
+    if not owner_id:
+        return redirect("login")
+
+    store = get_object_or_404(Store, pk=store_id)
+    return render(request, "owner/home.html", {"store": store})
+
+
+def logout_view(request):
+    """ログアウト"""
+    logout(request)
+    request.session.flush()
+    return redirect("login")
+
+
+def create_challenge(request):
+    store = Store.objects.filter(owner_id=request.user.id).first()
+    coupons = Coupon.objects.filter(store=store)
+
+    if request.method == 'POST':
+        form = ChallengeForm(request.POST)
+        if form.is_valid():
+            challenge = form.save(commit=False)
+            challenge.store = store
+            if challenge.quest_type == 'common':
+                challenge.reward_points = 20
+            challenge.save()
+            return redirect('create_challenge_success')
+    else:
+        form = ChallengeForm()
+
+    return render(request, 'owner/create_challenge.html', {
+        'form': form,
+        'store': store,
+        'coupons': coupons,
+    })
+
+def create_challenge_success(request):
+    return render(request, 'owner/create_challenge_success.html')

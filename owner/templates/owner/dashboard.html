@@ -1,0 +1,38 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>店舗選択 | CiQuest</title>
+  <link rel="stylesheet" href="{% static 'css/owner/dashboard.css' %}">
+</head>
+<body>
+  <header>
+    <h1>あなたの店舗一覧</h1>
+  </header>
+  <main>
+    {% if stores %}
+      <div class="store-list">
+        {% for store in stores %}
+          <div class="store-card">
+            <h2>{{ store.name }}</h2>
+            <p>{{ store.address }}</p>
+            <p>ステータス: 
+              {% if store.status == "approved" %}
+                <span class="approved">承認済み ✅</span>
+              {% elif store.status == "pending" %}
+                <span class="pending">審査中 ⏳</span>
+              {% else %}
+                <span class="rejected">却下 ❌</span>
+              {% endif %}
+            </p>
+            <a href="{% url 'owner_store_home' store.store_id %}" class="btn">この店舗を管理</a>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p>まだ登録された店舗がありません。</p>
+    {% endif %}
+  </main>
+</body>
+</html>

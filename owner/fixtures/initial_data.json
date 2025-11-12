@@ -1,0 +1,64 @@
+[
+  {
+    "model": "owner.rank",
+    "pk": 1,
+    "fields": {
+      "name": "ビギナー",
+      "required_points": 0,
+      "max_challenges_per_day": 3
+    }
+  },
+  {
+    "model": "owner.rank",
+    "pk": 2,
+    "fields": {
+      "name": "アドベンチャー",
+      "required_points": 500,
+      "max_challenges_per_day": 5
+    }
+  },
+  {
+    "model": "owner.rank",
+    "pk": 3,
+    "fields": {
+      "name": "マスター",
+      "required_points": 1500,
+      "max_challenges_per_day": 8
+    }
+  },
+  {
+    "model": "owner.storeowner",
+    "pk": 1,
+    "fields": {
+      "name": "宇都宮カフェ スマイル",
+      "email": "smile_owner@example.com",
+      "password": "hashed_pw_owner1",
+      "approved": true
+    }
+  },
+  {
+    "model": "owner.storeowner",
+    "pk": 2,
+    "fields": {
+      "name": "餃子ダイニング 龍門",
+      "email": "gyoza_owner@example.com",
+      "password": "hashed_pw_owner2",
+      "approved": true
+    }
+  },
+  {
+    "model": "owner.store",
+    "pk": 1,
+    "fields": {
+      "owner": 1,
+      "name": "宇都宮カフェ スマイル",
+      "address": "栃木県宇都宮市中央1-1-1",
+      "latitude": 36.5551234,
+      "longitude": 139.8823456,
+      "business_hours": "10:00〜20:00",
+      "store_description": "地元で人気のカフェ。スイーツが自慢。",
+      "qr_code": "QR-STORE-001",
+      "status": "approved"
+    }
+  }
+]

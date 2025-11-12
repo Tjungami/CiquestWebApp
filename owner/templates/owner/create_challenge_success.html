@@ -1,0 +1,73 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>チャレンジ作成完了 - CiQuest オーナー</title>
+
+  <link rel="stylesheet" href="{% static 'css/base/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/owner/common.css' %}">
+  <link rel="stylesheet" href="{% static 'css/owner/create_challenge.css' %}">
+
+  <style>
+    main {
+      text-align: center;
+      padding: 80px 20px;
+    }
+    .success-icon {
+      font-size: 64px;
+      color: #4CAF50;
+      margin-bottom: 20px;
+    }
+    .success-message {
+      font-size: 22px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 30px;
+    }
+    .next-actions a {
+      display: inline-block;
+      margin: 10px;
+      padding: 12px 24px;
+      border-radius: 8px;
+      text-decoration: none;
+      background-color: #89BDDE;
+      color: white;
+      transition: background-color 0.2s ease;
+    }
+    .next-actions a:hover {
+      background-color: #5ba2d3;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>チャレンジ作成完了</h1>
+    <nav>
+      <a href="{% url 'owner_dashboard' %}">ホーム</a>
+      <a href="{% url 'create_challenge' %}" class="active">チャレンジ作成</a>
+      <a href="{% url 'my_challenges' %}">チャレンジ一覧</a>
+      <a href="{% url 'stamp_settings' %}">スタンプ設定</a>
+      <a href="{% url 'stats' %}">統計</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="success-icon">🎉</div>
+    <div class="success-message">新しいチャレンジを登録しました！</div>
+    <p>登録されたチャレンジは、承認後にユーザーに公開されます。</p>
+
+    <div class="next-actions">
+      <a href="{% url 'my_challenges' %}">チャレンジ一覧へ</a>
+      <a href="{% url 'create_challenge' %}">もう一件作成する</a>
+      <a href="{% url 'owner_dashboard' %}">ホームへ戻る</a>
+    </div>
+  </main>
+
+  <footer>
+    <p>© 2025 CiQuest Owner Panel</p>
+  </footer>
+</body>
+</html>

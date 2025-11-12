@@ -1,0 +1,76 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ store.name }} | 店舗管理</title>
+
+  <link rel="stylesheet" href="{% static 'css/base/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/owner/common.css' %}">
+  <link rel="stylesheet" href="{% static 'css/owner/home.css' %}">
+
+  <!-- QRコード生成ライブラリ -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <!-- あなたのJS（static/js/owner/home.js） -->
+  <script src="{% static 'js/owner/home.js' %}" defer></script>
+</head>
+
+<body>
+  <header>
+    <h1>{{ store.name }} の管理ページ</h1>
+    <nav>
+      <a href="{% url 'owner_dashboard' %}">← 店舗一覧に戻る</a>
+      <a href="#" class="active">ホーム</a>
+      <a href="{% url 'create_challenge' %}">チャレンジ作成</a>
+      <a href="#">チャレンジ一覧</a>
+      <a href="#">スタンプ設定</a>
+      <a href="#">統計</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="overview">
+      <h2>店舗情報</h2>
+      <div class="store-info">
+        <p><strong>店舗名：</strong> {{ store.name }}</p>
+        <p><strong>住所：</strong> {{ store.address }}</p>
+        <p><strong>営業時間：</strong> {{ store.business_hours }}</p>
+        <p><strong>説明：</strong> {{ store.store_description }}</p>
+        <p><strong>ステータス：</strong>
+          {% if store.status == 'approved' %}
+            承認済み ✅
+          {% elif store.status == 'pending' %}
+            審査中 ⏳
+          {% else %}
+            却下 ❌
+          {% endif %}
+        </p>
+      </div>
+    </section>
+
+    <section class="qr-section">
+      <h2>QRコード</h2>
+      {% if store.qr_code %}
+        <div id="storeQRCode" data-qr="{{ store.qr_code }}"></div>
+      {% else %}
+        <p>まだQRコードが発行されていません。</p>
+      {% endif %}
+    </section>
+
+    <section class="edit-section">
+      <h2>店舗情報を編集</h2>
+      <form method="post" action="">
+        {% csrf_token %}
+        <label>営業時間：</label>
+        <input type="text" name="business_hours" value="{{ store.business_hours }}">
+
+        <label>店舗説明：</label>
+        <textarea name="store_description">{{ store.store_description }}</textarea>
+
+        <button type="submit">保存</button>
+      </form>
+    </section>
+  </main>
+</body>
+</html>
