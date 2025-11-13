@@ -1,9 +1,19 @@
 # C:\Users\j_tagami\CiquestWebApp\owner\views.py
 from django.shortcuts import render, get_object_or_404, redirect
-from ciquest_model.models import Store, StoreOwner,Challenge, Coupon
+from ciquest_model.models import Store, StoreOwner, Challenge, Coupon
 from django.contrib.auth import logout
 from django.contrib import messages
-from .forms import ChallengeForm
+from .forms import ChallengeForm, CouponForm
+
+
+def _get_owner_store(request):
+    owner_id = request.session.get("owner_id")
+    user = getattr(request, "user", None)
+    if not owner_id and getattr(user, "is_authenticated", False):
+        owner_id = user.id
+    if not owner_id:
+        return None
+    return Store.objects.filter(owner_id=owner_id).first()
 
 
 
@@ -54,7 +64,11 @@ def logout_view(request):
 
 
 def create_challenge(request):
-    store = Store.objects.filter(owner_id=request.user.id).first()
+    store = _get_owner_store(request)
+    if not store:
+        messages.error(request, "店舗情報が見つかりません。先に店舗登録を完了してください。")
+        return redirect("owner_dashboard")
+
     coupons = Coupon.objects.filter(store=store)
 
     if request.method == 'POST':
@@ -76,4 +90,39 @@ def create_challenge(request):
     })
 
 def create_challenge_success(request):
-    return render(request, 'owner/create_challenge_success.html')
+    store = _get_owner_store(request)
+    if not store:
+        return redirect("owner_dashboard")
+    return render(request, 'owner/create_challenge_success.html', {'store': store})
+
+
+def create_coupon(request):
+    store = _get_owner_store(request)
+    if not store:
+        messages.error(request, "店舗情報が見つかりません。先に店舗登録を完了してください。")
+        return redirect("owner_dashboard")
+
+    if request.method == 'POST':
+        form = CouponForm(request.POST)
+        if form.is_valid():
+            coupon = form.save(commit=False)
+            if coupon.type == 'store_specific':
+                coupon.store = store
+            else:
+                coupon.store = None
+            coupon.save()
+            return redirect('create_coupon_success')
+    else:
+        form = CouponForm()
+
+    return render(request, 'owner/create_coupon.html', {
+        'form': form,
+        'store': store,
+    })
+
+
+def create_coupon_success(request):
+    store = _get_owner_store(request)
+    if not store:
+        return redirect("owner_dashboard")
+    return render(request, 'owner/create_coupon_success.html', {'store': store})

@@ -1,0 +1,48 @@
+<!-- C:\Users\j_tagami\CiquestWebApp\owner\templates\owner\create_coupon_success.html -->
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>クーポン作成完了 - CiQuest オーナー</title>
+
+  <link rel="stylesheet" href="{% static 'css/base/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/owner/common.css' %}">
+  <link rel="stylesheet" href="{% static 'css/owner/create_coupon.css' %}">
+</head>
+
+<body class="coupon-success-page">
+  <header>
+    <h1>クーポン登録完了</h1>
+    <nav>
+      {% if store %}
+      <a href="{% url 'owner_store_home' store.store_id %}">ホーム</a>
+      {% else %}
+      <a href="{% url 'owner_dashboard' %}">ホーム</a>
+      {% endif %}
+      <a href="{% url 'create_challenge' %}">チャレンジ作成</a>
+      <a href="{% url 'create_coupon' %}" class="active">クーポン作成</a>
+      <a href="#">チャレンジ一覧</a>
+      <a href="#">スタンプ設定</a>
+      <a href="#">統計</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="success-icon">🎉</div>
+    <div class="success-message">新しいクーポンを登録しました！</div>
+    <p>登録したクーポンは即座にチャレンジの報酬やスタンプ交換で使用できます。</p>
+
+    <div class="next-actions">
+      <a href="{% url 'create_coupon' %}">続けてクーポンを作成</a>
+      <a href="{% url 'create_challenge' %}">チャレンジへの紐づけを設定</a>
+      <a href="{% url 'owner_dashboard' %}">ダッシュボードに戻る</a>
+    </div>
+  </main>
+
+  <footer>
+    <p>© 2025 CiQuest Owner Panel</p>
+  </footer>
+</body>
+</html>

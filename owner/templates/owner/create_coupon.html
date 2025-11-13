@@ -1,0 +1,114 @@
+<!-- C:\Users\j_tagami\CiquestWebApp\owner\templates\owner\create_coupon.html -->
+{% load static %}
+{% load widget_tweaks %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>クーポン作成 - CiQuest オーナー</title>
+
+  <link rel="stylesheet" href="{% static 'css/base/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/owner/common.css' %}">
+  <link rel="stylesheet" href="{% static 'css/owner/create_coupon.css' %}">
+</head>
+<body>
+  <header>
+    <h1>クーポン作成</h1>
+    <nav>
+      {% if store %}
+      <a href="{% url 'owner_store_home' store.store_id %}">ホーム</a>
+      {% else %}
+      <a href="{% url 'owner_dashboard' %}">ホーム</a>
+      {% endif %}
+      <a href="{% url 'create_challenge' %}">チャレンジ作成</a>
+      <a href="{% url 'create_coupon' %}" class="active">クーポン作成</a>
+      <a href="#">チャレンジ一覧</a>
+      <a href="#">スタンプ設定</a>
+      <a href="#">統計</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="coupon-form">
+      <div class="section-heading">
+        <div>
+          <h2>店舗向けクーポンを登録</h2>
+          <p class="section-description">ユーザーがポイントを使って交換できる特典を設定しましょう。</p>
+        </div>
+        <div class="store-chip">
+          <span>対象店舗</span>
+          <strong>{{ store.name }}</strong>
+        </div>
+      </div>
+
+      {% if messages %}
+        <ul class="messages">
+          {% for message in messages %}
+            <li class="{{ message.tags }}">{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+
+      {% if form.non_field_errors %}
+        <div class="error-block">
+          {{ form.non_field_errors }}
+        </div>
+      {% endif %}
+
+      <form method="post" action="{% url 'create_coupon' %}">
+        {% csrf_token %}
+
+        <div class="form-field">
+          <label for="{{ form.title.id_for_label }}">クーポン名</label>
+          {{ form.title }}
+          {% if form.title.errors %}
+            <div class="error">{{ form.title.errors }}</div>
+          {% endif %}
+        </div>
+
+        <div class="form-field">
+          <label for="{{ form.description.id_for_label }}">詳細・利用条件</label>
+          {{ form.description }}
+          {% if form.description.errors %}
+            <div class="error">{{ form.description.errors }}</div>
+          {% endif %}
+        </div>
+
+        <div class="form-field">
+          <label for="{{ form.required_points.id_for_label }}">必要ポイント</label>
+          <div class="field-helper">
+            {{ form.required_points }}
+            <span class="suffix">pt</span>
+          </div>
+          <p class="field-note">ポイントは0以上で設定できます。10ポイント刻みを推奨しています。</p>
+          {% if form.required_points.errors %}
+            <div class="error">{{ form.required_points.errors }}</div>
+          {% endif %}
+        </div>
+
+        <div class="form-field inline">
+          <div>
+            <label for="{{ form.type.id_for_label }}">クーポン区分</label>
+            {{ form.type }}
+          </div>
+          <div>
+            <label for="{{ form.expires_at.id_for_label }}">有効期限</label>
+            {{ form.expires_at }}
+            <p class="field-note">未設定の場合、期限なしとして扱われます。</p>
+          </div>
+        </div>
+
+        <div class="form-buttons">
+          <a href="{% url 'owner_dashboard' %}" class="cancel-btn">キャンセル</a>
+          <button type="submit" class="submit-btn">この内容で登録</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <footer>
+    <p>© 2025 CiQuest Owner Panel</p>
+  </footer>
+</body>
+</html>

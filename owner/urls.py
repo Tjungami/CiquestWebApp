@@ -9,4 +9,6 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('create_challenge/', views.create_challenge, name='create_challenge'),
     path('create_challenge/success/', views.create_challenge_success, name='create_challenge_success'),
+    path('create_coupon/', views.create_coupon, name='create_coupon'),
+    path('create_coupon/success/', views.create_coupon_success, name='create_coupon_success'),
 ]

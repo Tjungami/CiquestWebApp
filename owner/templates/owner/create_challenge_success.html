@@ -47,8 +47,13 @@
   <header>
     <h1>チャレンジ作成完了</h1>
     <nav>
+      {% if store %}
+      <a href="{% url 'owner_store_home' store.store_id %}">ホーム</a>
+      {% else %}
       <a href="{% url 'owner_dashboard' %}">ホーム</a>
+      {% endif %}
       <a href="{% url 'create_challenge' %}" class="active">チャレンジ作成</a>
+      <a href="{% url 'create_coupon' %}">クーポン作成</a>
       <a href="{% url 'my_challenges' %}">チャレンジ一覧</a>
       <a href="{% url 'stamp_settings' %}">スタンプ設定</a>
       <a href="{% url 'stats' %}">統計</a>

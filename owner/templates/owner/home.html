@@ -22,8 +22,9 @@
     <h1>{{ store.name }} の管理ページ</h1>
     <nav>
       <a href="{% url 'owner_dashboard' %}">← 店舗一覧に戻る</a>
-      <a href="#" class="active">ホーム</a>
+      <a href="{% url 'owner_store_home' store.store_id %}" class="active">ホーム</a>
       <a href="{% url 'create_challenge' %}">チャレンジ作成</a>
+      <a href="{% url 'create_coupon' %}">??????</a>
       <a href="#">チャレンジ一覧</a>
       <a href="#">スタンプ設定</a>
       <a href="#">統計</a>
