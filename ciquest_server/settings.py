@@ -1,3 +1,4 @@
+# C:\Users\j_tagami\CiquestWebApp\ciquest_server\settings.py
 """
 Django settings for ciquest_server project.
 

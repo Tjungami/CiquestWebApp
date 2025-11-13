@@ -1,3 +1,4 @@
+// C:\Users\j_tagami\CiquestWebApp\static\js\owner\stamp_settings.js
 // --- スタンプカード設定フォーム制御 ---
 document.addEventListener("DOMContentLoaded", () => {
   const rewardList = document.getElementById("rewardList");

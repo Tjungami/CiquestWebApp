@@ -1,3 +1,4 @@
+# C:\Users\j_tagami\CiquestWebApp\ciquest_model\scripts\test_seed.py
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from ciquest_model.models import *

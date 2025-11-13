@@ -1,3 +1,4 @@
+# C:\Users\j_tagami\CiquestWebApp\owner\views.py
 from django.shortcuts import render, get_object_or_404, redirect
 from ciquest_model.models import Store, StoreOwner,Challenge, Coupon
 from django.contrib.auth import logout

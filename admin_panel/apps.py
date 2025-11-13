@@ -1,3 +1,4 @@
+# C:\Users\j_tagami\CiquestWebApp\admin_panel\apps.py
 from django.apps import AppConfig
 
 

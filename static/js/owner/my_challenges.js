@@ -1,3 +1,4 @@
+// C:\Users\j_tagami\CiquestWebApp\static\js\owner\my_challenges.js
 // --- 発行クエスト一覧管理 ---
 
 document.addEventListener("DOMContentLoaded", () => {

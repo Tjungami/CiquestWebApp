@@ -1,3 +1,4 @@
+# C:\Users\j_tagami\CiquestWebApp\ciquest_model\models.py
 from django.db import models
 
 # ランク情報

@@ -1,3 +1,4 @@
+// C:\Users\j_tagami\CiquestWebApp\static\js\owner\stats.js
 // --- 統計画面モックデータ表示 ---
 document.addEventListener("DOMContentLoaded", () => {
   // グラフ表示

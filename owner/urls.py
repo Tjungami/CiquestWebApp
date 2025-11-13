@@ -1,3 +1,4 @@
+# C:\Users\j_tagami\CiquestWebApp\owner\urls.py
 from django.urls import path
 from . import views
 

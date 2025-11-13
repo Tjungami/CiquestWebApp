@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# C:\Users\j_tagami\CiquestWebApp\manage.py
 """Django's command-line utility for administrative tasks."""
 import os
 import sys

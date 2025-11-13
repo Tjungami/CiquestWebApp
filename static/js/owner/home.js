@@ -1,3 +1,4 @@
+// C:\Users\j_tagami\CiquestWebApp\static\js\owner\home.js
 document.addEventListener("DOMContentLoaded", () => {
   const qrContainer = document.getElementById("storeQRCode");
   if (!qrContainer) return;
