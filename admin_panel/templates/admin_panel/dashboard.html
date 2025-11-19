@@ -67,8 +67,10 @@
                 <div class="snapshot-item__icon" aria-hidden="true">🏬</div>
                 <div class="snapshot-item__body">
                   <strong>{{ store.name }}</strong>
-                  <p>{{ store.address|default:"住所未登録" }}</p>
-                  <small>登録日: {{ store.created_at|date:"Y/m/d" }}</small>
+                  <p class="snapshot-item__text">{{ store.address|default:"住所未登録" }}</p>
+                  <div class="snapshot-item__meta">
+                    <span class="snapshot-chip snapshot-chip--date">登録日 {{ store.created_at|date:"Y/m/d" }}</span>
+                  </div>
                 </div>
                 <span class="status-badge status-{{ store.status }}">{{ store.get_status_display }}</span>
               </div>
@@ -94,7 +96,7 @@
                 <div class="snapshot-item__icon" aria-hidden="true">🎯</div>
                 <div class="snapshot-item__body">
                   <strong>{{ challenge.title }}</strong>
-                  <p>
+                  <p class="snapshot-item__text">
                     店舗:
                     {% if challenge.store %}
                       {{ challenge.store.name }}
@@ -102,7 +104,9 @@
                       不明
                     {% endif %}
                   </p>
-                  <small>獲得ポイント: {{ challenge.reward_points }} pt</small>
+                  <div class="snapshot-item__meta">
+                    <span class="snapshot-chip snapshot-chip--points">獲得 {{ challenge.reward_points }} pt</span>
+                  </div>
                 </div>
                 {% if challenge.is_banned %}
                   <span class="status-badge status-banned">BAN中</span>
@@ -132,13 +136,20 @@
                 <div class="snapshot-item__icon" aria-hidden="true">🎟️</div>
                 <div class="snapshot-item__body">
                   <strong>{{ coupon.title }}</strong>
-                  <p>{{ coupon.description|default:"説明なし" }}</p>
-                  <small>必要ポイント: {{ coupon.required_points }} pt</small>
+                  <p class="snapshot-item__text">{{ coupon.description|default:"説明なし" }}</p>
+                  <div class="snapshot-item__meta">
+                    <span class="snapshot-chip snapshot-chip--points">必要 {{ coupon.required_points }} pt</span>
+                    {% if coupon.expires_at %}
+                      <span class="snapshot-chip snapshot-chip--date">期限 {{ coupon.expires_at|date:"Y/m/d" }}</span>
+                    {% else %}
+                      <span class="snapshot-chip snapshot-chip--date">期限未設定</span>
+                    {% endif %}
+                  </div>
                 </div>
                 {% if coupon.expires_at %}
-                  <span class="status-badge status-expire">期限: {{ coupon.expires_at|date:"Y/m/d" }}</span>
+                  <span class="status-badge status-expire">期限あり</span>
                 {% else %}
-                  <span class="status-badge status-expire">期限未設定</span>
+                  <span class="status-badge status-expire">期限なし</span>
                 {% endif %}
               </div>
             {% endfor %}
@@ -163,14 +174,16 @@
                 <div class="snapshot-item__icon" aria-hidden="true">📬</div>
                 <div class="snapshot-item__body">
                   <strong>{{ inquiry.category }}</strong>
-                  <p>
+                  <p class="snapshot-item__text">
                     {% if inquiry.store %}
                       {{ inquiry.store.name }}
                     {% else %}
                       店舗情報なし
                     {% endif %}
                   </p>
-                  <small>{{ inquiry.created_at|date:"Y/m/d" }}</small>
+                  <div class="snapshot-item__meta">
+                    <span class="snapshot-chip snapshot-chip--date">{{ inquiry.created_at|date:"Y/m/d" }}</span>
+                  </div>
                 </div>
                 <span class="status-badge status-{{ inquiry.status }}">{{ inquiry.get_status_display }}</span>
               </div>
