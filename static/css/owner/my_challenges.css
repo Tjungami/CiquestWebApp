@@ -50,15 +50,16 @@ button:hover {
 }
 
 /* --- チャレンジ追加ボタン --- */
-.add-challenge {
-  text-align: center;
-  margin-top: 20px;
+.section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
 }
 
-.add-challenge .submit-btn {
-  display: inline-block;
+.section-heading .submit-btn {
   background-color: #0078d7;
-  color: white;
+  color: #fff;
   padding: 10px 20px;
   border-radius: 6px;
   text-decoration: none;
@@ -66,8 +67,85 @@ button:hover {
   transition: background 0.2s;
 }
 
-.add-challenge .submit-btn:hover {
+.section-heading .submit-btn:hover {
   background-color: #005ea8;
+}
+
+.messages {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px 0;
+}
+
+.messages li {
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.messages li.success {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.messages li.error {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.muted {
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+.empty-state {
+  background: #f9fafb;
+  border: 1px dashed #d1d5db;
+  border-radius: 8px;
+  padding: 24px;
+  text-align: center;
+  color: #4b5563;
+}
+
+.empty-state a {
+  color: #0078d7;
+  text-decoration: underline;
+}
+
+.action-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.action-buttons .edit-btn,
+.action-buttons .delete-btn {
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.action-buttons .edit-btn {
+  background: #16a34a;
+}
+
+.action-buttons .delete-btn {
+  background: #dc2626;
+}
+
+.action-buttons .edit-btn:hover,
+.action-buttons .delete-btn:hover {
+  opacity: 0.85;
+}
+
+.action-buttons .delete-form {
+  margin: 0;
 }
 
 /* --- QRモーダル --- */

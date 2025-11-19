@@ -33,6 +33,107 @@ main {
   padding: 0 20px;
 }
 
+.messages {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 24px;
+}
+
+.messages li {
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.messages .success {
+  background: #e9f7ef;
+  color: #1e824c;
+}
+
+.messages .error {
+  background: #fdecea;
+  color: #c0392b;
+}
+
+.store-application {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+  padding: 24px;
+  margin-bottom: 32px;
+}
+
+.store-application h2 {
+  margin-top: 0;
+  margin-bottom: 8px;
+  color: #1f4e79;
+}
+
+.store-application .help-text {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+.application-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-field.full {
+  grid-column: 1 / -1;
+}
+
+.form-field label {
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.form-field input,
+.form-field textarea {
+  border: 1px solid #d5d9e2;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 0.95rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-field input:focus,
+.form-field textarea:focus {
+  border-color: #89bdde;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(137, 189, 222, 0.3);
+}
+
+.form-field .error {
+  margin-top: 4px;
+  color: #e74c3c;
+  font-size: 0.85rem;
+}
+
+.form-errors {
+  background: #fdecea;
+  border-left: 4px solid #e74c3c;
+  padding: 12px 16px;
+  border-radius: 8px;
+  color: #c0392b;
+  font-size: 0.9rem;
+}
+
 /* --- 店舗リスト --- */
 .store-list {
   display: grid;
@@ -102,6 +203,11 @@ main {
 .btn:hover {
   background: #005ea8;
   transform: translateY(-1px);
+}
+
+.submit-btn {
+  align-self: flex-start;
+  padding: 12px 24px;
 }
 
 /* --- 空リスト時 --- */

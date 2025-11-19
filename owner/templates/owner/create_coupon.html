@@ -6,27 +6,37 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="{% static 'img/common/CIquest.ico' %}" type="image/x-icon">
   <title>クーポン作成 - CiQuest オーナー</title>
 
   <link rel="stylesheet" href="{% static 'css/base/base.css' %}">
   <link rel="stylesheet" href="{% static 'css/owner/common.css' %}">
   <link rel="stylesheet" href="{% static 'css/owner/create_coupon.css' %}">
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      {% if coupon_limit_reached %}
+      alert('クーポンは最大 {{ coupon_limit }} 件までです。既存のクーポンを削除してから新規登録してください。');
+      {% endif %}
+    });
+  </script>
 </head>
 <body>
   <header>
     <h1>クーポン作成</h1>
-    <nav>
+        <nav>
       {% if store %}
-      <a href="{% url 'owner_store_home' store.store_id %}">ホーム</a>
+        <a href="{% url 'owner_store_home' store.store_id %}">ホーム</a>
       {% else %}
-      <a href="{% url 'owner_dashboard' %}">ホーム</a>
+        <a href="{% url 'owner_dashboard' %}">ホーム</a>
       {% endif %}
       <a href="{% url 'create_challenge' %}">チャレンジ作成</a>
       <a href="{% url 'create_coupon' %}" class="active">クーポン作成</a>
-      <a href="#">チャレンジ一覧</a>
-      <a href="#">スタンプ設定</a>
-      <a href="#">統計</a>
+      <a href="{% url 'coupon_list' %}">クーポン一覧</a>
+      <a href="{% url 'my_challenges' %}">チャレンジ一覧</a>
+      <a href="{% url 'stamp_settings' %}">スタンプ設定</a>
+      <a href="{% url 'stats' %}">統計</a>
     </nav>
+
   </header>
 
   <main>
@@ -56,7 +66,11 @@
         </div>
       {% endif %}
 
-      <form method="post" action="{% url 'create_coupon' %}">
+      {% if coupon_limit_reached %}
+        <p class="limit-warning">クーポンは最大 {{ coupon_limit }} 件までです。既存のクーポンを削除してから新規登録してください。</p>
+      {% endif %}
+
+      <form method="post" action="{% url 'create_coupon' %}" {% if coupon_limit_reached %}class="disabled-form" aria-disabled="true"{% endif %}>
         {% csrf_token %}
 
         <div class="form-field">
@@ -89,19 +103,35 @@
 
         <div class="form-field inline">
           <div>
-            <label for="{{ form.type.id_for_label }}">クーポン区分</label>
-            {{ form.type }}
+            <label>クーポン区分</label>
+            <p class="fixed-badge">店舗独自（固定）</p>
           </div>
           <div>
             <label for="{{ form.expires_at.id_for_label }}">有効期限</label>
-            {{ form.expires_at }}
-            <p class="field-note">未設定の場合、期限なしとして扱われます。</p>
+            <div class="split-datetime">
+              {% for subfield in form.expires_at %}
+                <div class="split-item">{{ subfield }}</div>
+              {% endfor %}
+            </div>
+            <p class="field-note">日付と時間を選択してください。未設定の場合、期限なしとして扱われます。</p>
+            {% if form.expires_at.errors %}
+              <div class="error">{{ form.expires_at.errors }}</div>
+            {% endif %}
           </div>
         </div>
 
+        <div class="form-field checkbox-field">
+          <label for="{{ form.publish_to_shop.id_for_label }}" class="checkbox-label">
+            {{ form.publish_to_shop }} このクーポンをショップに公開しますか。
+          </label>
+          {% if form.publish_to_shop.errors %}
+            <div class="error">{{ form.publish_to_shop.errors }}</div>
+          {% endif %}
+        </div>
+
         <div class="form-buttons">
-          <a href="{% url 'owner_dashboard' %}" class="cancel-btn">キャンセル</a>
-          <button type="submit" class="submit-btn">この内容で登録</button>
+          <a href="{% url 'owner_store_home' store.store_id %}" class="cancel-btn">キャンセル</a>
+          <button type="submit" class="submit-btn" {% if coupon_limit_reached %}disabled{% endif %}>この内容で登録</button>
         </div>
       </form>
     </section>

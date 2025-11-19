@@ -1,0 +1,127 @@
+<!-- C:\Users\j_tagami\CiquestWebApp\owner\templates\owner\edit_coupon.html -->
+{% load static %}
+{% load widget_tweaks %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="{% static 'img/common/CIquest.ico' %}" type="image/x-icon">
+  <title>クーポン編集 - CiQuest オーナー</title>
+
+  <link rel="stylesheet" href="{% static 'css/base/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/owner/common.css' %}">
+  <link rel="stylesheet" href="{% static 'css/owner/create_coupon.css' %}">
+</head>
+<body>
+  <header>
+    <h1>クーポン編集</h1>
+        <nav>
+      {% if store %}
+        <a href="{% url 'owner_store_home' store.store_id %}">ホーム</a>
+      {% else %}
+        <a href="{% url 'owner_dashboard' %}">ホーム</a>
+      {% endif %}
+      <a href="{% url 'create_challenge' %}">チャレンジ作成</a>
+      <a href="{% url 'create_coupon' %}">クーポン作成</a>
+      <a href="{% url 'coupon_list' %}" class="active">クーポン一覧</a>
+      <a href="{% url 'my_challenges' %}">チャレンジ一覧</a>
+      <a href="{% url 'stamp_settings' %}">スタンプ設定</a>
+      <a href="{% url 'stats' %}">統計</a>
+    </nav>
+
+  </header>
+
+  <main>
+    <section class="coupon-form">
+      <div class="section-heading">
+        <div>
+          <h2>「{{ coupon.title }}」を編集</h2>
+          <p class="section-description">内容を修正し、「この内容で更新」を押してください。</p>
+        </div>
+        <div class="store-chip">
+          <span>対象店舗</span>
+          <strong>{{ store.name }}</strong>
+        </div>
+      </div>
+
+      {% if messages %}
+        <ul class="messages">
+          {% for message in messages %}
+            <li class="{{ message.tags }}">{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+
+      <form method="post" action="{% url 'edit_coupon' coupon.coupon_id %}">
+        {% csrf_token %}
+
+        <div class="form-field">
+          <label for="{{ form.title.id_for_label }}">クーポン名</label>
+          {{ form.title }}
+          {% if form.title.errors %}
+            <div class="error">{{ form.title.errors }}</div>
+          {% endif %}
+        </div>
+
+        <div class="form-field">
+          <label for="{{ form.description.id_for_label }}">詳細・利用条件</label>
+          {{ form.description }}
+          {% if form.description.errors %}
+            <div class="error">{{ form.description.errors }}</div>
+          {% endif %}
+        </div>
+
+        <div class="form-field">
+          <label for="{{ form.required_points.id_for_label }}">必要ポイント</label>
+          <div class="field-helper">
+            {{ form.required_points }}
+            <span class="suffix">pt</span>
+          </div>
+          {% if form.required_points.errors %}
+            <div class="error">{{ form.required_points.errors }}</div>
+          {% endif %}
+        </div>
+
+        <div class="form-field inline">
+          <div>
+            <label>クーポン区分</label>
+            <p class="fixed-badge">店舗独自（固定）</p>
+          </div>
+          <div>
+            <label for="{{ form.expires_at.id_for_label }}">有効期限</label>
+            <div class="split-datetime">
+              {% for subfield in form.expires_at %}
+                <div class="split-item">{{ subfield }}</div>
+              {% endfor %}
+            </div>
+            <p class="field-note">日付と時間を選択してください。未設定の場合、期限なしとして扱われます。</p>
+            {% if form.expires_at.errors %}
+              <div class="error">{{ form.expires_at.errors }}</div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="form-field checkbox-field">
+          <label for="{{ form.publish_to_shop.id_for_label }}" class="checkbox-label">
+            {{ form.publish_to_shop }} ユーザー向けクーポンショップに公開する
+          </label>
+          <p class="field-note">公開すると、ユーザーアプリ内のクーポンショップにも表示されます。</p>
+          {% if form.publish_to_shop.errors %}
+            <div class="error">{{ form.publish_to_shop.errors }}</div>
+          {% endif %}
+        </div>
+
+        <div class="form-buttons">
+          <a href="{% url 'coupon_list' %}" class="cancel-btn">一覧へ戻る</a>
+          <button type="submit" class="submit-btn">この内容で更新</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <footer>
+    <p>© 2025 CiQuest Owner Panel</p>
+  </footer>
+</body>
+</html>

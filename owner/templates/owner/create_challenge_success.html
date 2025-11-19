@@ -5,6 +5,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="{% static 'img/common/CIquest.ico' %}" type="image/x-icon">
   <title>チャレンジ作成完了 - CiQuest オーナー</title>
 
   <link rel="stylesheet" href="{% static 'css/base/base.css' %}">
@@ -46,18 +47,20 @@
 <body>
   <header>
     <h1>チャレンジ作成完了</h1>
-    <nav>
+        <nav>
       {% if store %}
-      <a href="{% url 'owner_store_home' store.store_id %}">ホーム</a>
+        <a href="{% url 'owner_store_home' store.store_id %}">ホーム</a>
       {% else %}
-      <a href="{% url 'owner_dashboard' %}">ホーム</a>
+        <a href="{% url 'owner_dashboard' %}">ホーム</a>
       {% endif %}
       <a href="{% url 'create_challenge' %}" class="active">チャレンジ作成</a>
       <a href="{% url 'create_coupon' %}">クーポン作成</a>
+      <a href="{% url 'coupon_list' %}">クーポン一覧</a>
       <a href="{% url 'my_challenges' %}">チャレンジ一覧</a>
       <a href="{% url 'stamp_settings' %}">スタンプ設定</a>
       <a href="{% url 'stats' %}">統計</a>
     </nav>
+
   </header>
 
   <main>
@@ -68,7 +71,7 @@
     <div class="next-actions">
       <a href="{% url 'my_challenges' %}">チャレンジ一覧へ</a>
       <a href="{% url 'create_challenge' %}">もう一件作成する</a>
-      <a href="{% url 'owner_dashboard' %}">ホームへ戻る</a>
+      <a href="{% url 'owner_store_home' store.store_id %}">ホームへ戻る</a>
     </div>
   </main>
 

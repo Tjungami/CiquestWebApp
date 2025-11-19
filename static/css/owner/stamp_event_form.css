@@ -1,0 +1,106 @@
+/* C:\Users\j_tagami\CiquestWebApp\static\css\owner\stamp_event_form.css */
+
+body {
+  background: linear-gradient(135deg, #f0f4ff 0%, #ffffff 60%);
+  min-height: 100vh;
+}
+
+.event-form-wrapper {
+  max-width: 720px;
+  margin: 40px auto;
+  background: #fff;
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.12);
+}
+
+.event-form-wrapper h1 {
+  margin-bottom: 8px;
+}
+
+.event-form-wrapper p {
+  color: #6b7280;
+}
+
+form {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+label {
+  font-weight: 600;
+  display: block;
+  margin-bottom: 6px;
+}
+
+input[type="number"],
+input[type="text"],
+select {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 1rem;
+}
+
+.radio-group label {
+  font-weight: 500;
+}
+
+.radio-group ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  gap: 16px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.pill {
+  border-radius: 999px;
+  padding: 12px 28px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+}
+
+.pill.ghost {
+  border: 1px solid #d1d5db;
+  background: transparent;
+  color: #374151;
+}
+
+.pill.primary {
+  background: #2563eb;
+  color: #fff;
+}
+
+.errorlist {
+  margin: 6px 0 0;
+  color: #b91c1c;
+  list-style: none;
+  padding: 0;
+  font-size: 0.9rem;
+}
+
+.field-block {
+  display: flex;
+  flex-direction: column;
+}
+
+.hint {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+.hidden {
+  display: none;
+}

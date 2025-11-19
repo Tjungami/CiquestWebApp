@@ -3,6 +3,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+  <link rel="icon" href="{% static 'img/common/CIquest.ico' %}" type="image/x-icon">
   <meta charset="UTF-8">
   <title>店舗選択 | CiQuest</title>
   <link rel="stylesheet" href="{% static 'css/owner/dashboard.css' %}">
@@ -12,6 +13,74 @@
     <h1>あなたの店舗一覧</h1>
   </header>
   <main>
+    {% if messages %}
+      <ul class="messages">
+        {% for message in messages %}
+          <li class="{{ message.tags }}">{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    <section class="store-application">
+      <h2>新しい店舗を申請</h2>
+      <p class="help-text">必要事項を入力して送信すると、運営が内容を確認して承認ステータスを更新します。</p>
+      <form method="post" class="application-form">
+        {% csrf_token %}
+        {% if application_form.non_field_errors %}
+          <div class="form-errors">
+            {% for error in application_form.non_field_errors %}
+              <p>{{ error }}</p>
+            {% endfor %}
+          </div>
+        {% endif %}
+        <div class="form-grid">
+          <div class="form-field">
+            <label for="{{ application_form.name.id_for_label }}">店舗名</label>
+            {{ application_form.name }}
+            {% if application_form.name.errors %}
+              <span class="error">{{ application_form.name.errors.0 }}</span>
+            {% endif %}
+          </div>
+          <div class="form-field">
+            <label for="{{ application_form.address.id_for_label }}">住所</label>
+            {{ application_form.address }}
+            {% if application_form.address.errors %}
+              <span class="error">{{ application_form.address.errors.0 }}</span>
+            {% endif %}
+          </div>
+          <div class="form-field inline">
+            <label for="{{ application_form.latitude.id_for_label }}">緯度</label>
+            {{ application_form.latitude }}
+            {% if application_form.latitude.errors %}
+              <span class="error">{{ application_form.latitude.errors.0 }}</span>
+            {% endif %}
+          </div>
+          <div class="form-field inline">
+            <label for="{{ application_form.longitude.id_for_label }}">経度</label>
+            {{ application_form.longitude }}
+            {% if application_form.longitude.errors %}
+              <span class="error">{{ application_form.longitude.errors.0 }}</span>
+            {% endif %}
+          </div>
+          <div class="form-field">
+            <label for="{{ application_form.business_hours.id_for_label }}">営業時間</label>
+            {{ application_form.business_hours }}
+            {% if application_form.business_hours.errors %}
+              <span class="error">{{ application_form.business_hours.errors.0 }}</span>
+            {% endif %}
+          </div>
+          <div class="form-field full">
+            <label for="{{ application_form.store_description.id_for_label }}">店舗説明</label>
+            {{ application_form.store_description }}
+            {% if application_form.store_description.errors %}
+              <span class="error">{{ application_form.store_description.errors.0 }}</span>
+            {% endif %}
+          </div>
+        </div>
+        <button type="submit" class="btn submit-btn">申請する</button>
+      </form>
+    </section>
+
     {% if stores %}
       <div class="store-list">
         {% for store in stores %}

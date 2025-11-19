@@ -1,0 +1,186 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>運営ダッシュボード | Ciquest</title>
+  <link rel="stylesheet" href="{% static 'css/base/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/admin/sunset.css' %}">
+  <link rel="stylesheet" href="{% static 'css/admin/dashboard.css' %}">
+  <link rel="icon" href="{% static 'img/common/CIquest.ico' %}">
+</head>
+<body>
+  <header class="admin-header">
+    <h1>運営ダッシュボード</h1>
+    <nav>
+      <a href="{% url 'admin_dashboard' %}" {% if active_page == 'dashboard' %}class="active"{% endif %}>ダッシュボード</a>
+      <a href="{% url 'admin_stores' %}" {% if active_page == 'stores' %}class="active"{% endif %}>店舗承認</a>
+      <a href="{% url 'admin_challenges' %}" {% if active_page == 'challenges' %}class="active"{% endif %}>チャレンジ管理</a>
+      <a href="{% url 'admin_coupons' %}" {% if active_page == 'coupons' %}class="active"{% endif %}>クーポン管理</a>
+      <a href="{% url 'admin_inquiries' %}" {% if active_page == 'inquiries' %}class="active"{% endif %}>お問い合わせ</a>
+    </nav>
+    <a class="logout-btn" href="{% url 'logout' %}">ログアウト</a>
+  </header>
+
+  <main class="admin-dashboard">
+    <section class="summary-grid">
+      <article class="summary-card summary-card--stores">
+        <span class="summary-card__icon" aria-hidden="true">🏬</span>
+        <h3>審査待ち店舗</h3>
+        <p class="summary-value">{{ summary_pending_stores }} 件</p>
+        <small>最新の店舗申請状況</small>
+      </article>
+      <article class="summary-card summary-card--challenges">
+        <span class="summary-card__icon" aria-hidden="true">🎯</span>
+        <h3>チャレンジ</h3>
+        <p class="summary-value">{{ summary_challenges }} 件</p>
+        <small>公開中のチャレンジ数</small>
+      </article>
+      <article class="summary-card summary-card--coupons">
+        <span class="summary-card__icon" aria-hidden="true">🎟️</span>
+        <h3>共通クーポン</h3>
+        <p class="summary-value">{{ summary_coupons }} 件</p>
+        <small>発行済みの共通クーポン</small>
+      </article>
+      <article class="summary-card summary-card--inquiries">
+        <span class="summary-card__icon" aria-hidden="true">📬</span>
+        <h3>未対応のお問い合わせ</h3>
+        <p class="summary-value">{{ summary_inquiries }} 件</p>
+        <small>未読のお問い合わせ数</small>
+      </article>
+    </section>
+
+    <section class="snapshot-grid">
+      <article class="snapshot-card snapshot-card--stores">
+        <header>
+          <div>
+            <h2>店舗承認の状況</h2>
+            <p>審査待ち店舗の上位3件を表示します。</p>
+          </div>
+          <a class="snapshot-link" href="{% url 'admin_stores' %}">店舗承認画面へ</a>
+        </header>
+        <div class="snapshot-list">
+          {% if snapshot_pending_stores %}
+            {% for store in snapshot_pending_stores %}
+              <div class="snapshot-item snapshot-item--stores">
+                <div class="snapshot-item__icon" aria-hidden="true">🏬</div>
+                <div class="snapshot-item__body">
+                  <strong>{{ store.name }}</strong>
+                  <p>{{ store.address|default:"住所未登録" }}</p>
+                  <small>登録日: {{ store.created_at|date:"Y/m/d" }}</small>
+                </div>
+                <span class="status-badge status-{{ store.status }}">{{ store.get_status_display }}</span>
+              </div>
+            {% endfor %}
+          {% else %}
+            <p class="snapshot-empty">現在、審査待ちの店舗はありません。</p>
+          {% endif %}
+        </div>
+      </article>
+
+      <article class="snapshot-card snapshot-card--challenges">
+        <header>
+          <div>
+            <h2>チャレンジの最新情報</h2>
+            <p>最新のチャレンジを表示します。</p>
+          </div>
+          <a class="snapshot-link" href="{% url 'admin_challenges' %}">チャレンジ管理へ</a>
+        </header>
+        <div class="snapshot-list">
+          {% if snapshot_challenges %}
+            {% for challenge in snapshot_challenges %}
+              <div class="snapshot-item snapshot-item--challenges">
+                <div class="snapshot-item__icon" aria-hidden="true">🎯</div>
+                <div class="snapshot-item__body">
+                  <strong>{{ challenge.title }}</strong>
+                  <p>
+                    店舗:
+                    {% if challenge.store %}
+                      {{ challenge.store.name }}
+                    {% else %}
+                      不明
+                    {% endif %}
+                  </p>
+                  <small>獲得ポイント: {{ challenge.reward_points }} pt</small>
+                </div>
+                {% if challenge.is_banned %}
+                  <span class="status-badge status-banned">BAN中</span>
+                {% else %}
+                  <span class="status-badge status-active">公開中</span>
+                {% endif %}
+              </div>
+            {% endfor %}
+          {% else %}
+            <p class="snapshot-empty">登録済みのチャレンジはありません。</p>
+          {% endif %}
+        </div>
+      </article>
+
+      <article class="snapshot-card snapshot-card--coupons">
+        <header>
+          <div>
+            <h2>共通クーポン</h2>
+            <p>期限が近いクーポンを表示します。</p>
+          </div>
+          <a class="snapshot-link" href="{% url 'admin_coupons' %}">クーポン管理へ</a>
+        </header>
+        <div class="snapshot-list">
+          {% if snapshot_coupons %}
+            {% for coupon in snapshot_coupons %}
+              <div class="snapshot-item snapshot-item--coupons">
+                <div class="snapshot-item__icon" aria-hidden="true">🎟️</div>
+                <div class="snapshot-item__body">
+                  <strong>{{ coupon.title }}</strong>
+                  <p>{{ coupon.description|default:"説明なし" }}</p>
+                  <small>必要ポイント: {{ coupon.required_points }} pt</small>
+                </div>
+                {% if coupon.expires_at %}
+                  <span class="status-badge status-expire">期限: {{ coupon.expires_at|date:"Y/m/d" }}</span>
+                {% else %}
+                  <span class="status-badge status-expire">期限未設定</span>
+                {% endif %}
+              </div>
+            {% endfor %}
+          {% else %}
+            <p class="snapshot-empty">共通クーポンはまだありません。</p>
+          {% endif %}
+        </div>
+      </article>
+
+      <article class="snapshot-card snapshot-card--inquiries">
+        <header>
+          <div>
+            <h2>お問い合わせ</h2>
+            <p>未読または対応中のお問い合わせを表示します。</p>
+          </div>
+          <a class="snapshot-link" href="{% url 'admin_inquiries' %}">お問い合わせ管理へ</a>
+        </header>
+        <div class="snapshot-list">
+          {% if snapshot_inquiries %}
+            {% for inquiry in snapshot_inquiries %}
+              <div class="snapshot-item snapshot-item--inquiries">
+                <div class="snapshot-item__icon" aria-hidden="true">📬</div>
+                <div class="snapshot-item__body">
+                  <strong>{{ inquiry.category }}</strong>
+                  <p>
+                    {% if inquiry.store %}
+                      {{ inquiry.store.name }}
+                    {% else %}
+                      店舗情報なし
+                    {% endif %}
+                  </p>
+                  <small>{{ inquiry.created_at|date:"Y/m/d" }}</small>
+                </div>
+                <span class="status-badge status-{{ inquiry.status }}">{{ inquiry.get_status_display }}</span>
+              </div>
+            {% endfor %}
+          {% else %}
+            <p class="snapshot-empty">未対応のお問い合わせはありません。</p>
+          {% endif %}
+        </div>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

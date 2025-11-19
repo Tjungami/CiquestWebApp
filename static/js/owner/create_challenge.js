@@ -34,9 +34,10 @@ function confirmReset(event) {
 
 document.addEventListener("DOMContentLoaded", () => {
   // クエストタイプ切り替え
-  document
-    .getElementById("quest_type")
-    .addEventListener("change", toggleRewardFields);
+  const questTypeField = document.getElementById("quest_type");
+  if (questTypeField) {
+    questTypeField.addEventListener("change", toggleRewardFields);
+  }
 
   // 報酬タイプ切り替え
   const rewardType = document.getElementById("reward_type");
@@ -48,5 +49,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const resetBtn = document.querySelector("button[type='reset']");
   if (resetBtn) {
     resetBtn.addEventListener("click", confirmReset);
+  }
+
+  // 初期表示調整
+  if (questTypeField) {
+    toggleRewardFields();
+  }
+  if (rewardType) {
+    toggleRewardDetail();
   }
 });

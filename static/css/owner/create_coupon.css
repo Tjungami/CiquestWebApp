@@ -107,6 +107,32 @@
   align-items: flex-start;
 }
 
+.form-field.checkbox-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.checkbox-label input {
+  width: auto;
+}
+
+.fixed-badge {
+  display: inline-block;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: #eef3fa;
+  color: #1f2937;
+  font-size: 14px;
+  font-weight: 600;
+}
+
 .form-buttons {
   display: flex;
   justify-content: flex-end;
@@ -184,6 +210,20 @@
   font-size: 14px;
 }
 
+.limit-warning {
+  background: #fef3c7;
+  color: #92400e;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+
+.disabled-form {
+  pointer-events: none;
+  opacity: 0.6;
+}
+
 /* Success page */
 .coupon-success-page main {
   text-align: center;
@@ -216,4 +256,23 @@
 
 .coupon-success-page .next-actions a:hover {
   background-color: #5ba2d3;
+}
+.split-datetime {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.split-datetime .split-item {
+  flex: 1 1 160px;
+}
+
+.split-datetime input[type="date"],
+.split-datetime select.time-select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 15px;
 }

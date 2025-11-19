@@ -1,50 +1,52 @@
 // C:\Users\j_tagami\CiquestWebApp\static\js\owner\my_challenges.js
-// --- 発行クエスト一覧管理 ---
-
 document.addEventListener("DOMContentLoaded", () => {
   const qrModal = document.getElementById("qrModal");
-  const qrImage = document.getElementById("qrImage");
   const qrId = document.getElementById("qrId");
+  const qrCodeText = document.getElementById("qrCodeText");
+  const qrCanvas = document.getElementById("qrCanvas");
   const closeBtn = document.querySelector("#qrModal .close");
+  let qrInstance = null;
 
-  // QR表示ボタン
+  const openQrModal = (id, code) => {
+    qrId.textContent = id || "--";
+    qrCodeText.textContent = code || "未設定";
+    if (qrCanvas) {
+      qrCanvas.innerHTML = "";
+      if (code) {
+        qrInstance = new QRCode(qrCanvas, {
+          text: code,
+          width: 180,
+          height: 180,
+        });
+      }
+    }
+    qrModal.classList.remove("hidden");
+  };
+
   document.querySelectorAll(".qr-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
-      const id = btn.dataset.id;
-      qrId.textContent = id;
-      qrImage.src = "../../assets/qr_sample.png"; // 仮のQR画像
-      qrModal.classList.remove("hidden");
+      openQrModal(btn.dataset.id, btn.dataset.qr);
     });
   });
 
-  // モーダルを閉じる（×ボタン）
   if (closeBtn) {
     closeBtn.addEventListener("click", () => {
       qrModal.classList.add("hidden");
     });
   }
 
-  // 背景クリックでも閉じる
   window.addEventListener("click", (e) => {
     if (e.target === qrModal) {
       qrModal.classList.add("hidden");
     }
   });
 
-  // 削除確認
-  document.querySelectorAll(".delete-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      if (confirm("このチャレンジを削除しますか？")) {
-        alert("削除処理を実装予定（API接続）");
+  document.querySelectorAll(".delete-form").forEach((form) => {
+    form.addEventListener("submit", (event) => {
+      const title = form.dataset.title || "このチャレンジ";
+      if (!confirm(`${title}を削除しますか？`)) {
+        event.preventDefault();
       }
-    });
-  });
-
-  // 編集ボタン
-  document.querySelectorAll(".edit-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      alert("編集画面へ遷移（実装予定）");
-      // 例: location.href = `edit_challenge.html?id=${id}`;
     });
   });
 });

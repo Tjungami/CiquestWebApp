@@ -1,0 +1,108 @@
+<!-- C:\Users\j_tagami\CiquestWebApp\owner\templates\owner\coupons.html -->
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="{% static 'img/common/CIquest.ico' %}" type="image/x-icon">
+  <title>クーポン一覧 - CiQuest オーナー</title>
+
+  <link rel="stylesheet" href="{% static 'css/base/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/owner/common.css' %}">
+  <link rel="stylesheet" href="{% static 'css/owner/coupons.css' %}">
+</head>
+<body>
+  <header>
+    <h1>{{ store.name }} のクーポン一覧</h1>
+    <nav>
+      {% if store %}
+        <a href="{% url 'owner_store_home' store.store_id %}">ホーム</a>
+      {% else %}
+        <a href="{% url 'owner_dashboard' %}">ホーム</a>
+      {% endif %}
+      <a href="{% url 'create_challenge' %}">チャレンジ作成</a>
+      <a href="{% url 'create_coupon' %}">クーポン作成</a>
+      <a href="{% url 'coupon_list' %}" class="active">クーポン一覧</a>
+      <a href="{% url 'my_challenges' %}">チャレンジ一覧</a>
+      <a href="{% url 'stamp_settings' %}">スタンプ設定</a>
+      <a href="{% url 'stats' %}">統計</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="coupon-list">
+      <div class="section-heading">
+        <div>
+          <h2>登録済みクーポン</h2>
+          <p class="section-description">ユーザー向けショップ公開状況や有効期限を確認できます。</p>
+        </div>
+        <a href="{% url 'create_coupon' %}" class="submit-btn">＋ 新規作成</a>
+      </div>
+
+      {% if messages %}
+        <ul class="messages">
+          {% for message in messages %}
+            <li class="{{ message.tags }}">{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+
+      {% if coupons %}
+      <table>
+        <thead>
+          <tr>
+                        <th>タイトル</th>
+            <th>必要ポイント</th>
+            <th>区分</th>
+            <th>ショップ公開</th>
+            <th>有効期限</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for coupon in coupons %}
+          <tr>
+                        <td>{{ coupon.title }}</td>
+            <td>{{ coupon.required_points }} pt</td>
+            <td>{{ coupon.get_type_display }}</td>
+            <td>
+              {% if coupon.publish_to_shop %}
+              <span class="badge badge-success">公開中</span>
+              {% else %}
+              <span class="badge badge-muted">店内限定</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if coupon.expires_at %}
+                {{ coupon.expires_at|date:"Y/m/d H:i" }}
+              {% else %}
+                <span class="muted">期限なし</span>
+              {% endif %}
+            </td>
+            <td>
+              <div class="action-buttons">
+                <a href="{% url 'edit_coupon' coupon.coupon_id %}" class="edit-btn">編集</a>
+                <form method="post" action="{% url 'delete_coupon' coupon.coupon_id %}" class="delete-form" data-title="{{ coupon.title }}">
+                  {% csrf_token %}
+                  <button type="submit" class="delete-btn">削除</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p class="empty-state">まだクーポンは登録されていません。<a href="{% url 'create_coupon' %}">クーポン作成</a>から登録しましょう。</p>
+      {% endif %}
+    </section>
+  </main>
+
+  <footer>
+    <p>© 2025 CiQuest Owner Panel</p>
+  </footer>
+
+  <script src="{% static 'js/owner/coupons.js' %}" defer></script>
+</body>
+</html>

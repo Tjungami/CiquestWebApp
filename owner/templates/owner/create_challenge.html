@@ -6,28 +6,38 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="{% static 'img/common/CIquest.ico' %}" type="image/x-icon">
   <title>チャレンジ作成 - CiQuest オーナー</title>
 
   <link rel="stylesheet" href="{% static 'css/base/base.css' %}">
   <link rel="stylesheet" href="{% static 'css/owner/common.css' %}">
   <link rel="stylesheet" href="{% static 'css/owner/create_challenge.css' %}">
   <script src="{% static 'js/owner/create_challenge.js' %}" defer></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      {% if limit_reached %}
+      alert('チャレンジは最大 {{ challenge_limit }} 件までです。既存のチャレンジを削除してから新規登録してください。');
+      {% endif %}
+    });
+  </script>
 </head>
 <body>
   <header>
     <h1>チャレンジ作成</h1>
-    <nav>
+        <nav>
       {% if store %}
-      <a href="{% url 'owner_store_home' store.store_id %}">ホーム</a>
+        <a href="{% url 'owner_store_home' store.store_id %}">ホーム</a>
       {% else %}
-      <a href="{% url 'owner_dashboard' %}">ホーム</a>
+        <a href="{% url 'owner_dashboard' %}">ホーム</a>
       {% endif %}
       <a href="{% url 'create_challenge' %}" class="active">チャレンジ作成</a>
       <a href="{% url 'create_coupon' %}">クーポン作成</a>
-      <a href="#">チャレンジ一覧</a>
-      <a href="#">スタンプ設定</a>
-      <a href="#">統計</a>
+      <a href="{% url 'coupon_list' %}">クーポン一覧</a>
+      <a href="{% url 'my_challenges' %}">チャレンジ一覧</a>
+      <a href="{% url 'stamp_settings' %}">スタンプ設定</a>
+      <a href="{% url 'stats' %}">統計</a>
     </nav>
+
   </header>
 
   <main>
@@ -42,7 +52,11 @@
         </ul>
       {% endif %}
 
-      <form id="createChallengeForm" method="post" action="{% url 'create_challenge' %}">
+      {% if limit_reached %}
+        <p class="limit-warning">チャレンジは最大 {{ challenge_limit }} 件までです。既存のチャレンジを削除してから新規登録してください。</p>
+      {% endif %}
+
+      <form id="createChallengeForm" method="post" action="{% url 'create_challenge' %}" {% if limit_reached %}class="disabled-form" aria-disabled="true"{% endif %}>
         {% csrf_token %}
 
         <div class="form-field">
@@ -84,19 +98,25 @@
           </div>
 
           <div id="reward_coupon" class="hidden">
-            <label for="reward_coupon_id">クーポンを選択</label>
-            {{ form.reward_coupon_id }}
+            <label for="reward_coupon_field">クーポンを選択</label>
+            {{ form.reward_coupon|attr:"id:reward_coupon_field" }}
+            {% if coupons|length == 0 %}
+            <p class="field-note">まだクーポンがありません。先にクーポンを作成してください。</p>
+            {% endif %}
           </div>
 
           <div id="reward_service" class="hidden">
             <label for="reward_detail">サービス内容は説明の欄に記載してください。</label>
             {{ form.reward_detail }}
+            {% if form.reward_detail.errors %}
+              <div class="error">{{ form.reward_detail.errors }}</div>
+            {% endif %}
           </div>
         </div>
 
         <div class="form-buttons">
-          <button type="reset" class="cancel-btn">リセット</button>
-          <button type="submit" class="submit-btn">作成する</button>
+          <button type="reset" class="cancel-btn" {% if limit_reached %}disabled{% endif %}>リセット</button>
+          <button type="submit" class="submit-btn" {% if limit_reached %}disabled{% endif %}>作成する</button>
         </div>
       </form>
     </section>

@@ -1,79 +1,102 @@
 <!-- C:\Users\j_tagami\CiquestWebApp\owner\templates\owner\my_challenges.html -->
+{% load static %}
 <!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>発行クエスト一覧 - CiQuest オーナー</title>
+  <link rel="icon" href="{% static 'img/common/CIquest.ico' %}" type="image/x-icon">
+  <title>チャレンジ一覧 - CiQuest オーナー</title>
 
-  <!-- 共通CSS -->
-  <link rel="stylesheet" href="../../css/base/base.css">
-  <link rel="stylesheet" href="../../css/owner/common.css">
-
-  <!-- このページ専用CSS -->
-  <link rel="stylesheet" href="../../css/owner/my_challenges.css">
+  <link rel="stylesheet" href="{% static 'css/base/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/owner/common.css' %}">
+  <link rel="stylesheet" href="{% static 'css/owner/my_challenges.css' %}">
 </head>
 
 <body>
   <header>
-    <h1>チャレンジ一覧</h1>
-    <nav>
-      <a href="dashboard.html" class="active">ホーム</a>
-      <a href="create_challenge.html">チャレンジ作成</a>
-      <a href="create_coupon.html">??????</a>
-      <a href="my_challenges.html">チャレンジ一覧</a>
-      <a href="stamp_settings.html">スタンプ設定</a>
-      <a href="stats.html">統計</a>
+    <h1>{{ store.name }} のチャレンジ一覧</h1>
+        <nav>
+      {% if store %}
+        <a href="{% url 'owner_store_home' store.store_id %}">ホーム</a>
+      {% else %}
+        <a href="{% url 'owner_dashboard' %}">ホーム</a>
+      {% endif %}
+      <a href="{% url 'create_challenge' %}">チャレンジ作成</a>
+      <a href="{% url 'create_coupon' %}">クーポン作成</a>
+      <a href="{% url 'coupon_list' %}">クーポン一覧</a>
+      <a href="{% url 'my_challenges' %}" class="active">チャレンジ一覧</a>
+      <a href="{% url 'stamp_settings' %}">スタンプ設定</a>
+      <a href="{% url 'stats' %}">統計</a>
     </nav>
-    <!-- ログアウトボタン -->
-    <button id="logoutButton" class="logout-btn">ログアウト</button>
+
   </header>
 
   <main>
     <section class="challenge-list">
-      <h2>登録中のチャレンジ</h2>
+      {% if messages %}
+        <ul class="messages">
+          {% for message in messages %}
+            <li class="{{ message.tags }}">{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+
+      <div class="section-heading">
+        <h2>登録中のチャレンジ</h2>
+        <a href="{% url 'create_challenge' %}" class="submit-btn">＋ 新規作成</a>
+      </div>
+
+      {% if challenges %}
       <table>
         <thead>
           <tr>
-            <th>ID</th>
             <th>タイトル</th>
             <th>タイプ</th>
             <th>クエスト種別</th>
             <th>報酬</th>
+            <th>QRコード</th>
             <th>操作</th>
           </tr>
         </thead>
-        <tbody id="challengeTable">
-          <!-- JSで動的に生成予定 -->
+        <tbody>
+          {% for challenge in challenges %}
           <tr>
-            <td>12</td>
-            <td>写真を投稿しよう！</td>
-            <td>PHOTO</td>
-            <td>店舗独自</td>
-            <td>ドリンク無料クーポン</td>
+            <td>{{ challenge.title }}</td>
+            <td>{{ challenge.get_type_display }}</td>
+            <td>{{ challenge.get_quest_type_display }}</td>
             <td>
-              <button class="qr-btn" data-id="12">QR表示</button>
-              <button class="edit-btn">編集</button>
-              <button class="delete-btn">削除</button>
+              {% if challenge.reward_type == 'coupon' %}
+                {{ challenge.reward_coupon.title|default:"クーポン未設定" }}
+              {% elif challenge.reward_type == 'service' %}
+                {{ challenge.reward_detail|default:"-" }}
+              {% else %}
+                {{ challenge.reward_points }} pt
+              {% endif %}
+            </td>
+            <td>
+              {% if challenge.qr_code %}
+              <button class="qr-btn" data-id="{{ challenge.challenge_id }}" data-qr="{{ challenge.qr_code }}">QR表示</button>
+              {% else %}
+              <span class="muted">未設定</span>
+              {% endif %}
+            </td>
+            <td>
+              <div class="action-buttons">
+                <a href="{% url 'edit_challenge' challenge.challenge_id %}" class="edit-btn">編集</a>
+                <form method="post" action="{% url 'delete_challenge' challenge.challenge_id %}" class="delete-form" data-title="{{ challenge.title }}">
+                  {% csrf_token %}
+                  <button type="submit" class="delete-btn">削除</button>
+                </form>
+              </div>
             </td>
           </tr>
-          <tr>
-            <td>15</td>
-            <td>QRを読み取ろう！</td>
-            <td>QR</td>
-            <td>共通</td>
-            <td>20pt</td>
-            <td>
-              <button class="qr-btn" data-id="15">QR表示</button>
-              <button class="edit-btn">編集</button>
-              <button class="delete-btn">削除</button>
-            </td>
-          </tr>
+          {% endfor %}
         </tbody>
       </table>
-      <div class="add-challenge">
-        <a href="create_challenge.html" class="submit-btn">＋ 新しいチャレンジを作成</a>
-      </div>
+      {% else %}
+      <p class="empty-state">まだチャレンジが登録されていません。<a href="{% url 'create_challenge' %}">チャレンジを作成</a>してみましょう。</p>
+      {% endif %}
     </section>
   </main>
 
@@ -81,32 +104,17 @@
     <p>© 2025 CiQuest Owner Panel</p>
   </footer>
 
-  <!-- QR表示モーダル -->
   <div id="qrModal" class="modal hidden">
     <div class="modal-content">
       <span class="close">&times;</span>
       <h3>チャレンジQRコード</h3>
-      <img id="qrImage" src="../../assets/qr_sample.png" alt="QRコード" />
       <p>ID: <span id="qrId">--</span></p>
+      <p>コード: <span id="qrCodeText">--</span></p>
+      <div id="qrCanvas"></div>
     </div>
   </div>
 
-  <script src="../../js/owner/my_challenges.js"></script>
-  <script src="../../js/common/navigation.js"></script>
-  <script>
-    // ログアウトボタンのクリックイベント
-    const logoutButton = document.getElementById("logoutButton");
-
-    logoutButton.addEventListener("click", () => {
-      // ローカルストレージのユーザー情報を削除
-      localStorage.removeItem("userName");
-      localStorage.removeItem("userEmail");
-      localStorage.removeItem("userPassword");
-
-      // ログイン画面にリダイレクト
-      window.location.href = "login.html";  // ログイン画面に遷移
-    });
-  </script>
-
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <script src="{% static 'js/owner/my_challenges.js' %}"></script>
 </body>
 </html>

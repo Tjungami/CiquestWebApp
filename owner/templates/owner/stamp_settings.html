@@ -1,57 +1,120 @@
 <!-- C:\Users\j_tagami\CiquestWebApp\owner\templates\owner\stamp_settings.html -->
+{% load static %}
 <!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>スタンプカード設定 - CiQuest オーナー</title>
-
-  <!-- 共通CSS -->
-  <link rel="stylesheet" href="../../css/base/base.css">
-  <link rel="stylesheet" href="../../css/owner/common.css">
-
-  <!-- このページ専用CSS -->
-  <link rel="stylesheet" href="../../css/owner/stamp_settings.css">
+  <link rel="icon" href="{% static 'img/common/CIquest.ico' %}" type="image/x-icon">
+  <title>スタンプ設定 - CiQuest オーナー</title>
+  <link rel="stylesheet" href="{% static 'css/base/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/owner/common.css' %}">
+  <link rel="stylesheet" href="{% static 'css/owner/stamp_settings.css' %}">
 </head>
-
 <body>
   <header>
-    <h1>スタンプカード設定</h1>
+    <h1>{{ store.name }} のスタンプイベント管理</h1>
     <nav>
-      <a href="dashboard.html">ホーム</a>
-      <a href="create_challenge.html">チャレンジ作成</a>
-      <a href="create_coupon.html">??????</a>
-      <a href="my_challenges.html">チャレンジ一覧</a>
-      <a href="stamp_settings.html" class="active">スタンプ設定</a>
-      <a href="stats.html">統計</a>
+      <a href="{% url 'owner_store_home' store.store_id %}">ホーム</a>
+      <a href="{% url 'create_challenge' %}">チャレンジ作成</a>
+      <a href="{% url 'create_coupon' %}">クーポン作成</a>
+      <a href="{% url 'coupon_list' %}">クーポン一覧</a>
+      <a href="{% url 'my_challenges' %}">チャレンジ一覧</a>
+      <a href="{% url 'stamp_settings' %}" class="active">スタンプ設定</a>
+      <a href="{% url 'stats' %}">統計</a>
     </nav>
-    <!-- ログアウトボタン -->
-    <button id="logoutButton" class="logout-btn">ログアウト</button>
   </header>
 
-  <main>
-    <section class="stamp-settings">
-      <h2>スタンプカード設定</h2>
+  <main class="stamp-settings-container">
+    {% if messages %}
+      <div class="page-messages">
+        {% for message in messages %}
+          <div class="message message-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
 
-      <!-- カード上限設定 -->
-      <form id="stampSettingsForm" onsubmit="return false;">
-        <label for="max_stamps">最大スタンプ数（1〜30）</label>
-        <input type="number" id="max_stamps" name="max_stamps" min="1" max="30" value="30" required>
-
-        <h3>報酬設定</h3>
-        <p class="note">スタンプ数に応じて複数の報酬を設定できます。</p>
-
-        <div id="rewardList">
-          <!-- 動的に報酬フォームを追加 -->
+    <section class="card card-settings">
+      <div class="card-settings-header">
+        <div>
+          <p class="eyebrow">Stamp Card</p>
+          <h2>スタンプカード設定</h2>
+          <p>カードは店舗ごとに1つだけです。最大スタンプ数を設定し、保存するとカードが作成／更新されます。</p>
         </div>
+        {% if setting %}
+          <form method="post" action="{% url 'delete_stamp_settings' %}" onsubmit="return confirm('スタンプカードを削除すると、登録済みイベントも全て削除されます。よろしいですか？');">
+            {% csrf_token %}
+            <button type="submit" class="btn danger outline">カードを削除</button>
+          </form>
+        {% endif %}
+      </div>
 
-        <button type="button" class="add-reward-btn">＋ 報酬を追加</button>
-
-        <div class="form-buttons">
-          <button type="reset" class="cancel-btn">リセット</button>
-          <button type="submit" class="submit-btn">保存</button>
+      <form method="post" action="{% url 'stamp_settings' %}" class="card-settings-form">
+        {% csrf_token %}
+        <input type="hidden" name="intent" value="update_card">
+        <label for="max_stamps">最高スタンプ数（1〜30）</label>
+        <div class="max-controls">
+          <input type="range" id="max_stamps_slider" min="1" max="30" value="{{ max_stamps|default:30 }}">
+          <input type="number" id="max_stamps" name="max_stamps" min="1" max="30" value="{{ max_stamps|default:30 }}" required>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn primary">
+            {% if setting %}設定を更新{% else %}カードを作成{% endif %}
+          </button>
         </div>
       </form>
+    </section>
+
+    <section class="card event-list">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Events</p>
+          <h2>スタンプイベント一覧</h2>
+        </div>
+        <span class="count-pill">{{ events|length }} 件</span>
+      </div>
+
+      {% if setting %}
+        {% if events %}
+          <div class="event-table-wrapper">
+            <div class="event-row header">
+              <span>スタンプ数</span>
+              <span>タイプ</span>
+              <span>報酬内容</span>
+              <span>操作</span>
+            </div>
+            {% for reward in events %}
+              <div class="event-row">
+                <span>{{ reward.stamp_threshold }}</span>
+                <span>{% if reward.reward_type == 'coupon' %}クーポン{% else %}サービス{% endif %}</span>
+                <span>
+                  {% if reward.reward_type == 'coupon' and reward.reward_coupon %}
+                    {{ reward.reward_coupon.title }}
+                  {% elif reward.reward_type == 'service' %}
+                    {{ reward.reward_service_desc|default:"内容未設定" }}
+                  {% else %}
+                    -
+                  {% endif %}
+                </span>
+                <span class="row-actions">
+                  <a class="btn ghost" href="{% url 'edit_stamp_event' reward.pk %}">編集</a>
+                  <form method="post" action="{% url 'delete_stamp_event' reward.pk %}" onsubmit="return confirm('イベントを削除しますか？');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn danger ghost">削除</button>
+                  </form>
+                </span>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="empty-notice">イベントは登録されていません。下のボタンから追加しましょう。</p>
+        {% endif %}
+        <div class="event-footer">
+          <a class="btn primary" href="{% url 'create_stamp_event' %}">+ 新しいイベントを作成</a>
+        </div>
+      {% else %}
+        <p class="empty-notice">スタンプカードを先に作成してください。</p>
+      {% endif %}
     </section>
   </main>
 
@@ -59,22 +122,19 @@
     <p>© 2025 CiQuest Owner Panel</p>
   </footer>
 
-  <script src="../../js/owner/stamp_settings.js"></script>
-  <script src="../../js/common/navigation.js"></script>
   <script>
-    // ログアウトボタンのクリックイベント
-    const logoutButton = document.getElementById("logoutButton");
-
-    logoutButton.addEventListener("click", () => {
-      // ローカルストレージのユーザー情報を削除
-      localStorage.removeItem("userName");
-      localStorage.removeItem("userEmail");
-      localStorage.removeItem("userPassword");
-
-      // ログイン画面にリダイレクト
-      window.location.href = "login.html";  // ログイン画面に遷移
-    });
+    const slider = document.getElementById('max_stamps_slider');
+    const numberInput = document.getElementById('max_stamps');
+    if (slider && numberInput) {
+      slider.addEventListener('input', (event) => {
+        numberInput.value = event.target.value;
+      });
+      numberInput.addEventListener('input', (event) => {
+        const value = Math.min(30, Math.max(1, Number(event.target.value) || 1));
+        event.target.value = value;
+        slider.value = value;
+      });
+    }
   </script>
-
 </body>
 </html>

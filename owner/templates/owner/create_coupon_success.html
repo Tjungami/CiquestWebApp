@@ -5,6 +5,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="{% static 'img/common/CIquest.ico' %}" type="image/x-icon">
   <title>クーポン作成完了 - CiQuest オーナー</title>
 
   <link rel="stylesheet" href="{% static 'css/base/base.css' %}">
@@ -15,18 +16,20 @@
 <body class="coupon-success-page">
   <header>
     <h1>クーポン登録完了</h1>
-    <nav>
+        <nav>
       {% if store %}
-      <a href="{% url 'owner_store_home' store.store_id %}">ホーム</a>
+        <a href="{% url 'owner_store_home' store.store_id %}">ホーム</a>
       {% else %}
-      <a href="{% url 'owner_dashboard' %}">ホーム</a>
+        <a href="{% url 'owner_dashboard' %}">ホーム</a>
       {% endif %}
       <a href="{% url 'create_challenge' %}">チャレンジ作成</a>
       <a href="{% url 'create_coupon' %}" class="active">クーポン作成</a>
-      <a href="#">チャレンジ一覧</a>
-      <a href="#">スタンプ設定</a>
-      <a href="#">統計</a>
+      <a href="{% url 'coupon_list' %}">クーポン一覧</a>
+      <a href="{% url 'my_challenges' %}">チャレンジ一覧</a>
+      <a href="{% url 'stamp_settings' %}">スタンプ設定</a>
+      <a href="{% url 'stats' %}">統計</a>
     </nav>
+
   </header>
 
   <main>
@@ -36,6 +39,7 @@
 
     <div class="next-actions">
       <a href="{% url 'create_coupon' %}">続けてクーポンを作成</a>
+      <a href="{% url 'coupon_list' %}">クーポン一覧</a>
       <a href="{% url 'create_challenge' %}">チャレンジへの紐づけを設定</a>
       <a href="{% url 'owner_dashboard' %}">ダッシュボードに戻る</a>
     </div>

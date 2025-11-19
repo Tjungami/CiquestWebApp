@@ -1,0 +1,150 @@
+/* C:\Users\j_tagami\CiquestWebApp\static\css\owner\coupons.css */
+.coupon-list table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+}
+
+.coupon-list th,
+.coupon-list td {
+  padding: 12px;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: center;
+  font-size: 15px;
+}
+
+.coupon-list th {
+  background: #f3f4f6;
+  font-weight: 600;
+  color: #111827;
+}
+
+.section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+  gap: 16px;
+}
+
+.section-heading h2 {
+  margin: 0;
+}
+
+.section-description {
+  margin: 4px 0 0 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.submit-btn {
+  background-color: #0078d7;
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.submit-btn:hover {
+  background-color: #005ea8;
+}
+
+.messages {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px 0;
+}
+
+.messages li {
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.messages li.success {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.messages li.error {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.badge-success {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.badge-muted {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.muted {
+  color: #9ca3af;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.action-buttons .edit-btn,
+.action-buttons .delete-btn {
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.action-buttons .edit-btn {
+  background: #16a34a;
+}
+
+.action-buttons .delete-btn {
+  background: #dc2626;
+}
+
+.action-buttons .edit-btn:hover,
+.action-buttons .delete-btn:hover {
+  opacity: 0.85;
+}
+
+.action-buttons .delete-form {
+  margin: 0;
+}
+
+.empty-state {
+  background: #f9fafb;
+  border: 1px dashed #d1d5db;
+  border-radius: 10px;
+  padding: 24px;
+  text-align: center;
+  color: #4b5563;
+  margin-top: 12px;
+}
+
+.empty-state a {
+  color: #0078d7;
+  text-decoration: underline;
+}

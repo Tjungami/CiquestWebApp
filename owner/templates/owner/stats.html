@@ -1,32 +1,33 @@
 <!-- C:\Users\j_tagami\CiquestWebApp\owner\templates\owner\stats.html -->
+{% load static %}
 <!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="{% static 'img/common/CIquest.ico' %}" type="image/x-icon">
   <title>統計 - CiQuest オーナー</title>
 
-  <!-- 共通CSS -->
-  <link rel="stylesheet" href="../../css/base/base.css">
-  <link rel="stylesheet" href="../../css/owner/common.css">
-
-  <!-- このページ専用CSS -->
-  <link rel="stylesheet" href="../../css/owner/stats.css">
+  <link rel="stylesheet" href="{% static 'css/base/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/owner/common.css' %}">
+  <link rel="stylesheet" href="{% static 'css/owner/stats.css' %}">
 </head>
-
 <body>
   <header>
-    <h1>店舗統計</h1>
+    <h1>{{ store.name }} の統計</h1>
     <nav>
-      <a href="dashboard.html">ホーム</a>
-      <a href="create_challenge.html">チャレンジ作成</a>
-      <a href="create_coupon.html">??????</a>
-      <a href="my_challenges.html">チャレンジ一覧</a>
-      <a href="stamp_settings.html">スタンプ設定</a>
-      <a href="stats.html" class="active">統計</a>
+      {% if store %}
+        <a href="{% url 'owner_store_home' store.store_id %}">ホーム</a>
+      {% else %}
+        <a href="{% url 'owner_dashboard' %}">ホーム</a>
+      {% endif %}
+      <a href="{% url 'create_challenge' %}">チャレンジ作成</a>
+      <a href="{% url 'create_coupon' %}">クーポン作成</a>
+      <a href="{% url 'coupon_list' %}">クーポン一覧</a>
+      <a href="{% url 'my_challenges' %}">チャレンジ一覧</a>
+      <a href="{% url 'stamp_settings' %}">スタンプ設定</a>
+      <a href="{% url 'stats' %}" class="active">統計</a>
     </nav>
-    <!-- ログアウトボタン -->
-    <button id="logoutButton" class="logout-btn">ログアウト</button>
   </header>
 
   <main>
@@ -35,19 +36,19 @@
       <div class="stats-grid">
         <div class="stat-card">
           <h3>総チャレンジ参加者</h3>
-          <p id="totalParticipants">125人</p>
+          <p id="totalParticipants" class="stat-value" data-value="{{ overview.total_participants|default:0 }}" data-suffix="人">{{ overview.total_participants|default:"0" }}</p>
         </div>
         <div class="stat-card">
           <h3>平均クリア率</h3>
-          <p id="clearRate">68%</p>
+          <p id="clearRate" class="stat-value" data-value="{{ overview.clear_rate|default:0 }}" data-suffix="%">{{ overview.clear_rate|default:"0" }}%</p>
         </div>
         <div class="stat-card">
           <h3>総スタンプ取得数</h3>
-          <p id="totalStamps">1,240個</p>
+          <p id="totalStamps" class="stat-value" data-value="{{ overview.total_stamps|default:0 }}" data-suffix="個">{{ overview.total_stamps|default:"0" }}</p>
         </div>
         <div class="stat-card">
           <h3>クーポン利用数</h3>
-          <p id="couponUsage">85枚</p>
+          <p id="couponUsage" class="stat-value" data-value="{{ overview.coupon_usage|default:0 }}" data-suffix="件">{{ overview.coupon_usage|default:"0" }}</p>
         </div>
       </div>
     </section>
@@ -59,11 +60,15 @@
 
     <section class="ranking-section">
       <h2>人気チャレンジランキング</h2>
-      <ol id="challengeRanking">
-        <li>写真を撮って投稿しよう！</li>
-        <li>QRを読み取ってポイントGET</li>
-        <li>来店チェックインチャレンジ</li>
-      </ol>
+      {% if ranking %}
+        <ol id="challengeRanking">
+          {% for item in ranking %}
+            <li>{{ item }}</li>
+          {% endfor %}
+        </ol>
+      {% else %}
+        <p class="empty-text">ランキングデータがありません。</p>
+      {% endif %}
     </section>
   </main>
 
@@ -71,23 +76,10 @@
     <p>© 2025 CiQuest Owner Panel</p>
   </footer>
 
+  {{ chart_labels|default:"[]"|json_script:"stats-chart-labels" }}
+  {{ chart_values|default:"[]"|json_script:"stats-chart-values" }}
+
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="../../js/owner/stats.js"></script>
-  <script src="../../js/common/navigation.js"></script>
-  <script>
-    // ログアウトボタンのクリックイベント
-    const logoutButton = document.getElementById("logoutButton");
-
-    logoutButton.addEventListener("click", () => {
-      // ローカルストレージのユーザー情報を削除
-      localStorage.removeItem("userName");
-      localStorage.removeItem("userEmail");
-      localStorage.removeItem("userPassword");
-
-      // ログイン画面にリダイレクト
-      window.location.href = "login.html";  // ログイン画面に遷移
-    });
-  </script>
-
+  <script src="{% static 'js/owner/stats.js' %}"></script>
 </body>
 </html>

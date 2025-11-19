@@ -29,10 +29,16 @@ class User(models.Model):
 # 店舗オーナー
 class StoreOwner(models.Model):
     owner_id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, blank=True)
+    business_name = models.CharField(max_length=150, blank=True)
+    contact_phone = models.CharField(max_length=20, blank=True)
     email = models.EmailField(max_length=100, unique=True)
     password = models.CharField(max_length=255)
     approved = models.BooleanField(default=False)
+    is_verified = models.BooleanField(default=False)
+    verification_token = models.CharField(max_length=128, blank=True, null=True)
+    verification_sent_at = models.DateTimeField(null=True, blank=True)
+    onboarding_completed = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -77,6 +83,7 @@ class Coupon(models.Model):
     required_points = models.IntegerField()
     type = models.CharField(max_length=20, choices=TYPE_CHOICES, default='common')
     expires_at = models.DateTimeField(null=True, blank=True)
+    publish_to_shop = models.BooleanField(default=False)
 
     def __str__(self):
         return self.title
@@ -113,6 +120,7 @@ class Challenge(models.Model):
     qr_code = models.CharField(max_length=255, blank=True, null=True)
     reward_coupon = models.ForeignKey(Coupon, on_delete=models.SET_NULL, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    is_banned = models.BooleanField(default=False)
 
     def __str__(self):
         return self.title
@@ -151,6 +159,36 @@ class UserCoupon(models.Model):
 
 
 # スタンプカード
+class StoreStampSetting(models.Model):
+    store = models.OneToOneField(Store, on_delete=models.CASCADE, related_name='stamp_setting')
+    max_stamps = models.PositiveSmallIntegerField(default=30)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.store.name} - 設定"
+
+
+class StoreStampReward(models.Model):
+    REWARD_TYPE_CHOICES = [
+        ('coupon', 'クーポン'),
+        ('service', 'サービス'),
+    ]
+
+    setting = models.ForeignKey(StoreStampSetting, on_delete=models.CASCADE, related_name='rewards')
+    stamp_threshold = models.PositiveSmallIntegerField()
+    reward_type = models.CharField(max_length=20, choices=REWARD_TYPE_CHOICES)
+    reward_coupon = models.ForeignKey(Coupon, on_delete=models.SET_NULL, null=True, blank=True)
+    reward_service_desc = models.CharField(max_length=255, blank=True)
+    display_order = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        ordering = ['display_order', 'stamp_threshold']
+
+    def __str__(self):
+        return f"{self.setting.store.name} - {self.stamp_threshold}個"
+
+
 class StoreStamp(models.Model):
     stamp_id = models.AutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -186,3 +224,35 @@ class StoreTag(models.Model):
 
     def __str__(self):
         return f"{self.store.name} - {self.tag.name}"
+
+
+class AdminAccount(models.Model):
+    admin_id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=100)
+    email = models.EmailField(max_length=100, unique=True)
+    password = models.CharField(max_length=255)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
+
+class AdminInquiry(models.Model):
+    STATUS_CHOICES = [
+        ('unread', '未読'),
+        ('in_progress', '対応中'),
+        ('resolved', '対応済み'),
+    ]
+
+    inquiry_id = models.AutoField(primary_key=True)
+    store = models.ForeignKey(Store, on_delete=models.SET_NULL, null=True, blank=True)
+    related_challenge = models.ForeignKey(Challenge, on_delete=models.SET_NULL, null=True, blank=True)
+    category = models.CharField(max_length=50)
+    message = models.TextField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='unread')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        base = self.category or "問い合わせ"
+        return f"{base} - {self.get_status_display()}"

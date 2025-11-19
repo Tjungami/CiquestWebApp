@@ -154,3 +154,13 @@ SESSION_COOKIE_AGE = 60 * 60 * 24 * 7  # 7日間保持
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # ブラウザ閉じてもログイン保持
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/owner/dashboard/'
+
+ADMIN_LOGIN_ACCOUNTS = [
+    {"identifier": "admin", "password": "9999"},
+]
+
+
+
+# 末尾などに追記
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+DEFAULT_FROM_EMAIL = "no-reply@ciquest.local"

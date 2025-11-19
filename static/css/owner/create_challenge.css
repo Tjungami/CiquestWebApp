@@ -81,3 +81,17 @@
 .hidden {
   display: none;
 }
+
+.limit-warning {
+  background: #fef3c7;
+  color: #92400e;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+
+.disabled-form {
+  pointer-events: none;
+  opacity: 0.6;
+}

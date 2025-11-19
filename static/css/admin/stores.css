@@ -1,0 +1,124 @@
+.stores-page {
+  padding: 40px 5% 60px;
+}
+
+.store-approvals {
+  background: rgba(255, 255, 255, 0.94);
+  border-radius: 24px;
+  padding: 32px;
+  box-shadow: var(--shadow);
+}
+
+.store-approvals__header {
+  margin-bottom: 16px;
+}
+
+.store-approvals__header h2 {
+  margin: 0 0 6px;
+  font-size: 1.4rem;
+  color: var(--sunset-deep);
+}
+
+.store-approvals__header p {
+  margin: 0 0 24px;
+  color: #7a5c4f;
+}
+
+.store-list {
+  display: grid;
+  gap: 18px;
+}
+
+.store-card {
+  background: var(--sunset-card);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+  padding: 20px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-left: 6px solid var(--sunset-accent);
+}
+
+.store-info h3,
+.store-info strong {
+  margin: 0 0 6px;
+  font-size: 1.1rem;
+}
+
+.store-info p {
+  margin: 4px 0;
+  color: #5c4033;
+  font-size: 0.95rem;
+}
+
+.store-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.store-actions button {
+  border: none;
+  border-radius: 999px;
+  padding: 8px 20px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #fff;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.store-actions button:hover {
+  transform: translateY(-1px);
+}
+
+.approve-btn {
+  background: linear-gradient(120deg, #ffb347, #ffcc33);
+  color: #5a3602;
+}
+
+.reject-btn {
+  background: linear-gradient(120deg, #ff5f6d, #ffc371);
+}
+
+.store-item {
+  background: var(--sunset-card);
+  border-radius: 16px;
+  padding: 16px 20px;
+  box-shadow: var(--shadow);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.store-item-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.store-item-actions button {
+  border: none;
+  border-radius: 999px;
+  padding: 6px 16px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #fff;
+  background: linear-gradient(120deg, #ff6a88, #ff99ac);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+}
+
+@media (max-width: 780px) {
+  .store-card {
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+  }
+
+  .store-actions,
+  .store-item-actions {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+}

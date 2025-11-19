@@ -1,0 +1,68 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>アカウント設定 | CiQuest</title>
+  <link rel="icon" href="{% static 'img/common/CIquest.ico' %}" type="image/x-icon">
+  <link rel="stylesheet" href="{% static 'css/owner/onboarding.css' %}">
+</head>
+<body>
+  <main class="onboarding-wrapper">
+    <section class="onboarding-card">
+      <h1>アカウント設定</h1>
+      <p class="lead">
+        オーナー情報を登録してください。設定完了後、運営の審査が終わり次第ダッシュボードをご利用いただけます。
+      </p>
+
+      {% if messages %}
+        <ul class="messages">
+          {% for message in messages %}
+            <li class="{{ message.tags }}">{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+
+      <form method="post">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+          <div class="form-errors">
+            {% for error in form.non_field_errors %}
+              <p>{{ error }}</p>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        <div class="form-field">
+          <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+          {{ form.name }}
+          {% for error in form.name.errors %}
+            <span class="field-error">{{ error }}</span>
+          {% endfor %}
+        </div>
+
+        <div class="form-field">
+          <label for="{{ form.business_name.id_for_label }}">{{ form.business_name.label }}</label>
+          {{ form.business_name }}
+          {% for error in form.business_name.errors %}
+            <span class="field-error">{{ error }}</span>
+          {% endfor %}
+        </div>
+
+        <div class="form-field">
+          <label for="{{ form.contact_phone.id_for_label }}">{{ form.contact_phone.label }}</label>
+          {{ form.contact_phone }}
+          {% if form.contact_phone.help_text %}
+            <small class="help-text">{{ form.contact_phone.help_text }}</small>
+          {% endif %}
+          {% for error in form.contact_phone.errors %}
+            <span class="field-error">{{ error }}</span>
+          {% endfor %}
+        </div>
+
+        <button type="submit" class="primary-btn">設定を保存する</button>
+      </form>
+    </section>
+  </main>
+</body>
+</html>

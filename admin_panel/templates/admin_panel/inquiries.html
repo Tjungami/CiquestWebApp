@@ -1,0 +1,38 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>お問い合わせ管理 | Ciquest</title>
+  <link rel="stylesheet" href="{% static 'css/base/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/admin/sunset.css' %}">
+  <link rel="stylesheet" href="{% static 'css/admin/inquiries.css' %}">
+  <link rel="icon" href="{% static 'img/common/CIquest.ico' %}">
+</head>
+<body>
+  <header class="admin-header">
+    <h1>お問い合わせ管理</h1>
+    <nav>
+      <a href="{% url 'admin_dashboard' %}" {% if active_page == 'dashboard' %}class="active"{% endif %}>ダッシュボード</a>
+      <a href="{% url 'admin_stores' %}" {% if active_page == 'stores' %}class="active"{% endif %}>店舗承認</a>
+      <a href="{% url 'admin_challenges' %}" {% if active_page == 'challenges' %}class="active"{% endif %}>チャレンジ管理</a>
+      <a href="{% url 'admin_coupons' %}" {% if active_page == 'coupons' %}class="active"{% endif %}>クーポン管理</a>
+      <a href="{% url 'admin_inquiries' %}" {% if active_page == 'inquiries' %}class="active"{% endif %}>お問い合わせ</a>
+    </nav>
+    <a class="logout-btn" href="{% url 'logout' %}">ログアウト</a>
+  </header>
+
+  <main class="inquiries-page">
+    <div class="tab-menu">
+      <button class="tab active" data-status="unread">未読</button>
+      <button class="tab" data-status="in_progress">対応中</button>
+      <button class="tab" data-status="resolved">対応済み</button>
+    </div>
+
+    <section id="inquiryList" class="inquiry-list"></section>
+  </main>
+
+  <script src="{% static 'js/admin/inquiries.js' %}"></script>
+</body>
+</html>

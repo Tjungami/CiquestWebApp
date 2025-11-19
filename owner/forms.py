@@ -1,12 +1,58 @@
 # C:\Users\j_tagami\CiquestWebApp\owner\forms.py
+import datetime
+
 from django import forms
-from ciquest_model.models import Challenge, Coupon
+from ciquest_model.models import Challenge, Coupon, Store, StoreStampReward
+
+COUPON_TIME_CHOICES = [('', '時間を選択')] + [
+    (f"{hour:02d}:00", f"{hour:02d}:00") for hour in range(24)
+]
+
+
+class CouponExpiryWidget(forms.MultiWidget):
+    def __init__(self, attrs=None):
+        widgets = [
+            forms.DateInput(attrs={'type': 'date'}),
+            forms.Select(choices=COUPON_TIME_CHOICES, attrs={'class': 'time-select'}),
+        ]
+        super().__init__(widgets, attrs)
+
+    def decompress(self, value):
+        if value:
+            return [value.date(), value.strftime('%H:%M')]
+        return [None, None]
+
+
+class CouponExpiryField(forms.MultiValueField):
+    def __init__(self, *args, **kwargs):
+        fields = (
+            forms.DateField(required=False, input_formats=['%Y-%m-%d']),
+            forms.ChoiceField(required=False, choices=COUPON_TIME_CHOICES),
+        )
+        super().__init__(fields=fields, require_all_fields=False, *args, **kwargs)
+        self.widget = CouponExpiryWidget()
+
+    def compress(self, data_list):
+        if not data_list:
+            return None
+        date_value, time_value = data_list
+        if not date_value:
+            return None
+        if not time_value:
+            raise forms.ValidationError("時間を選択してください。")
+        hour, minute = map(int, time_value.split(':'))
+        return datetime.datetime.combine(date_value, datetime.time(hour, minute))
 
 
 class ChallengeForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # reward_points はフォーム上で入力しないため任意扱いにする
+        self.fields['reward_points'].required = False
+
     class Meta:
         model = Challenge
-        fields = ['title', 'description', 'reward_points', 'reward_coupon', 'type', 'quest_type', 'reward_type']
+        fields = ['title', 'description', 'reward_points', 'reward_coupon', 'reward_detail', 'type', 'quest_type', 'reward_type']
         widgets = {
             'title': forms.TextInput(attrs={
                 'placeholder': '例：写真を撮って投稿しよう',
@@ -16,6 +62,10 @@ class ChallengeForm(forms.ModelForm):
                 'rows': 4,
                 'maxlength': 500,
                 'placeholder': 'チャレンジの詳細説明を入力してください'
+            }),
+            'reward_detail': forms.TextInput(attrs={
+                'placeholder': 'サービス内容や付帯条件を入力',
+                'maxlength': 255
             }),
         }
 
@@ -31,16 +81,27 @@ class ChallengeForm(forms.ModelForm):
             raise forms.ValidationError("説明文は500文字以内で入力してください。")
         return description
 
+    def clean(self):
+        cleaned_data = super().clean()
+        quest_type = cleaned_data.get('quest_type')
+        reward_type = cleaned_data.get('reward_type')
+        reward_coupon = cleaned_data.get('reward_coupon')
+        reward_detail = cleaned_data.get('reward_detail')
+
+        if quest_type == 'store_specific' and reward_type == 'coupon' and not reward_coupon:
+            self.add_error('reward_coupon', "クーポン報酬を選択してください。")
+        if reward_type == 'service' and not reward_detail:
+            self.add_error('reward_detail', "サービス報酬の内容を入力してください。")
+
+        return cleaned_data
+
 
 class CouponForm(forms.ModelForm):
-    expires_at = forms.DateTimeField(
-        required=False,
-        widget=forms.DateTimeInput(attrs={'type': 'datetime-local'})
-    )
+    expires_at = CouponExpiryField(required=False)
 
     class Meta:
         model = Coupon
-        fields = ['title', 'description', 'required_points', 'type', 'expires_at']
+        fields = ['title', 'description', 'required_points', 'publish_to_shop', 'expires_at']
         widgets = {
             'title': forms.TextInput(attrs={
                 'placeholder': '例：500円割引クーポン',
@@ -55,6 +116,7 @@ class CouponForm(forms.ModelForm):
                 'min': 0,
                 'step': 10
             }),
+            'publish_to_shop': forms.CheckboxInput(),
         }
 
     def clean_title(self):
@@ -74,3 +136,110 @@ class CouponForm(forms.ModelForm):
         if points < 0:
             raise forms.ValidationError("必要ポイントは0以上を入力してください。")
         return points
+
+class StampEventForm(forms.Form):
+    stamp_threshold = forms.IntegerField(
+        label="必要スタンプ数",
+        min_value=1,
+        max_value=30,
+        widget=forms.NumberInput(attrs={"min": 1, "max": 30})
+    )
+    reward_type = forms.ChoiceField(
+        label="報酬タイプ",
+        choices=StoreStampReward.REWARD_TYPE_CHOICES,
+        widget=forms.RadioSelect
+    )
+    reward_coupon = forms.ModelChoiceField(
+        label="クーポン報酬",
+        queryset=Coupon.objects.none(),
+        required=False,
+        empty_label="クーポンを選択"
+    )
+    reward_service_desc = forms.CharField(
+        label="サービス内容",
+        required=False,
+        widget=forms.TextInput(attrs={"placeholder": "例：トッピング無料、限定メニュー提供など"})
+    )
+
+    def __init__(self, *args, coupon_queryset=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if coupon_queryset is not None:
+            self.fields["reward_coupon"].queryset = coupon_queryset
+
+    def clean(self):
+        cleaned_data = super().clean()
+        reward_type = cleaned_data.get("reward_type")
+        reward_coupon = cleaned_data.get("reward_coupon")
+        reward_service_desc = cleaned_data.get("reward_service_desc")
+
+        if reward_type == "coupon" and not reward_coupon:
+            self.add_error("reward_coupon", "クーポン報酬を選択してください。")
+        if reward_type == "service" and not reward_service_desc:
+            self.add_error("reward_service_desc", "サービス内容を入力してください。")
+
+        return cleaned_data
+
+
+class StoreApplicationForm(forms.ModelForm):
+    class Meta:
+        model = Store
+        fields = [
+            "name",
+            "address",
+            "latitude",
+            "longitude",
+            "business_hours",
+            "store_description",
+        ]
+        widgets = {
+            "name": forms.TextInput(
+                attrs={
+                    "placeholder": "例：CIquest カフェ本店",
+                    "maxlength": 100,
+                }
+            ),
+            "address": forms.TextInput(
+                attrs={
+                    "placeholder": "例：東京都千代田区1-2-3",
+                    "maxlength": 255,
+                }
+            ),
+            "latitude": forms.NumberInput(
+                attrs={
+                    "step": "0.0000001",
+                    "placeholder": "緯度 (例: 35.1234567)",
+                }
+            ),
+            "longitude": forms.NumberInput(
+                attrs={
+                    "step": "0.0000001",
+                    "placeholder": "経度 (例: 139.1234567)",
+                }
+            ),
+            "business_hours": forms.TextInput(
+                attrs={
+                    "placeholder": "例：10:00〜20:00（定休日：水曜）",
+                    "maxlength": 100,
+                }
+            ),
+            "store_description": forms.Textarea(
+                attrs={
+                    "rows": 4,
+                    "maxlength": 500,
+                    "placeholder": "店舗の特徴や提供サービスを記載してください",
+                }
+            ),
+        }
+
+    def clean_latitude(self):
+        latitude = self.cleaned_data["latitude"]
+        if latitude < -90 or latitude > 90:
+            raise forms.ValidationError("緯度は-90.0〜90.0の範囲で入力してください。")
+        return latitude
+
+    def clean_longitude(self):
+        longitude = self.cleaned_data["longitude"]
+        if longitude < -180 or longitude > 180:
+            raise forms.ValidationError("経度は-180.0〜180.0の範囲で入力してください。")
+        return longitude
+

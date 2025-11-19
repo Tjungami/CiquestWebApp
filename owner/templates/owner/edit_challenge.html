@@ -1,0 +1,116 @@
+<!-- C:\Users\j_tagami\CiquestWebApp\owner\templates\owner\edit_challenge.html -->
+{% load static %}
+{% load widget_tweaks %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="{% static 'img/common/CIquest.ico' %}" type="image/x-icon">
+  <title>チャレンジ編集 - CiQuest オーナー</title>
+
+  <link rel="stylesheet" href="{% static 'css/base/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/owner/common.css' %}">
+  <link rel="stylesheet" href="{% static 'css/owner/create_challenge.css' %}">
+  <script src="{% static 'js/owner/create_challenge.js' %}" defer></script>
+</head>
+<body>
+  <header>
+    <h1>チャレンジ編集</h1>
+        <nav>
+      {% if store %}
+        <a href="{% url 'owner_store_home' store.store_id %}">ホーム</a>
+      {% else %}
+        <a href="{% url 'owner_dashboard' %}">ホーム</a>
+      {% endif %}
+      <a href="{% url 'create_challenge' %}" class="active">チャレンジ作成</a>
+      <a href="{% url 'create_coupon' %}">クーポン作成</a>
+      <a href="{% url 'coupon_list' %}">クーポン一覧</a>
+      <a href="{% url 'my_challenges' %}">チャレンジ一覧</a>
+      <a href="{% url 'stamp_settings' %}">スタンプ設定</a>
+      <a href="{% url 'stats' %}">統計</a>
+    </nav>
+
+  </header>
+
+  <main>
+    <section class="challenge-form">
+      <h2>「{{ challenge.title }}」を編集</h2>
+
+      {% if messages %}
+        <ul class="messages">
+          {% for message in messages %}
+            <li class="{{ message.tags }}">{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+
+      <form method="post" action="{% url 'edit_challenge' challenge.challenge_id %}">
+        {% csrf_token %}
+
+        <div class="form-field">
+          <label for="title">タイトル</label>
+          {{ form.title }}
+          {% if form.title.errors %}
+            <div class="error">{{ form.title.errors }}</div>
+          {% endif %}
+        </div>
+
+        <div class="form-field">
+          <label for="description">説明</label>
+          {{ form.description }}
+          {% if form.description.errors %}
+            <div class="error">{{ form.description.errors }}</div>
+          {% endif %}
+        </div>
+
+        <div class="form-field">
+          <label for="type">チャレンジタイプ</label>
+          {{ form.type }}
+        </div>
+
+        <div class="form-field">
+          <label for="quest_type">クエスト種類</label>
+          {{ form.quest_type|attr:"id:quest_type" }}
+        </div>
+
+        <div id="commonReward" class="reward-section">
+          <p class="fixed-info">報酬は20ポイント（固定）</p>
+        </div>
+
+        <div id="storeSpecificReward" class="reward-section hidden">
+          <div class="form-field">
+            <label for="reward_type">報酬タイプ</label>
+            {{ form.reward_type|attr:"id:reward_type" }}
+          </div>
+
+          <div id="reward_coupon" class="hidden">
+            <label for="reward_coupon_field">クーポンを選択</label>
+            {{ form.reward_coupon|attr:"id:reward_coupon_field" }}
+            {% if form.reward_coupon.errors %}
+              <div class="error">{{ form.reward_coupon.errors }}</div>
+            {% endif %}
+          </div>
+
+          <div id="reward_service" class="hidden">
+            <label for="reward_detail">サービス内容は説明欄に記載してください。</label>
+            {{ form.reward_detail }}
+            {% if form.reward_detail.errors %}
+              <div class="error">{{ form.reward_detail.errors }}</div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="form-buttons">
+          <a href="{% url 'my_challenges' %}" class="cancel-btn">一覧へ戻る</a>
+          <button type="submit" class="submit-btn">更新する</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <footer>
+    <p>© 2025 CiQuest Owner Panel</p>
+  </footer>
+</body>
+</html>

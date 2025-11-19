@@ -1,0 +1,87 @@
+<!-- C:\Users\j_tagami\CiquestWebApp\owner\templates\owner\stamp_event_form.html -->
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="{% static 'img/common/CIquest.ico' %}" type="image/x-icon">
+  <title>スタンプイベント{% if mode == 'edit' %}編集{% else %}作成{% endif %} - CiQuest オーナー</title>
+  <link rel="stylesheet" href="{% static 'css/base/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/owner/common.css' %}">
+  <link rel="stylesheet" href="{% static 'css/owner/stamp_event_form.css' %}">
+</head>
+<body>
+  <div class="event-form-wrapper">
+    <h1>
+      {% if mode == 'edit' %}
+        スタンプイベントを編集
+      {% else %}
+        スタンプイベントを作成
+      {% endif %}
+    </h1>
+    <p>スタンプ数と報酬内容を設定してください。保存するとスタンプカードに反映されます。</p>
+
+    <form method="post">
+      {% csrf_token %}
+
+      <div class="field-block">
+        {{ form.stamp_threshold.label_tag }}
+        {{ form.stamp_threshold }}
+        {{ form.stamp_threshold.errors }}
+      </div>
+
+      <div class="field-block radio-group">
+        {{ form.reward_type.label_tag }}
+        {{ form.reward_type }}
+        {{ form.reward_type.errors }}
+      </div>
+
+      <div class="field-block js-coupon-field">
+        {{ form.reward_coupon.label_tag }}
+        {{ form.reward_coupon }}
+        {{ form.reward_coupon.errors }}
+        <p class="hint">クーポン報酬を選ぶ場合のみ選択してください。</p>
+      </div>
+
+      <div class="field-block js-service-field">
+        {{ form.reward_service_desc.label_tag }}
+        {{ form.reward_service_desc }}
+        {{ form.reward_service_desc.errors }}
+        <p class="hint">サービス内容報酬の場合のみ入力してください。</p>
+      </div>
+
+      <div class="form-actions">
+        <a href="{% url 'stamp_settings' %}" class="pill ghost" role="button">戻る</a>
+        <button type="submit" class="pill primary">
+          {% if mode == 'edit' %}更新する{% else %}追加する{% endif %}
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    const rewardTypeRadios = document.querySelectorAll('input[name="reward_type"]');
+    const couponField = document.querySelector('.js-coupon-field');
+    const serviceField = document.querySelector('.js-service-field');
+
+    function toggleFields() {
+      const selected = document.querySelector('input[name="reward_type"]:checked');
+      if (!selected) return;
+      if (selected.value === 'coupon') {
+        couponField.classList.remove('hidden');
+        serviceField.classList.add('hidden');
+      } else {
+        couponField.classList.add('hidden');
+        serviceField.classList.remove('hidden');
+      }
+    }
+
+    rewardTypeRadios.forEach((radio) => {
+      radio.addEventListener('change', toggleFields);
+    });
+
+    toggleFields();
+  </script>
+</body>
+</html>
