@@ -230,12 +230,29 @@ class AdminAccount(models.Model):
     admin_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100)
     email = models.EmailField(max_length=100, unique=True)
-    password = models.CharField(max_length=255)
+    password = models.CharField(max_length=255, blank=True)
+    APPROVAL_CHOICES = [
+        ("pending", "申請中"),
+        ("approved", "承認済み"),
+        ("rejected", "却下"),
+    ]
+    approval_status = models.CharField(max_length=20, choices=APPROVAL_CHOICES, default="pending")
+    created_by = models.ForeignKey(
+        "self", on_delete=models.SET_NULL, null=True, blank=True, related_name="created_admins"
+    )
+    approved_by = models.ForeignKey(
+        "self", on_delete=models.SET_NULL, null=True, blank=True, related_name="approved_admins"
+    )
+    approved_at = models.DateTimeField(null=True, blank=True)
     is_active = models.BooleanField(default=True)
+    is_deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+    restore_token = models.CharField(max_length=128, blank=True, null=True)
+    restore_token_expires_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.name
+        return f"{self.name} ({self.get_approval_status_display()})"
 
 
 class AdminInquiry(models.Model):

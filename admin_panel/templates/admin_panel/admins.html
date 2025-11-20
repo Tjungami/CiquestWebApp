@@ -4,15 +4,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>店舗承認管理 | Ciquest</title>
+  <title>運営ユーザー管理 | Ciquest</title>
   <link rel="stylesheet" href="{% static 'css/base/base.css' %}">
   <link rel="stylesheet" href="{% static 'css/admin/sunset.css' %}">
-  <link rel="stylesheet" href="{% static 'css/admin/stores.css' %}">
+  <link rel="stylesheet" href="{% static 'css/admin/admins.css' %}">
   <link rel="icon" href="{% static 'img/common/CIquest.ico' %}">
 </head>
 <body>
   <header class="admin-header">
-    <h1>店舗承認管理</h1>
+    <h1>運営ユーザー管理</h1>
     <nav>
       <a href="{% url 'admin_dashboard' %}" {% if active_page == 'dashboard' %}class="active"{% endif %}>ダッシュボード</a>
       <a href="{% url 'admin_stores' %}" {% if active_page == 'stores' %}class="active"{% endif %}>店舗承認</a>
@@ -24,25 +24,27 @@
     <a class="logout-btn" href="{% url 'logout' %}">ログアウト</a>
   </header>
 
-  <main class="stores-page">
-    <section class="store-approvals">
-      <header class="store-approvals__header">
-        <div>
-          <h2>店舗承認管理</h2>
-          <p>審査中の店舗を承認または却下してください。</p>
-        </div>
-      </header>
-      <div class="tab-menu">
-        <button class="tab active" data-status="pending">審査待ち</button>
-        <button class="tab" data-status="approved">承認済み</button>
-        <button class="tab" data-status="rejected">却下済み</button>
+  <main class="admins-page">
+    <section class="admin-form">
+      <h2>新規運営ユーザー作成</h2>
+      <p class="hint">現在ログイン中の運営ユーザーが直接メールアドレスとパスワードを登録します。</p>
+      <form id="adminCreateForm">
+        <input type="text" id="adminName" placeholder="氏名" required>
+        <input type="email" id="adminEmail" placeholder="メールアドレス" required>
+        <input type="password" id="adminPassword" placeholder="パスワード（8文字以上）" required minlength="8">
+        <button type="submit">作成する</button>
+      </form>
+    </section>
+
+    <section class="admin-list">
+      <div class="admin-list-header">
+        <h2>運営ユーザー一覧</h2>
+        <p class="hint">追加したユーザーは即時有効になります。</p>
       </div>
-      <div id="store-list" class="store-list">
-        <p>店舗データを読み込み中です…</p>
-      </div>
+      <div id="adminContainer"></div>
     </section>
   </main>
 
-  <script src="{% static 'js/admin/stores.js' %}"></script>
+  <script src="{% static 'js/admin/admins.js' %}"></script>
 </body>
 </html>

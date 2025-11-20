@@ -2,7 +2,12 @@ const API_BASE = "/operator/api/coupons";
 const CSRF_TOKEN = getCsrfToken();
 
 document.addEventListener("DOMContentLoaded", () => {
-  loadCoupons();
+  const filter = document.getElementById("couponFilter");
+  loadCoupons(filter.value);
+
+  filter.addEventListener("change", (event) => {
+    loadCoupons(event.target.value);
+  });
 
   const form = document.getElementById("couponForm");
   form.addEventListener("submit", async (event) => {
@@ -19,17 +24,19 @@ function getCsrfToken() {
   return value ? decodeURIComponent(value.split("=")[1]) : "";
 }
 
-async function loadCoupons() {
+async function loadCoupons(type = "all") {
   const container = document.getElementById("couponContainer");
   container.innerHTML = "<p>読み込み中です…</p>";
 
   try {
-    const res = await fetch(`${API_BASE}/?type=common`);
+    const query =
+      type && type !== "all" ? `?type=${encodeURIComponent(type)}` : "";
+    const res = await fetch(`${API_BASE}/${query}`);
     if (!res.ok) throw new Error();
     const data = await res.json();
 
     if (!data.length) {
-      container.innerHTML = "<p>共通クーポンはまだ登録されていません。</p>";
+      container.innerHTML = "<p>該当するクーポンはまだ登録されていません。</p>";
       return;
     }
 
@@ -38,16 +45,33 @@ async function loadCoupons() {
         (coupon) => `
         <div class="coupon-card">
           <div class="coupon-info">
-            <strong>${coupon.title}</strong><br>
-            ${coupon.description || "説明なし"}<br>
-            必要ポイント:
-            <input type="number" min="1" value="${coupon.required_points}" data-id="${coupon.coupon_id}" class="points-input">
-            <br>
-            有効期限: ${
-              coupon.expires_at
-                ? new Date(coupon.expires_at).toLocaleDateString()
-                : "未設定"
-            }
+            <div class="coupon-meta">
+              <span class="type-badge type-${coupon.type}">
+                ${coupon.type === "store_specific" ? "店舗独自" : "共通"}
+              </span>
+              <span class="store-label">
+                ${
+                  coupon.type === "store_specific"
+                    ? coupon.store_name || "店舗未設定"
+                    : "全店舗"
+                }
+              </span>
+            </div>
+            <strong>${coupon.title}</strong>
+            <p class="coupon-desc">${coupon.description || "説明なし"}</p>
+            <div class="coupon-fields">
+              <label>
+                必要ポイント:
+                <input type="number" min="1" value="${coupon.required_points}" data-id="${coupon.coupon_id}" class="points-input">
+              </label>
+              <span>
+                有効期限: ${
+                  coupon.expires_at
+                    ? new Date(coupon.expires_at).toLocaleDateString()
+                    : "未設定"
+                }
+              </span>
+            </div>
           </div>
           <div class="coupon-actions">
             <button class="delete-btn" data-id="${coupon.coupon_id}">削除</button>

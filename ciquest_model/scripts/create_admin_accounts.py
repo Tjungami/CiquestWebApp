@@ -14,6 +14,7 @@ def create_admin_accounts():
                 "name": account["name"],
                 "password": account["password"],
                 "is_active": True,
+                "approval_status": "approved",
             },
         )
         status = "created" if created else "updated"

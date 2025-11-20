@@ -58,6 +58,30 @@
   gap: 18px;
 }
 
+.coupon-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.filter-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  color: #5c4033;
+}
+
+.filter-control select {
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 1px solid #f5b08b;
+  background: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+}
+
 .coupon-card {
   background: rgba(255, 255, 255, 0.9);
   border-radius: 18px;
@@ -73,6 +97,46 @@
 .coupon-info {
   flex: 1;
   color: #5c4033;
+}
+
+.coupon-meta {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.type-badge {
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  background: #ffe5d4;
+  color: #b55326;
+}
+
+.type-badge.type-store_specific {
+  background: #e8f3ff;
+  color: #1c5d99;
+}
+
+.store-label {
+  background: rgba(92, 64, 51, 0.08);
+  color: #5c4033;
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-weight: 700;
+}
+
+.coupon-desc {
+  margin: 6px 0 12px;
+}
+
+.coupon-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
 }
 
 .coupon-info input {

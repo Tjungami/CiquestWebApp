@@ -18,6 +18,7 @@
       <a href="{% url 'admin_stores' %}" {% if active_page == 'stores' %}class="active"{% endif %}>店舗承認</a>
       <a href="{% url 'admin_challenges' %}" {% if active_page == 'challenges' %}class="active"{% endif %}>チャレンジ管理</a>
       <a href="{% url 'admin_coupons' %}" {% if active_page == 'coupons' %}class="active"{% endif %}>クーポン管理</a>
+      <a href="{% url 'admin_admins' %}" {% if active_page == 'admins' %}class="active"{% endif %}>運営ユーザー</a>
       <a href="{% url 'admin_inquiries' %}" {% if active_page == 'inquiries' %}class="active"{% endif %}>お問い合わせ</a>
     </nav>
     <a class="logout-btn" href="{% url 'logout' %}">ログアウト</a>
@@ -36,7 +37,17 @@
     </section>
 
     <section class="coupon-list">
-      <h2>共通クーポン一覧</h2>
+      <div class="coupon-list-header">
+        <h2>クーポン一覧</h2>
+        <label class="filter-control">
+          表示フィルタ
+          <select id="couponFilter">
+            <option value="all">すべて</option>
+            <option value="common">共通のみ</option>
+            <option value="store_specific">店舗独自のみ</option>
+          </select>
+        </label>
+      </div>
       <div id="couponContainer"></div>
     </section>
   </main>

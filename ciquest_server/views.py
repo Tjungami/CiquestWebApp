@@ -21,12 +21,12 @@ def unified_login(request):
         owner = StoreOwner.objects.filter(email__iexact=identifier).first()
         if owner and owner.password == password:
             if not owner.is_verified:
-                error = "メール認証が完了していません。メール内のリンクをクリックしてください。"
+                error = "Email verification is not completed. Please click the link in the email."
             elif not owner.onboarding_completed:
                 request.session.flush()
                 request.session["owner_id"] = owner.owner_id
                 request.session["admin_authenticated"] = False
-                messages.info(request, "アカウント設定を完了してください。")
+                messages.info(request, "Please complete your account setup.")
                 return redirect("owner_onboarding")
             elif owner.approved:
                 request.session.flush()
@@ -34,15 +34,37 @@ def unified_login(request):
                 request.session["admin_authenticated"] = False
                 return redirect("owner_dashboard")
             else:
-                error = "現在、運営による店舗審査中です。しばらくお待ちください。"
+                error = "Your store is awaiting approval. Please wait for the review."
         else:
-            admin = AdminAccount.objects.filter(email__iexact=identifier, is_active=True).first()
+            admin = AdminAccount.objects.filter(email__iexact=identifier, is_deleted=False).first()
             if admin and admin.password == password:
-                request.session.flush()
-                request.session["admin_authenticated"] = True
-                return redirect("admin_dashboard")
-
-            error = "メールアドレスまたはパスワードが正しくありません。"
+                if admin.approval_status != "approved" or not admin.is_active:
+                    error = "This account is not approved or is inactive. Please contact another admin."
+                else:
+                    request.session.flush()
+                    request.session["admin_authenticated"] = True
+                    request.session["admin_id"] = admin.admin_id
+                    # Send login notification email; failures are ignored so login proceeds.
+                    try:
+                        ip = request.META.get("REMOTE_ADDR") or "unknown"
+                        now = timezone.now().strftime("%Y-%m-%d %H:%M:%S %Z")
+                        subject = "【Ciquest】運営ログイン通知"
+                        body = (
+                            f"{admin.name} 様\n\n"
+                            "以下の内容で運営ダッシュボードへのログインが行われました。\n"
+                            f"日時: {now}\n"
+                            f"IP: {ip}\n\n"
+                            "心当たりがない場合はパスワードを変更し、他の運営に連絡してください。"
+                        )
+                        from_email = getattr(settings, "DEFAULT_FROM_EMAIL", None) or getattr(
+                            settings, "EMAIL_HOST_USER", None
+                        ) or "no-reply@ciquest.local"
+                        send_mail(subject, body, from_email, [admin.email], fail_silently=True)
+                    except Exception:
+                        pass
+                    return redirect("admin_dashboard")
+            else:
+                error = "Email address or password is incorrect."
 
     return render(request, "common/login.html", {"error": error})
 

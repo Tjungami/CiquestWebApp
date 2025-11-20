@@ -8,6 +8,7 @@ urlpatterns = [
     path('challenges/', views.challenges_dashboard, name='admin_challenges'),
     path('coupons/', views.coupons_dashboard, name='admin_coupons'),
     path('inquiries/', views.inquiries_dashboard, name='admin_inquiries'),
+    path('admins/', views.admins_dashboard, name='admin_admins'),
     path('api/stores/', views.api_store_list, name='admin_api_stores'),
     path(
         'api/stores/<int:store_id>/<str:new_status>/',
@@ -30,6 +31,22 @@ urlpatterns = [
         'api/coupons/<int:coupon_id>/delete/',
         views.api_coupon_delete,
         name='admin_api_coupon_delete',
+    ),
+    path('api/admins/', views.api_admin_list_create, name='admin_api_admins'),
+    path(
+        'api/admins/<int:admin_id>/approve/',
+        views.api_admin_approve,
+        name='admin_api_admin_approve',
+    ),
+    path(
+        'api/admins/<int:admin_id>/delete/',
+        views.api_admin_delete,
+        name='admin_api_admin_delete',
+    ),
+    path(
+        'admins/<int:admin_id>/restore/<str:token>/',
+        views.admin_account_restore,
+        name='admin_account_restore',
     ),
     path('api/inquiries/', views.api_inquiry_list, name='admin_api_inquiries'),
     path(
