@@ -25,7 +25,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ============================================================
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-$lb9_cepk#vl@5=8sqp888)=d7r4c+qv^+7yt7ixtz76n^j#5*')
 DEBUG = os.environ.get("DJANGO_DEBUG", "True") == "True"
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",") if os.environ.get("ALLOWED_HOSTS") else []
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",") if os.environ.get("ALLOWED_HOSTS") else [
+    "ciquestwebapp.onrender.com",
+    "localhost",
+    "127.0.0.1",
+]
 
 
 # ============================================================
