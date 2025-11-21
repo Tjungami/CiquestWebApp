@@ -1,0 +1,232 @@
+/* C:\Users\j_tagami\CiquestWebApp\static\css\owner\dashboard.css */
+/* ==============================
+   店舗ダッシュボード画面
+   ============================== */
+
+body {
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  background: #f2f5fa;
+  margin: 0;
+  padding: 0;
+  color: #333;
+}
+
+/* --- ヘッダー --- */
+header {
+  background: linear-gradient(90deg, #A7CEE6 0%, #89BDDE 100%);
+  color: #fff;
+  text-align: center;
+  padding: 18px 0;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+header h1 {
+  margin: 0;
+  font-size: 1.8rem;
+  letter-spacing: 0.03em;
+}
+
+/* --- メインコンテンツ --- */
+main {
+  max-width: 1000px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+.messages {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 24px;
+}
+
+.messages li {
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.messages .success {
+  background: #e9f7ef;
+  color: #1e824c;
+}
+
+.messages .error {
+  background: #fdecea;
+  color: #c0392b;
+}
+
+.store-application {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+  padding: 24px;
+  margin-bottom: 32px;
+}
+
+.store-application h2 {
+  margin-top: 0;
+  margin-bottom: 8px;
+  color: #1f4e79;
+}
+
+.store-application .help-text {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+.application-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-field.full {
+  grid-column: 1 / -1;
+}
+
+.form-field label {
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.form-field input,
+.form-field textarea {
+  border: 1px solid #d5d9e2;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 0.95rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-field input:focus,
+.form-field textarea:focus {
+  border-color: #89bdde;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(137, 189, 222, 0.3);
+}
+
+.form-field .error {
+  margin-top: 4px;
+  color: #e74c3c;
+  font-size: 0.85rem;
+}
+
+.form-errors {
+  background: #fdecea;
+  border-left: 4px solid #e74c3c;
+  padding: 12px 16px;
+  border-radius: 8px;
+  color: #c0392b;
+  font-size: 0.9rem;
+}
+
+/* --- 店舗リスト --- */
+.store-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+/* --- 店舗カード --- */
+.store-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+  padding: 20px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.store-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
+}
+
+.store-card h2 {
+  margin: 0 0 8px;
+  color: #0078d7;
+  font-size: 1.4rem;
+}
+
+.store-card p {
+  margin: 5px 0;
+  font-size: 0.95rem;
+  color: #555;
+}
+
+/* --- ステータス表示 --- */
+.approved {
+  color: #27ae60; /* 緑 */
+  font-weight: bold;
+}
+
+.pending {
+  color: #f39c12; /* ゴールド */
+  font-weight: bold;
+}
+
+.rejected {
+  color: #e74c3c; /* 赤 */
+  font-weight: bold;
+}
+
+/* --- ボタン --- */
+.btn {
+  display: inline-block;
+  text-align: center;
+  background: #0078d7;
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 6px;
+  margin-top: 12px;
+  font-size: 1rem;
+  text-decoration: none;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.btn:hover {
+  background: #005ea8;
+  transform: translateY(-1px);
+}
+
+.submit-btn {
+  align-self: flex-start;
+  padding: 12px 24px;
+}
+
+/* --- 空リスト時 --- */
+main p {
+  text-align: center;
+  color: #777;
+  font-size: 1rem;
+  margin-top: 60px;
+}
+
+/* --- レスポンシブ --- */
+@media (max-width: 600px) {
+  header h1 {
+    font-size: 1.4rem;
+  }
+  .store-card {
+    padding: 16px;
+  }
+  .btn {
+    font-size: 0.9rem;
+  }
+}

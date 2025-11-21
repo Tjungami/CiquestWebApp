@@ -1,0 +1,101 @@
+:root {
+  --sunset-sky: linear-gradient(135deg, #ff9a62, #ff6a88 55%, #8c68cd);
+  --sunset-card: rgba(255, 255, 255, 0.92);
+  --sunset-hover: rgba(255, 255, 255, 0.6);
+  --sunset-text: #2e1a16;
+  --sunset-accent: #f75f5f;
+  --sunset-deep: #c44536;
+  --sunset-gold: #ffd384;
+  --shadow: 0 20px 45px rgba(46, 26, 22, 0.18);
+}
+
+body {
+  font-family: "Noto Sans JP", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  margin: 0;
+  min-height: 100vh;
+  background: linear-gradient(#fff7ef, #fff1eb);
+  color: var(--sunset-text);
+}
+
+.admin-header {
+  background: var(--sunset-sky);
+  color: #fff;
+  padding: 32px 5% 24px;
+  text-align: center;
+  box-shadow: 0 25px 40px rgba(255, 106, 136, 0.25);
+  border-bottom-left-radius: 26px;
+  border-bottom-right-radius: 26px;
+}
+
+.admin-header h1 {
+  margin: 0 0 16px;
+  font-size: 1.9rem;
+  letter-spacing: 0.02em;
+}
+
+.admin-header nav {
+  display: inline-flex;
+  gap: 14px;
+  background: rgba(255, 255, 255, 0.28);
+  padding: 10px 20px;
+  border-radius: 999px;
+}
+
+.admin-header nav a {
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: none;
+  font-weight: 600;
+  padding: 10px 18px;
+  border-radius: 999px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.admin-header nav a.active,
+.admin-header nav a:hover {
+  background: var(--sunset-hover);
+  color: var(--sunset-deep);
+}
+
+.logout-btn {
+  margin-top: 18px;
+  display: inline-block;
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  color: #fff;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.logout-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.tab-menu {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.tab {
+  background: #ffe1c7;
+  border: none;
+  border-radius: 999px;
+  padding: 10px 20px;
+  font-weight: 600;
+  color: var(--sunset-text);
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+}
+
+.tab.active {
+  background: var(--sunset-accent);
+  color: #fff;
+  box-shadow: 0 12px 25px rgba(247, 95, 95, 0.35);
+}
+
+.tab:not(.active):hover {
+  transform: translateY(-1px);
+}
