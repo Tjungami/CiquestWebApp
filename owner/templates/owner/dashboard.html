@@ -48,19 +48,18 @@
               <span class="error">{{ application_form.address.errors.0 }}</span>
             {% endif %}
           </div>
-          <div class="form-field inline">
-            <label for="{{ application_form.latitude.id_for_label }}">緯度</label>
-            {{ application_form.latitude }}
-            {% if application_form.latitude.errors %}
-              <span class="error">{{ application_form.latitude.errors.0 }}</span>
+          <div class="form-field">
+            <label for="{{ application_form.latlng.id_for_label }}">緯度・経度（カンマ区切り）</label>
+            {{ application_form.latlng }}
+            {{ application_form.latitude }}{{ application_form.longitude }}
+            {% if application_form.latlng.errors %}
+              <span class="error">{{ application_form.latlng.errors.0 }}</span>
             {% endif %}
-          </div>
-          <div class="form-field inline">
-            <label for="{{ application_form.longitude.id_for_label }}">経度</label>
-            {{ application_form.longitude }}
-            {% if application_form.longitude.errors %}
-              <span class="error">{{ application_form.longitude.errors.0 }}</span>
-            {% endif %}
+            <p class="help-text">
+              緯度経度のコピー方法は
+              <a href="https://youtu.be/_hUHKtBShKI" target="_blank" rel="noopener">こちらの動画</a>
+              を参照してください。
+            </p>
           </div>
           <div class="form-field">
             <label for="{{ application_form.business_hours.id_for_label }}">営業時間</label>
