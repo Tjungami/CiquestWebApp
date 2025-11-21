@@ -176,3 +176,11 @@ EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "1") == "1"
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER or "no-reply@ciquest.local")
+
+
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    'ciquestwebapp.onrender.com',
+]
+
