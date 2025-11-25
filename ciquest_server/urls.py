@@ -14,5 +14,6 @@ urlpatterns = [
     path('onboarding/', views.onboarding_view, name='owner_onboarding'),
     path('login/', views.unified_login, name='login'),
     path('logout/', views.unified_logout, name='logout'),
+    path('api/stores/', views.public_store_list, name='public_store_list'),
     path('', lambda request: redirect('login')),
 ]

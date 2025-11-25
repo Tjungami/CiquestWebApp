@@ -182,5 +182,7 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     'ciquestwebapp.onrender.com',
+    '13.222.11.15',
+    'ec2-13-222-11-15.compute-1.amazonaws.com',
 ]
 

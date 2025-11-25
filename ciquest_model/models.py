@@ -60,9 +60,17 @@ class Store(models.Model):
     latitude = models.DecimalField(max_digits=10, decimal_places=7)
     longitude = models.DecimalField(max_digits=10, decimal_places=7)
     business_hours = models.CharField(max_length=100, blank=True, null=True)
+    business_hours_json = models.JSONField(blank=True, null=True)
     store_description = models.TextField(blank=True, null=True)
+    phone = models.CharField(max_length=30, blank=True, null=True)
+    website = models.URLField(blank=True, null=True)
+    instagram = models.URLField(blank=True, null=True)
+    main_image = models.CharField(max_length=255, blank=True, null=True)
     qr_code = models.CharField(max_length=255, unique=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    is_featured = models.BooleanField(default=False)
+    priority = models.IntegerField(default=0)
+    updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

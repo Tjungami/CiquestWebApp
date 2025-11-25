@@ -1,4 +1,5 @@
 import secrets
+import math
 
 from django.conf import settings
 from django.contrib import messages
@@ -9,6 +10,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from ciquest_model.models import AdminAccount, StoreOwner
+from ciquest_model.models import Store, StoreTag, Tag
 from ciquest_server.forms import OwnerProfileForm, OwnerSignupForm
 
 
@@ -73,6 +75,82 @@ def unified_logout(request):
     django_logout(request)
     request.session.flush()
     return redirect("login")
+
+
+def _haversine_km(lat1, lon1, lat2, lon2):
+    """Calculate distance between two points on Earth in kilometers."""
+    r = 6371.0
+    phi1 = math.radians(lat1)
+    phi2 = math.radians(lat2)
+    d_phi = math.radians(lat2 - lat1)
+    d_lambda = math.radians(lon2 - lon1)
+    a = math.sin(d_phi / 2) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(d_lambda / 2) ** 2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    return r * c
+
+
+def public_store_list(request):
+    """
+    公開用 店舗一覧API
+    GET /api/stores?lat=..&lon=..
+    """
+    user_lat = request.GET.get("lat")
+    user_lon = request.GET.get("lon")
+    lat_lon_provided = user_lat is not None and user_lon is not None
+
+    if lat_lon_provided:
+        try:
+            user_lat_f = float(user_lat)
+            user_lon_f = float(user_lon)
+        except (TypeError, ValueError):
+            return JsonResponse({"detail": "lat/lon は数値で指定してください。"}, status=400)
+    else:
+        user_lat_f = user_lon_f = None
+
+    stores = (
+        Store.objects.filter(status="approved")
+        .prefetch_related("storetag_set__tag")
+        .order_by("-created_at")
+    )
+
+    results = []
+    for store in stores:
+        distance_km = None
+        if lat_lon_provided and store.latitude is not None and store.longitude is not None:
+            distance_km = round(
+                _haversine_km(
+                    user_lat_f,
+                    user_lon_f,
+                    float(store.latitude),
+                    float(store.longitude),
+                ),
+                3,
+            )
+
+        tags = [st.tag.name for st in store.storetag_set.all() if st.tag]
+
+        results.append(
+            {
+                "id": store.store_id,
+                "name": store.name,
+                "description": store.store_description or "",
+                "lat": float(store.latitude) if store.latitude is not None else None,
+                "lon": float(store.longitude) if store.longitude is not None else None,
+                "distance": distance_km,  # km
+                "tags": tags,
+                "main_image": store.main_image or "",
+                "phone": store.phone or "",
+                "website": store.website or "",
+                "instagram": store.instagram or "",
+                "business_hours": store.business_hours or "",
+                "business_hours_json": store.business_hours_json or {},
+                "is_featured": store.is_featured,
+                "priority": store.priority,
+                "updated_at": store.updated_at.isoformat() if store.updated_at else None,
+            }
+        )
+
+    return JsonResponse(results, safe=False)
 
 
 def signup_view(request):
