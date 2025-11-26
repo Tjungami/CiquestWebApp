@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
+import dj_database_url
 
 # ============================================================
 # BASE PATH
@@ -25,11 +26,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ============================================================
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-$lb9_cepk#vl@5=8sqp888)=d7r4c+qv^+7yt7ixtz76n^j#5*')
 DEBUG = os.environ.get("DJANGO_DEBUG", "True") == "True"
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",") if os.environ.get("ALLOWED_HOSTS") else [
-    "ciquestwebapp.onrender.com",
-    "localhost",
-    "127.0.0.1",
-]
+ALLOWED_HOSTS = (
+    os.environ.get("ALLOWED_HOSTS", "").split(",")
+    if os.environ.get("ALLOWED_HOSTS")
+    else [
+        "ciquestwebapp.onrender.com",
+        "localhost",
+        "127.0.0.1",
+        "44.222.189.208",
+        "ec2-44-222-189-208.compute-1.amazonaws.com",
+    ]
+)
 
 
 # ============================================================
@@ -118,6 +125,13 @@ else:
         }
     }
 
+# DATABASE_URL が設定されている場合は優先して利用（Render/Postgres 用）
+DATABASE_URL = os.environ.get("DATABASE_URL")
+if DATABASE_URL:
+    DATABASES = {
+        "default": dj_database_url.config(default=DATABASE_URL, conn_max_age=600)
+    }
+
 
 # ============================================================
 # PASSWORD VALIDATION
@@ -177,12 +191,4 @@ EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER or "no-reply@ciquest.local")
 
-
-ALLOWED_HOSTS = [
-    'localhost',
-    '127.0.0.1',
-    'ciquestwebapp.onrender.com',
-    '13.222.11.15',
-    'ec2-13-222-11-15.compute-1.amazonaws.com',
-]
 
