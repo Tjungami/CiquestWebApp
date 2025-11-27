@@ -26,17 +26,21 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ============================================================
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-$lb9_cepk#vl@5=8sqp888)=d7r4c+qv^+7yt7ixtz76n^j#5*')
 DEBUG = os.environ.get("DJANGO_DEBUG", "True") == "True"
-ALLOWED_HOSTS = (
-    os.environ.get("ALLOWED_HOSTS", "").split(",")
-    if os.environ.get("ALLOWED_HOSTS")
-    else [
-        "ciquestwebapp.onrender.com",
-        "localhost",
-        "127.0.0.1",
-        "44.222.189.208",
-        "ec2-44-222-189-208.compute-1.amazonaws.com",
-    ]
-)
+_default_allowed = [
+    "ciquestwebapp.onrender.com",
+    "localhost",
+    "127.0.0.1",
+    "44.222.189.208",
+    "ec2-44-222-189-208.compute-1.amazonaws.com",
+]
+_env_allowed = [
+    h.strip() for h in os.environ.get("ALLOWED_HOSTS", "").split(",") if h.strip()
+]
+# Render 固有のホスト名を自動で許可（環境変数 RENDER_EXTERNAL_HOSTNAME がある場合）
+_render_host = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
+if _render_host:
+    _env_allowed.append(_render_host)
+ALLOWED_HOSTS = _env_allowed or _default_allowed
 
 
 # ============================================================
@@ -65,6 +69,7 @@ INSTALLED_APPS = [
 # ============================================================
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -159,6 +164,8 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+# WhiteNoise で圧縮・キャッシュ付与した静的ファイルを配信
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 
 # ============================================================
