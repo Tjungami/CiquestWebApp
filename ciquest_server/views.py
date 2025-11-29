@@ -4,14 +4,14 @@ import math
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import logout as django_logout
-from django.core.mail import send_mail
+from django.core.mail import get_connection, send_mail
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils import timezone
 
 from ciquest_model.models import AdminAccount, StoreOwner
-from ciquest_model.models import Store, StoreTag, Tag
-from ciquest_server.forms import OwnerProfileForm, OwnerSignupForm
+from ciquest_model.models import AdminAccount, Store, StoreTag, Tag
+from ciquest_server.forms import AdminSignupForm, OwnerProfileForm, OwnerSignupForm
 
 
 def unified_login(request):
@@ -46,24 +46,29 @@ def unified_login(request):
                     request.session.flush()
                     request.session["admin_authenticated"] = True
                     request.session["admin_id"] = admin.admin_id
-                    # Send login notification email; failures are ignored so login proceeds.
-                    try:
-                        ip = request.META.get("REMOTE_ADDR") or "unknown"
-                        now = timezone.now().strftime("%Y-%m-%d %H:%M:%S %Z")
-                        subject = "【Ciquest】運営ログイン通知"
-                        body = (
-                            f"{admin.name} 様\n\n"
-                            "以下の内容で運営ダッシュボードへのログインが行われました。\n"
-                            f"日時: {now}\n"
-                            f"IP: {ip}\n\n"
-                            "心当たりがない場合はパスワードを変更し、他の運営に連絡してください。"
-                        )
-                        from_email = getattr(settings, "DEFAULT_FROM_EMAIL", None) or getattr(
-                            settings, "EMAIL_HOST_USER", None
-                        ) or "no-reply@ciquest.local"
-                        send_mail(subject, body, from_email, [admin.email], fail_silently=True)
-                    except Exception:
-                        pass
+                    # 管理ログイン通知メール（EMAIL_HOST が未設定なら送信しない）
+                    if getattr(settings, "EMAIL_HOST", ""):
+                        try:
+                            ip = request.META.get("REMOTE_ADDR") or "unknown"
+                            now = timezone.now().strftime("%Y-%m-%d %H:%M:%S %Z")
+                            subject = "【Ciquest】運営ログイン通知"
+                            body = (
+                                f"{admin.name} 様\n\n"
+                                "以下の内容で運営ダッシュボードへのログインが行われました。\n"
+                                f"日時: {now}\n"
+                                f"IP: {ip}\n\n"
+                                "心当たりがない場合はパスワードを変更し、他の運営に連絡してください。"
+                            )
+                            from_email = getattr(settings, "DEFAULT_FROM_EMAIL", None) or getattr(
+                                settings, "EMAIL_HOST_USER", None
+                            ) or "no-reply@ciquest.local"
+                            try:
+                                connection = get_connection(timeout=5)
+                            except Exception:
+                                connection = None
+                            send_mail(subject, body, from_email, [admin.email], fail_silently=True, connection=connection)
+                        except Exception:
+                            pass
                     return redirect("admin_dashboard")
             else:
                 error = "Email address or password is incorrect."
@@ -176,6 +181,28 @@ def signup_view(request):
         form = OwnerSignupForm()
 
     return render(request, "common/signup.html", {"form": form, "sent_to": sent_to})
+
+
+def admin_signup_view(request):
+    if request.method == "POST":
+        form = AdminSignupForm(request.POST)
+        if form.is_valid():
+            AdminAccount.objects.update_or_create(
+                email=form.cleaned_data["email"].lower(),
+                defaults={
+                    "name": form.cleaned_data["name"],
+                    "password": form.cleaned_data["password1"],
+                    "approval_status": "approved",
+                    "is_active": True,
+                    "is_deleted": False,
+                },
+            )
+            messages.success(request, "運営アカウントを登録しました。ログインしてください。")
+            return redirect("login")
+    else:
+        form = AdminSignupForm()
+
+    return render(request, "common/admin_signup.html", {"form": form})
 
 
 def signup_verify_view(request):

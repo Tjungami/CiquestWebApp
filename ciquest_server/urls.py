@@ -10,6 +10,7 @@ urlpatterns = [
     path('owner/', include('owner.urls')),
     path('operator/', include('admin_panel.urls')),
     path('signup/', views.signup_view, name='signup'),
+    path('admin-signup/', views.admin_signup_view, name='admin_signup'),
     path('signup/verify/', views.signup_verify_view, name='signup_verify'),
     path('onboarding/', views.onboarding_view, name='owner_onboarding'),
     path('login/', views.unified_login, name='login'),
