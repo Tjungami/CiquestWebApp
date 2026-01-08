@@ -187,6 +187,9 @@ ADMIN_LOGIN_ACCOUNTS = [
     {"identifier": "admin", "password": "9999"},
 ]
 
+# Public API key for phone clients (header: phone-API-key)
+PHONE_API_KEY = os.environ.get("PHONE_API_KEY", "")
+
 
 
 # メール送信設定（本番では環境変数で上書き）

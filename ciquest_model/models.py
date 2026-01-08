@@ -1,5 +1,23 @@
 # C:\Users\j_tagami\CiquestWebApp\ciquest_model\models.py
+from django.contrib.auth.hashers import identify_hasher, make_password
 from django.db import models
+from django.contrib.auth.hashers import identify_hasher, make_password
+
+
+def _needs_hash(password):
+    if not password:
+        return False
+    try:
+        identify_hasher(password)
+        return False
+    except ValueError:
+        return True
+
+
+def _hash_password_if_needed(password):
+    if _needs_hash(password):
+        return make_password(password)
+    return password
 
 # ランク情報
 class Rank(models.Model):
@@ -25,6 +43,15 @@ class User(models.Model):
     def __str__(self):
         return self.username
 
+    def save(self, *args, **kwargs):
+        if self.password:
+            self.password = _hash_password_if_needed(self.password)
+        super().save(*args, **kwargs)
+
+    def save(self, *args, **kwargs):
+        self.password = _hash_password_if_needed(self.password)
+        super().save(*args, **kwargs)
+
 
 # 店舗オーナー
 class StoreOwner(models.Model):
@@ -43,6 +70,15 @@ class StoreOwner(models.Model):
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        if self.password:
+            self.password = _hash_password_if_needed(self.password)
+        super().save(*args, **kwargs)
+
+    def save(self, *args, **kwargs):
+        self.password = _hash_password_if_needed(self.password)
+        super().save(*args, **kwargs)
 
 
 # 店舗
@@ -262,6 +298,15 @@ class AdminAccount(models.Model):
     def __str__(self):
         return f"{self.name} ({self.get_approval_status_display()})"
 
+    def save(self, *args, **kwargs):
+        if self.password:
+            self.password = _hash_password_if_needed(self.password)
+        super().save(*args, **kwargs)
+
+    def save(self, *args, **kwargs):
+        self.password = _hash_password_if_needed(self.password)
+        super().save(*args, **kwargs)
+
 
 class AdminInquiry(models.Model):
     STATUS_CHOICES = [
@@ -281,3 +326,12 @@ class AdminInquiry(models.Model):
     def __str__(self):
         base = self.category or "問い合わせ"
         return f"{base} - {self.get_status_display()}"
+# パスワードを保存する前にハッシュ化（既にハッシュならそのまま）
+def _hash_password_if_needed(value):
+    if not value:
+        return value
+    try:
+        identify_hasher(value)
+        return value
+    except ValueError:
+        return make_password(value)

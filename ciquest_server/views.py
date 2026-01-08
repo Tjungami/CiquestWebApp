@@ -110,7 +110,7 @@ def _verify_password(raw_password, stored_password, user_obj):
 
 
 def _require_phone_api_key(request):
-    expected_key = getattr(settings, "PUBLIC_API_KEY", "")
+    expected_key = getattr(settings, "PHONE_API_KEY", "")
     if not expected_key:
         return None
     provided_key = request.headers.get("phone-API-key") or request.META.get("HTTP_PHONE_API_KEY")
