@@ -1,6 +1,8 @@
 # C:\Users\j_tagami\CiquestWebApp\ciquest_model\scripts\test_seed.py
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+from django.contrib.auth.hashers import make_password
+
 from ciquest_model.models import *
 from django.utils import timezone
 
@@ -41,7 +43,7 @@ def seed_users():
         ("jiro", "jiro@example.com", "hashed_pw_3", ranks[0]),
     ]
     for username, email, pw, rank in users:
-        User.objects.create(username=username, email=email, password=pw, rank=rank, points=50)
+        User.objects.create(username=username, email=email, password=make_password(pw), rank=rank, points=50)
     print("ユーザーを作成しました。")
 
 
@@ -52,7 +54,7 @@ def seed_store_owners():
         ("未承認オーナー", "test@pending.com", "hashed_pw_3", False),
     ]
     for name, email, pw, approved in owners:
-        StoreOwner.objects.create(name=name, email=email, password=pw, approved=approved)
+        StoreOwner.objects.create(name=name, email=email, password=make_password(pw), approved=approved)
     print("店舗オーナーを作成しました。")
 
 

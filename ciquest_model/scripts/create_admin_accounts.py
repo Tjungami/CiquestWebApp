@@ -1,4 +1,6 @@
-﻿from ciquest_model.models import AdminAccount
+from django.contrib.auth.hashers import make_password
+
+from ciquest_model.models import AdminAccount
 
 
 def create_admin_accounts():
@@ -12,7 +14,7 @@ def create_admin_accounts():
             email=account["email"],
             defaults={
                 "name": account["name"],
-                "password": account["password"],
+                "password": make_password(account["password"]),
                 "is_active": True,
                 "approval_status": "approved",
             },

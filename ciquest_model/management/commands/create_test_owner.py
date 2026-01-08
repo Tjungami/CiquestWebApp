@@ -1,3 +1,4 @@
+from django.contrib.auth.hashers import make_password
 from django.core.management.base import BaseCommand
 
 from ciquest_model.models import StoreOwner
@@ -15,7 +16,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "--password",
             default="testpassword",
-            help="設定するパスワード（平文で保存されます）",
+            help="設定するパスワード（ハッシュ化して保存されます）",
         )
         parser.add_argument(
             "--name",
@@ -31,7 +32,7 @@ class Command(BaseCommand):
         owner, created = StoreOwner.objects.update_or_create(
             email=email,
             defaults={
-                "password": password,
+                "password": make_password(password),
                 "name": name,
                 "approved": True,
                 "is_verified": True,

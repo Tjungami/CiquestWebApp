@@ -4,6 +4,7 @@ import math
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import logout as django_logout
+from django.contrib.auth.hashers import check_password, make_password
 from django.core.mail import get_connection, send_mail
 from django.db.models import Q
 from django.shortcuts import redirect, render
@@ -23,7 +24,7 @@ def unified_login(request):
         password = request.POST.get("password") or ""
 
         owner = StoreOwner.objects.filter(email__iexact=identifier).first()
-        if owner and owner.password == password:
+        if owner and _verify_password(password, owner.password, owner):
             if not owner.is_verified:
                 error = "Email verification is not completed. Please click the link in the email."
             elif not owner.onboarding_completed:
@@ -41,7 +42,7 @@ def unified_login(request):
                 error = "Your store is awaiting approval. Please wait for the review."
         else:
             admin = AdminAccount.objects.filter(email__iexact=identifier, is_deleted=False).first()
-            if admin and admin.password == password:
+            if admin and _verify_password(password, admin.password, admin):
                 if admin.approval_status != "approved" or not admin.is_active:
                     error = "This account is not approved or is inactive. Please contact another admin."
                 else:
@@ -96,13 +97,25 @@ def _haversine_km(lat1, lon1, lat2, lon2):
     return r * c
 
 
+def _verify_password(raw_password, stored_password, user_obj):
+    if not stored_password:
+        return False
+    if check_password(raw_password, stored_password):
+        return True
+    if stored_password == raw_password:
+        user_obj.password = make_password(raw_password)
+        user_obj.save(update_fields=["password"])
+        return True
+    return False
+
+
 def _require_phone_api_key(request):
     expected_key = getattr(settings, "PUBLIC_API_KEY", "")
     if not expected_key:
         return None
     provided_key = request.headers.get("phone-API-key") or request.META.get("HTTP_PHONE_API_KEY")
     if not provided_key or not secrets.compare_digest(provided_key, expected_key):
-        return JsonResponse({"detail": "Unauthorized."}, status=401)
+        return JsonResponse({"detail": "認証に失敗しました。"}, status=401)
     return None
 
 
@@ -192,7 +205,7 @@ def public_coupon_list(request):
         try:
             store_id_int = int(store_id)
         except (TypeError, ValueError):
-            return JsonResponse({"detail": "store_id must be an integer."}, status=400)
+            return JsonResponse({"detail": "store_id は整数で指定してください。"}, status=400)
         queryset = queryset.filter(store_id=store_id_int)
 
     queryset = queryset.filter(Q(store__isnull=True) | Q(store__status="approved")).order_by(
@@ -238,7 +251,7 @@ def public_challenge_list(request):
         try:
             store_id_int = int(store_id)
         except (TypeError, ValueError):
-            return JsonResponse({"detail": "store_id must be an integer."}, status=400)
+            return JsonResponse({"detail": "store_id は整数で指定してください。"}, status=400)
         queryset = queryset.filter(store_id=store_id_int)
 
     results = []
@@ -270,7 +283,7 @@ def signup_view(request):
         if form.is_valid():
             owner = StoreOwner.objects.create(
                 email=form.cleaned_data["email"].lower(),
-                password=form.cleaned_data["password1"],
+                password=make_password(form.cleaned_data["password1"]),
                 approved=False,
             )
             owner.is_verified = True
@@ -296,7 +309,7 @@ def admin_signup_view(request):
                 email=form.cleaned_data["email"].lower(),
                 defaults={
                     "name": form.cleaned_data["name"],
-                    "password": form.cleaned_data["password1"],
+                    "password": make_password(form.cleaned_data["password1"]),
                     "approval_status": "approved",
                     "is_active": True,
                     "is_deleted": False,

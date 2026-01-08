@@ -4,6 +4,7 @@ from datetime import datetime, time
 
 from django.conf import settings
 from django.core.mail import send_mail
+from django.contrib.auth.hashers import make_password
 from django.db.models import Q
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -176,12 +177,13 @@ def api_admin_list_create(request):
         return JsonResponse({"detail": "??????????????????????"}, status=400)
     if len(password) < 8:
         return JsonResponse({"detail": "??????8????????????"}, status=400)
+    hashed_password = make_password(password)
 
     existing = AdminAccount.objects.filter(email__iexact=email).first()
     if existing:
         if existing.is_deleted:
             existing.name = name
-            existing.password = password
+            existing.password = hashed_password
             existing.approval_status = "approved"
             existing.is_active = True
             existing.is_deleted = False
@@ -212,7 +214,7 @@ def api_admin_list_create(request):
     admin = AdminAccount.objects.create(
         name=name,
         email=email,
-        password=password,
+        password=hashed_password,
         approval_status="approved",
         is_active=True,
         created_by=current_admin,
