@@ -16,5 +16,7 @@ urlpatterns = [
     path('login/', views.unified_login, name='login'),
     path('logout/', views.unified_logout, name='logout'),
     path('api/stores/', views.public_store_list, name='public_store_list'),
+    path('api/coupons/', views.public_coupon_list, name='public_coupon_list'),
+    path('api/challenges/', views.public_challenge_list, name='public_challenge_list'),
     path('', lambda request: redirect('login')),
 ]

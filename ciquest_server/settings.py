@@ -181,6 +181,8 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # ブラウザ閉じてもログイン�
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/owner/dashboard/'
 
+PUBLIC_API_KEY = os.environ.get("PHONE_API_KEY", "")
+
 ADMIN_LOGIN_ACCOUNTS = [
     {"identifier": "admin", "password": "9999"},
 ]

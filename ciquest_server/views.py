@@ -5,12 +5,14 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import logout as django_logout
 from django.core.mail import get_connection, send_mail
+from django.db.models import Q
 from django.shortcuts import redirect, render
+from django.http import JsonResponse
 from django.urls import reverse
 from django.utils import timezone
 
 from ciquest_model.models import AdminAccount, StoreOwner
-from ciquest_model.models import AdminAccount, Store, StoreTag, Tag
+from ciquest_model.models import AdminAccount, Store, StoreTag, Tag, Coupon, Challenge
 from ciquest_server.forms import AdminSignupForm, OwnerProfileForm, OwnerSignupForm
 
 
@@ -94,11 +96,24 @@ def _haversine_km(lat1, lon1, lat2, lon2):
     return r * c
 
 
+def _require_phone_api_key(request):
+    expected_key = getattr(settings, "PUBLIC_API_KEY", "")
+    if not expected_key:
+        return None
+    provided_key = request.headers.get("phone-API-key") or request.META.get("HTTP_PHONE_API_KEY")
+    if not provided_key or not secrets.compare_digest(provided_key, expected_key):
+        return JsonResponse({"detail": "Unauthorized."}, status=401)
+    return None
+
+
 def public_store_list(request):
     """
     公開用 店舗一覧API
     GET /api/stores?lat=..&lon=..
     """
+    auth_error = _require_phone_api_key(request)
+    if auth_error:
+        return auth_error
     user_lat = request.GET.get("lat")
     user_lon = request.GET.get("lon")
     lat_lon_provided = user_lat is not None and user_lon is not None
@@ -152,6 +167,96 @@ def public_store_list(request):
                 "is_featured": store.is_featured,
                 "priority": store.priority,
                 "updated_at": store.updated_at.isoformat() if store.updated_at else None,
+            }
+        )
+
+    return JsonResponse(results, safe=False)
+
+
+def public_coupon_list(request):
+    """
+    Public coupon list API.
+    GET /api/coupons?store_id=..&type=..
+    """
+    auth_error = _require_phone_api_key(request)
+    if auth_error:
+        return auth_error
+    store_id = request.GET.get("store_id")
+    coupon_type = request.GET.get("type")
+
+    queryset = Coupon.objects.select_related("store").filter(publish_to_shop=True)
+    if coupon_type in {"common", "store_specific"}:
+        queryset = queryset.filter(type=coupon_type)
+
+    if store_id:
+        try:
+            store_id_int = int(store_id)
+        except (TypeError, ValueError):
+            return JsonResponse({"detail": "store_id must be an integer."}, status=400)
+        queryset = queryset.filter(store_id=store_id_int)
+
+    queryset = queryset.filter(Q(store__isnull=True) | Q(store__status="approved")).order_by(
+        "-expires_at",
+        "-coupon_id",
+    )
+
+    results = []
+    for coupon in queryset:
+        store = coupon.store
+        results.append(
+            {
+                "coupon_id": coupon.coupon_id,
+                "title": coupon.title,
+                "description": coupon.description or "",
+                "required_points": coupon.required_points,
+                "type": coupon.type,
+                "expires_at": coupon.expires_at.isoformat() if coupon.expires_at else None,
+                "store_id": coupon.store_id,
+                "store_name": store.name if store else "",
+            }
+        )
+
+    return JsonResponse(results, safe=False)
+
+
+def public_challenge_list(request):
+    """
+    Public challenge list API.
+    GET /api/challenges?store_id=..
+    """
+    auth_error = _require_phone_api_key(request)
+    if auth_error:
+        return auth_error
+    store_id = request.GET.get("store_id")
+    queryset = (
+        Challenge.objects.select_related("store", "reward_coupon")
+        .filter(is_banned=False, store__status="approved")
+        .order_by("-created_at")
+    )
+
+    if store_id:
+        try:
+            store_id_int = int(store_id)
+        except (TypeError, ValueError):
+            return JsonResponse({"detail": "store_id must be an integer."}, status=400)
+        queryset = queryset.filter(store_id=store_id_int)
+
+    results = []
+    for challenge in queryset:
+        results.append(
+            {
+                "challenge_id": challenge.challenge_id,
+                "title": challenge.title,
+                "description": challenge.description or "",
+                "reward_points": challenge.reward_points,
+                "type": challenge.type,
+                "quest_type": challenge.quest_type,
+                "reward_type": challenge.reward_type,
+                "reward_detail": challenge.reward_detail or "",
+                "reward_coupon_id": challenge.reward_coupon_id,
+                "store_id": challenge.store_id,
+                "store_name": challenge.store.name if challenge.store else "",
+                "created_at": challenge.created_at.isoformat(),
             }
         )
 
