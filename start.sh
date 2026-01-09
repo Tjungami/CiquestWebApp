@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
 set -e
 
-# 1) Apply migrations
+# 0) Repair broken migration history (one-time recovery)
 python manage.py migrate --noinput --fake-initial
+python manage.py migrate contenttypes 0002 --fake
 
+# 1) Apply remaining migrations normally
+python manage.py migrate --noinput
 
 # 2) Seed base data (optional)
 if [ "${SEED_CIQUEST:-0}" != "0" ]; then
