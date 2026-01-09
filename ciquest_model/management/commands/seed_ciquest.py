@@ -25,67 +25,140 @@ from ciquest_model.models import (
 
 
 class Command(BaseCommand):
-    help = "Seed test data for Ciquest (idempotent)"
+    help = "Seed test data for Ciquest (safe & idempotent)"
 
     @transaction.atomic
     def handle(self, *args, **options):
         now = timezone.now()
 
-        # ---- Rank (unique by name) ----
-        bronze, _ = Rank.objects.update_or_create(
-            name="ブロンズ",
-            defaults={"required_points": 0, "max_challenges_per_day": 3},
+        # --------------------
+        # Helpers
+        # --------------------
+        def upsert_rank(name, required_points, max_per_day):
+            obj, _ = Rank.objects.update_or_create(
+                name=name,
+                defaults={"required_points": required_points, "max_challenges_per_day": max_per_day},
+            )
+            return obj
+
+        def upsert_user(email, username, raw_password, rank, points):
+            obj, created = User.objects.get_or_create(
+                email=email,
+                defaults={"username": username, "password": raw_password, "rank": rank, "points": points},
+            )
+            if not created:
+                # update safe fields only (do NOT reset password on re-run)
+                changed = False
+                if obj.username != username:
+                    obj.username = username
+                    changed = True
+                if obj.rank_id != (rank.rank_id if rank else None):
+                    obj.rank = rank
+                    changed = True
+                if obj.points != points:
+                    obj.points = points
+                    changed = True
+                if changed:
+                    obj.save(update_fields=["username", "rank", "points"])
+            return obj
+
+        def upsert_owner(email, raw_password, **fields):
+            obj, created = StoreOwner.objects.get_or_create(
+                email=email,
+                defaults={"password": raw_password, **fields},
+            )
+            if not created:
+                # update safe fields only (do NOT reset password on re-run)
+                changed_fields = []
+                for k, v in fields.items():
+                    if getattr(obj, k) != v:
+                        setattr(obj, k, v)
+                        changed_fields.append(k)
+                if changed_fields:
+                    obj.save(update_fields=changed_fields)
+            return obj
+
+        def upsert_admin(email, raw_password, **fields):
+            obj, created = AdminAccount.objects.get_or_create(
+                email=email,
+                defaults={"password": raw_password, **fields},
+            )
+            if not created:
+                changed_fields = []
+                for k, v in fields.items():
+                    if getattr(obj, k) != v:
+                        setattr(obj, k, v)
+                        changed_fields.append(k)
+                if changed_fields:
+                    obj.save(update_fields=changed_fields)
+            return obj
+
+        def upsert_coupon(store, title, *, create_only_expires_days=None, **fields):
+            # store + title で一意とみなす（DB制約も付けるの推奨）
+            obj, created = Coupon.objects.get_or_create(
+                store=store,
+                title=title,
+                defaults={
+                    **fields,
+                    **(
+                        {"expires_at": now + timedelta(days=create_only_expires_days)}
+                        if create_only_expires_days is not None
+                        else {}
+                    ),
+                },
+            )
+            if not created:
+                # expires_at は作成時のみ。その他は必要なら更新。
+                changed_fields = []
+                for k, v in fields.items():
+                    if getattr(obj, k) != v:
+                        setattr(obj, k, v)
+                        changed_fields.append(k)
+                if changed_fields:
+                    obj.save(update_fields=changed_fields)
+            return obj
+
+        # --------------------
+        # Rank
+        # --------------------
+        bronze = upsert_rank("ブロンズ", 0, 3)
+        silver = upsert_rank("シルバー", 50, 5)
+        gold = upsert_rank("ゴールド", 150, 8)
+
+        # --------------------
+        # Users
+        # --------------------
+        u1 = upsert_user("jun@example.com", "jun", "password123", bronze, 10)
+        u2 = upsert_user("yuki@example.com", "yuki", "password123", silver, 70)
+        u3 = upsert_user("taro@example.com", "taro", "password123", gold, 210)
+
+        # --------------------
+        # StoreOwners
+        # --------------------
+        o1 = upsert_owner(
+            "owner1@example.com",
+            "ownerpass",
+            name="田上商店 代表",
+            business_name="田上商店",
+            contact_phone="080-1111-2222",
+            approved=True,
+            is_verified=True,
+            onboarding_completed=True,
         )
-        silver, _ = Rank.objects.update_or_create(
-            name="シルバー",
-            defaults={"required_points": 50, "max_challenges_per_day": 5},
-        )
-        gold, _ = Rank.objects.update_or_create(
-            name="ゴールド",
-            defaults={"required_points": 150, "max_challenges_per_day": 8},
+        o2 = upsert_owner(
+            "owner2@example.com",
+            "ownerpass",
+            name="宇都宮カフェ 管理者",
+            business_name="Utsunomiya Cafe",
+            contact_phone="090-3333-4444",
+            approved=True,
+            is_verified=True,
+            onboarding_completed=True,
         )
 
-        # ---- Users (unique by email) ----
-        u1, _ = User.objects.update_or_create(
-            email="jun@example.com",
-            defaults={"username": "jun", "password": "password123", "rank": bronze, "points": 10},
-        )
-        u2, _ = User.objects.update_or_create(
-            email="yuki@example.com",
-            defaults={"username": "yuki", "password": "password123", "rank": silver, "points": 70},
-        )
-        u3, _ = User.objects.update_or_create(
-            email="taro@example.com",
-            defaults={"username": "taro", "password": "password123", "rank": gold, "points": 210},
-        )
-
-        # ---- StoreOwners (unique by email) ----
-        o1, _ = StoreOwner.objects.update_or_create(
-            email="owner1@example.com",
-            defaults={
-                "name": "田上商店 代表",
-                "business_name": "田上商店",
-                "contact_phone": "080-1111-2222",
-                "password": "ownerpass",
-                "approved": True,
-                "is_verified": True,
-                "onboarding_completed": True,
-            },
-        )
-        o2, _ = StoreOwner.objects.update_or_create(
-            email="owner2@example.com",
-            defaults={
-                "name": "宇都宮カフェ 管理者",
-                "business_name": "Utsunomiya Cafe",
-                "contact_phone": "090-3333-4444",
-                "password": "ownerpass",
-                "approved": True,
-                "is_verified": True,
-                "onboarding_completed": True,
-            },
-        )
-
-        # ---- Stores (unique by qr_code) ----
+        # --------------------
+        # Stores (unique by qr_code)
+        # --------------------
         s1, _ = Store.objects.update_or_create(
             qr_code="STORE_QR_GYOZA_TAGAMI_0001",
             defaults={
@@ -143,7 +216,9 @@ class Command(BaseCommand):
             },
         )
 
-        # ---- Tags (unique by name) ----
+        # --------------------
+        # Tags (unique by name)
+        # --------------------
         t_food, _ = Tag.objects.update_or_create(
             name="グルメ",
             defaults={"category": "ジャンル", "display_order": 1, "is_active": True},
@@ -161,48 +236,46 @@ class Command(BaseCommand):
             defaults={"category": "属性", "display_order": 11, "is_active": True},
         )
 
-        # ---- StoreTag (unique_together store+tag) ----
         StoreTag.objects.update_or_create(store=s1, tag=t_food, defaults={"added_by": o1})
         StoreTag.objects.update_or_create(store=s1, tag=t_takeout, defaults={"added_by": o1})
         StoreTag.objects.update_or_create(store=s2, tag=t_cafe, defaults={"added_by": o2})
         StoreTag.objects.update_or_create(store=s2, tag=t_family, defaults={"added_by": o2})
 
-        # ---- Coupons (best-effort uniqueness by title + store) ----
-        c_common, _ = Coupon.objects.update_or_create(
-            store=None,
-            title="共通100円引き",
-            defaults={
-                "description": "対象店舗ならどこでも使える割引。",
-                "required_points": 30,
-                "type": "common",
-                "expires_at": now + timedelta(days=60),
-                "publish_to_shop": True,
-            },
+        # --------------------
+        # Coupons (store + title)
+        # expires_at is set only on create
+        # --------------------
+        c_common = upsert_coupon(
+            None,
+            "共通100円引き",
+            create_only_expires_days=60,
+            description="対象店舗ならどこでも使える割引。",
+            required_points=30,
+            type="common",
+            publish_to_shop=True,
         )
-        c_s1, _ = Coupon.objects.update_or_create(
-            store=s1,
-            title="餃子1皿サービス",
-            defaults={
-                "description": "来店時に餃子1皿サービス。",
-                "required_points": 60,
-                "type": "store_specific",
-                "expires_at": now + timedelta(days=30),
-                "publish_to_shop": True,
-            },
+        c_s1 = upsert_coupon(
+            s1,
+            "餃子1皿サービス",
+            create_only_expires_days=30,
+            description="来店時に餃子1皿サービス。",
+            required_points=60,
+            type="store_specific",
+            publish_to_shop=True,
         )
-        c_s2, _ = Coupon.objects.update_or_create(
-            store=s2,
-            title="ラテトッピング無料",
-            defaults={
-                "description": "フォーム増量またはシロップ追加。",
-                "required_points": 40,
-                "type": "store_specific",
-                "expires_at": now + timedelta(days=45),
-                "publish_to_shop": True,
-            },
+        c_s2 = upsert_coupon(
+            s2,
+            "ラテトッピング無料",
+            create_only_expires_days=45,
+            description="フォーム増量またはシロップ追加。",
+            required_points=40,
+            type="store_specific",
+            publish_to_shop=True,
         )
 
-        # ---- Challenges (unique by qr_code) ----
+        # --------------------
+        # Challenges (unique by qr_code)
+        # --------------------
         ch1, _ = Challenge.objects.update_or_create(
             qr_code="CH_QR_GYOZA_BUY_0001",
             defaults={
@@ -249,7 +322,10 @@ class Command(BaseCommand):
             },
         )
 
-        # ---- UserChallenge (unique per user+challenge) ----
+        # --------------------
+        # Progress / ownership tables
+        # (Needs model unique constraints ideally; seed uses update_or_create anyway)
+        # --------------------
         UserChallenge.objects.update_or_create(
             user=u1, challenge=ch1,
             defaults={"status": "in_progress", "proof_image": None, "approved_by_store": False, "cleared_at": None},
@@ -263,11 +339,9 @@ class Command(BaseCommand):
             defaults={"status": "retired", "proof_image": None, "approved_by_store": False, "cleared_at": None},
         )
 
-        # ---- UserCoupon (no unique constraint -> approximate uniqueness) ----
         UserCoupon.objects.get_or_create(user=u2, coupon=c_s2, defaults={"is_used": False, "used_at": None})
         UserCoupon.objects.get_or_create(user=u3, coupon=c_common, defaults={"is_used": True, "used_at": now - timedelta(days=3)})
 
-        # ---- Stamp setting / reward / stamp ----
         setting1, _ = StoreStampSetting.objects.update_or_create(store=s1, defaults={"max_stamps": 10})
 
         StoreStampReward.objects.update_or_create(
@@ -291,25 +365,20 @@ class Command(BaseCommand):
             },
         )
 
-        StoreStamp.objects.update_or_create(
-            user=u1, store=s1, defaults={"stamps_count": 3, "reward_given": False}
-        )
-        StoreStamp.objects.update_or_create(
-            user=u2, store=s1, defaults={"stamps_count": 6, "reward_given": False}
+        StoreStamp.objects.update_or_create(user=u1, store=s1, defaults={"stamps_count": 3, "reward_given": False})
+        StoreStamp.objects.update_or_create(user=u2, store=s1, defaults={"stamps_count": 6, "reward_given": False})
+
+        # --------------------
+        # Admin
+        # --------------------
+        upsert_admin(
+            "admin@example.com",
+            "adminpass",
+            name="管理者",
+            approval_status="approved",
+            is_active=True,
         )
 
-        # ---- AdminAccount (unique by email) ----
-        a1, _ = AdminAccount.objects.update_or_create(
-            email="admin@example.com",
-            defaults={
-                "name": "管理者",
-                "password": "adminpass",
-                "approval_status": "approved",
-                "is_active": True,
-            },
-        )
-
-        # ---- AdminInquiry (avoid duplicates: if exists for same store+challenge+category, update message/status) ----
         AdminInquiry.objects.update_or_create(
             store=s1,
             related_challenge=ch1,
@@ -320,4 +389,4 @@ class Command(BaseCommand):
             },
         )
 
-        self.stdout.write(self.style.SUCCESS("Seed completed (idempotent)."))
+        self.stdout.write(self.style.SUCCESS("Seed completed (safe & idempotent)."))
