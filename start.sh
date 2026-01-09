@@ -2,7 +2,8 @@
 set -e
 
 # 1) Apply migrations
-python manage.py migrate --noinput
+python manage.py migrate --noinput --fake-initial
+
 
 # 2) Seed base data (optional)
 if [ "${SEED_CIQUEST:-0}" != "0" ]; then
