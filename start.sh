@@ -1,8 +1,13 @@
 #!/usr/bin/env bash
 set -e
 
-# Run migrations (DATABASE_URL must be set)
+# 1) Apply migrations
 python manage.py migrate --noinput
+
+# 2) Seed base data (optional)
+if [ "${SEED_CIQUEST:-0}" != "0" ]; then
+  python manage.py seed_ciquest
+fi
 
 # Optional: seed a test owner when SEED_TEST_OWNER is set (idempotent)
 if [ "${SEED_TEST_OWNER:-0}" != "0" ]; then
