@@ -294,7 +294,10 @@ def admin_account_restore(request, admin_id, token):
 
     html = f"""
     <html>
-      <head><title>復元完了</title></head>
+      <head>
+        <meta charset="utf-8">
+        <title>復元完了</title>
+      </head>
       <body>
         <h1>アカウントを復元しました</h1>
         <p>{target.name} 様の運営アカウントを復元しました。ログインし直してください。</p>
@@ -302,7 +305,7 @@ def admin_account_restore(request, admin_id, token):
       </body>
     </html>
     """
-    return HttpResponse(html, content_type="text/html")
+    return HttpResponse(html, content_type="text/html; charset=utf-8")
 
 
 @require_http_methods(["GET"])
@@ -343,6 +346,20 @@ def api_store_update_status(request, store_id, new_status):
     store.status = new_status
     store.save(update_fields=["status"])
     return JsonResponse({"detail": "更新しました。", "status": new_status})
+
+
+@require_http_methods(["DELETE"])
+def api_store_delete(request, store_id):
+    unauthorized = _require_admin_for_json(request)
+    if unauthorized:
+        return unauthorized
+
+    store = get_object_or_404(Store, pk=store_id)
+    if store.status != "approved":
+        return JsonResponse({"detail": "承認済みの店舗のみ削除できます。"}, status=400)
+
+    store.delete()
+    return JsonResponse({"detail": "削除しました。"})
 
 
 @require_http_methods(["GET"])

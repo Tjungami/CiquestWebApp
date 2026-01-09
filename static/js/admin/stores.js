@@ -54,6 +54,13 @@ async function loadStores(status) {
                 `
                 : ""
             }
+            ${
+              status === "approved"
+                ? `
+                  <button class="delete-btn" data-store="${store.store_id}" data-name="${store.name}">削除</button>
+                `
+                : ""
+            }
           </div>
         </div>
       `
@@ -65,6 +72,14 @@ async function loadStores(status) {
         btn.addEventListener("click", (event) => {
           const target = event.currentTarget;
           updateStatus(target.dataset.store, target.dataset.next);
+        });
+      });
+    }
+    if (status === "approved") {
+      document.querySelectorAll(".delete-btn").forEach((btn) => {
+        btn.addEventListener("click", (event) => {
+          const target = event.currentTarget;
+          requestDelete(target.dataset.store, target.dataset.name || "");
         });
       });
     }
@@ -87,5 +102,38 @@ async function updateStatus(id, newStatus) {
     loadStores(activeTab);
   } catch (err) {
     alert("店舗ステータスの更新に失敗しました。");
+  }
+}
+
+function confirmDelete(storeName) {
+  if (!confirm(`この店舗を削除します。本当によろしいですか？\n${storeName}`)) {
+    return false;
+  }
+  const typed = prompt(
+    `削除を実行するには、DELETE と入力してください。\n${storeName}`
+  );
+  if (typed !== "DELETE") {
+    alert("削除を中止しました。");
+    return false;
+  }
+  return confirm(`最終確認です。本当に削除しますか？\n${storeName}`);
+}
+
+async function requestDelete(id, storeName) {
+  if (!confirmDelete(storeName)) {
+    return;
+  }
+  try {
+    const res = await fetch(`${API_BASE}/${id}/delete/`, {
+      method: "DELETE",
+      headers: {
+        "X-CSRFToken": STORES_CSRF_TOKEN,
+      },
+    });
+    if (!res.ok) throw new Error();
+    const activeTab = document.querySelector(".tab.active").dataset.status;
+    loadStores(activeTab);
+  } catch (err) {
+    alert("削除に失敗しました。時間を置いて再試行してください。");
   }
 }

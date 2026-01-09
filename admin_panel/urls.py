@@ -15,6 +15,11 @@ urlpatterns = [
         views.api_store_update_status,
         name='admin_api_store_update',
     ),
+    path(
+        'api/stores/<int:store_id>/delete/',
+        views.api_store_delete,
+        name='admin_api_store_delete',
+    ),
     path('api/challenges/', views.api_challenge_list, name='admin_api_challenges'),
     path(
         'api/challenges/<int:challenge_id>/ban/',
