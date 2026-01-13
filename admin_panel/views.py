@@ -19,6 +19,7 @@ from ciquest_model.models import (
     Challenge,
     Coupon,
     Store,
+    User,
 )
 
 
@@ -114,6 +115,13 @@ def admins_dashboard(request):
     return render(request, "admin_panel/admins.html", {"active_page": "admins"})
 
 
+def users_dashboard(request):
+    redirect_response = _redirect_if_not_admin(request)
+    if redirect_response:
+        return redirect_response
+    return render(request, "admin_panel/users.html", {"active_page": "users"})
+
+
 def _json_unauthorized():
     return JsonResponse({"detail": "認証が必要です。"}, status=401)
 
@@ -148,6 +156,17 @@ def _serialize_admin(account, current_admin=None):
         "approved_at": account.approved_at.isoformat() if account.approved_at else None,
         "is_active": account.is_active,
         "can_approve": False,
+    }
+
+
+def _serialize_user(user):
+    return {
+        "user_id": user.user_id,
+        "username": user.username,
+        "email": user.email,
+        "rank": user.rank.name if user.rank else "",
+        "points": user.points,
+        "created_at": user.created_at.isoformat() if user.created_at else None,
     }
 
 
@@ -536,3 +555,30 @@ def api_inquiry_update_status(request, inquiry_id):
     inquiry.status = next_status
     inquiry.save(update_fields=["status"])
     return JsonResponse({"detail": "更新しました。", "status": next_status})
+
+
+@require_http_methods(["GET"])
+def api_user_list(request):
+    unauthorized = _require_admin_for_json(request)
+    if unauthorized:
+        return unauthorized
+
+    keyword = (request.GET.get("search") or "").strip()
+    queryset = User.objects.select_related("rank").order_by("-created_at")
+    if keyword:
+        queryset = queryset.filter(
+            Q(username__icontains=keyword) | Q(email__icontains=keyword)
+        )
+    users = [_serialize_user(user) for user in queryset]
+    return JsonResponse(users, safe=False)
+
+
+@require_http_methods(["DELETE"])
+def api_user_delete(request, user_id):
+    unauthorized = _require_admin_for_json(request)
+    if unauthorized:
+        return unauthorized
+
+    user = get_object_or_404(User, pk=user_id)
+    user.delete()
+    return JsonResponse({"detail": "削除しました。"})

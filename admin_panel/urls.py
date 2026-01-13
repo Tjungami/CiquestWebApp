@@ -9,6 +9,7 @@ urlpatterns = [
     path('coupons/', views.coupons_dashboard, name='admin_coupons'),
     path('inquiries/', views.inquiries_dashboard, name='admin_inquiries'),
     path('admins/', views.admins_dashboard, name='admin_admins'),
+    path('users/', views.users_dashboard, name='admin_users'),
     path('api/stores/', views.api_store_list, name='admin_api_stores'),
     path(
         'api/stores/<int:store_id>/delete/',
@@ -58,5 +59,11 @@ urlpatterns = [
         'api/inquiries/<int:inquiry_id>/update_status/',
         views.api_inquiry_update_status,
         name='admin_api_inquiry_update_status',
+    ),
+    path('api/users/', views.api_user_list, name='admin_api_users'),
+    path(
+        'api/users/<int:user_id>/delete/',
+        views.api_user_delete,
+        name='admin_api_user_delete',
     ),
 ]

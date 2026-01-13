@@ -1,0 +1,115 @@
+.users-page {
+  padding: 40px 5% 60px;
+}
+
+.users-panel {
+  background: var(--sunset-card);
+  border-radius: 22px;
+  box-shadow: var(--shadow);
+  padding: 28px;
+}
+
+.users-panel__header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.users-panel__header h2 {
+  margin: 0 0 6px;
+  color: var(--sunset-deep);
+}
+
+.search-box {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.search-box input {
+  padding: 10px 14px;
+  border-radius: 14px;
+  border: 1px solid #f5b08b;
+  font-size: 1rem;
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.search-box button {
+  border: none;
+  border-radius: 999px;
+  padding: 10px 18px;
+  font-weight: 700;
+  cursor: pointer;
+  background: linear-gradient(120deg, #ff9a62, #ff6a88);
+  color: #fff;
+  box-shadow: 0 12px 25px rgba(255, 106, 136, 0.35);
+}
+
+.user-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.user-card {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 18px;
+  padding: 18px 22px;
+  box-shadow: 0 15px 30px rgba(47, 26, 22, 0.12);
+  border-left: 5px solid var(--sunset-accent);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.user-card__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.user-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  color: #5c4033;
+}
+
+.user-meta span {
+  background: rgba(92, 64, 51, 0.08);
+  padding: 6px 10px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.user-points {
+  font-weight: 700;
+  color: #5c4033;
+}
+
+.user-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.user-actions .delete-btn {
+  border: none;
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-weight: 700;
+  cursor: pointer;
+  color: #fff;
+  background: linear-gradient(120deg, #f45c43, #eb3349);
+  box-shadow: 0 12px 25px rgba(235, 51, 73, 0.35);
+}
+
+.user-empty {
+  text-align: center;
+  color: #5c4033;
+  padding: 20px 0;
+}
