@@ -1,5 +1,10 @@
-import secrets
+import datetime
+import hashlib
+import json
 import math
+import secrets
+
+import jwt
 
 from django.conf import settings
 from django.contrib import messages
@@ -7,13 +12,24 @@ from django.contrib.auth import logout as django_logout
 from django.contrib.auth.hashers import check_password, make_password
 from django.core.mail import get_connection, send_mail
 from django.db.models import Q
-from django.shortcuts import redirect, render
 from django.http import JsonResponse
+from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
 
-from ciquest_model.models import AdminAccount, StoreOwner
-from ciquest_model.models import AdminAccount, Store, StoreTag, Tag, Coupon, Challenge
+from ciquest_model.models import (
+    AdminAccount,
+    Challenge,
+    Coupon,
+    Store,
+    StoreOwner,
+    StoreTag,
+    Tag,
+    User,
+    UserRefreshToken,
+)
 from ciquest_server.forms import AdminSignupForm, OwnerProfileForm, OwnerSignupForm
 
 
@@ -109,6 +125,123 @@ def _verify_password(raw_password, stored_password, user_obj):
     return False
 
 
+def _json_error(message, status=400):
+    return JsonResponse({"detail": message}, status=status)
+
+
+def _get_request_data(request):
+    if request.content_type and "application/json" in request.content_type:
+        try:
+            raw_body = request.body.decode("utf-8") if request.body else ""
+            data = json.loads(raw_body or "{}")
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            return None, _json_error("Invalid JSON.", status=400)
+        return data, None
+    return request.POST, None
+
+
+def _serialize_user(user):
+    return {
+        "id": user.user_id,
+        "username": user.username,
+        "email": user.email,
+        "rank_id": user.rank_id,
+        "rank": user.rank.name if user.rank else None,
+        "points": user.points,
+        "created_at": user.created_at.isoformat() if user.created_at else None,
+    }
+
+
+def _hash_token(raw_token):
+    return hashlib.sha256(raw_token.encode("utf-8")).hexdigest()
+
+
+def _extract_bearer_token(request):
+    auth_header = request.headers.get("Authorization") or request.META.get("HTTP_AUTHORIZATION")
+    if not auth_header:
+        return None
+    parts = auth_header.split()
+    if len(parts) == 2 and parts[0].lower() == "bearer":
+        return parts[1]
+    return None
+
+
+def _jwt_secret():
+    return getattr(settings, "JWT_SECRET_KEY", settings.SECRET_KEY)
+
+
+def _jwt_encode(payload):
+    return jwt.encode(payload, _jwt_secret(), algorithm=getattr(settings, "JWT_ALGORITHM", "HS256"))
+
+
+def _jwt_decode(raw_token):
+    return jwt.decode(
+        raw_token,
+        _jwt_secret(),
+        algorithms=[getattr(settings, "JWT_ALGORITHM", "HS256")],
+    )
+
+
+def _jwt_timestamps(lifetime_seconds):
+    now = timezone.now()
+    exp = now + datetime.timedelta(seconds=lifetime_seconds)
+    return now, exp
+
+
+def _create_access_token(user):
+    now, exp = _jwt_timestamps(getattr(settings, "JWT_ACCESS_LIFETIME_SECONDS", 900))
+    payload = {
+        "sub": str(user.user_id),
+        "type": "access",
+        "iat": int(now.timestamp()),
+        "exp": int(exp.timestamp()),
+    }
+    return _jwt_encode(payload)
+
+
+def _create_refresh_token(user):
+    now, exp = _jwt_timestamps(
+        getattr(settings, "JWT_REFRESH_LIFETIME_SECONDS", 60 * 60 * 24 * 14)
+    )
+    jti = secrets.token_hex(16)
+    payload = {
+        "sub": str(user.user_id),
+        "type": "refresh",
+        "jti": jti,
+        "iat": int(now.timestamp()),
+        "exp": int(exp.timestamp()),
+    }
+    raw_token = _jwt_encode(payload)
+    UserRefreshToken.objects.filter(user=user, revoked_at__isnull=True).update(revoked_at=now)
+    UserRefreshToken.objects.create(
+        user=user,
+        token_hash=_hash_token(raw_token),
+        expires_at=exp,
+    )
+    return raw_token
+
+
+def _get_user_from_access_token(request):
+    raw_token = _extract_bearer_token(request)
+    if not raw_token:
+        return None, _json_error("Authorization token is required.", status=401)
+    try:
+        payload = _jwt_decode(raw_token)
+    except jwt.ExpiredSignatureError:
+        return None, _json_error("Token has expired.", status=401)
+    except jwt.InvalidTokenError:
+        return None, _json_error("Invalid token.", status=401)
+    if payload.get("type") != "access":
+        return None, _json_error("Invalid token type.", status=401)
+    user_id = payload.get("sub")
+    if not user_id:
+        return None, _json_error("Invalid token.", status=401)
+    user = User.objects.select_related("rank").filter(user_id=user_id).first()
+    if not user:
+        return None, _json_error("User not found.", status=401)
+    return user, None
+
+
 def _require_phone_api_key(request):
     expected_key = getattr(settings, "PHONE_API_KEY", "")
     if not expected_key:
@@ -117,6 +250,103 @@ def _require_phone_api_key(request):
     if not provided_key or not secrets.compare_digest(provided_key, expected_key):
         return JsonResponse({"detail": "認証に失敗しました。"}, status=401)
     return None
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def api_user_create(request):
+    data, error = _get_request_data(request)
+    if error:
+        return error
+    username = (data.get("username") or "").strip()
+    email = (data.get("email") or "").strip().lower()
+    password = data.get("password") or ""
+
+    if not username or not email or not password:
+        return _json_error("username, email, password are required.", status=400)
+    if User.objects.filter(email__iexact=email).exists():
+        return _json_error("Email already exists.", status=400)
+
+    user = User.objects.create(username=username, email=email, password=password)
+    return JsonResponse(_serialize_user(user), status=201)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def api_login(request):
+    data, error = _get_request_data(request)
+    if error:
+        return error
+    email = (data.get("email") or "").strip().lower()
+    password = data.get("password") or ""
+
+    if not email or not password:
+        return _json_error("email and password are required.", status=400)
+
+    user = User.objects.select_related("rank").filter(email__iexact=email).first()
+    if not user or not _verify_password(password, user.password, user):
+        return _json_error("Email address or password is incorrect.", status=401)
+
+    access = _create_access_token(user)
+    refresh = _create_refresh_token(user)
+    return JsonResponse({"user": _serialize_user(user), "access": access, "refresh": refresh})
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def api_token_refresh(request):
+    data, error = _get_request_data(request)
+    if error:
+        return error
+    refresh = data.get("refresh") if data else None
+    if not refresh:
+        return _json_error("refresh is required.", status=400)
+    try:
+        payload = _jwt_decode(refresh)
+    except jwt.ExpiredSignatureError:
+        return _json_error("Token has expired.", status=401)
+    except jwt.InvalidTokenError:
+        return _json_error("Invalid token.", status=401)
+    if payload.get("type") != "refresh":
+        return _json_error("Invalid token type.", status=401)
+    token_hash = _hash_token(refresh)
+    token_obj = (
+        UserRefreshToken.objects.select_related("user", "user__rank")
+        .filter(token_hash=token_hash, revoked_at__isnull=True)
+        .first()
+    )
+    if not token_obj:
+        return _json_error("Invalid token.", status=401)
+    if token_obj.expires_at and token_obj.expires_at <= timezone.now():
+        return _json_error("Token has expired.", status=401)
+    access = _create_access_token(token_obj.user)
+    return JsonResponse({"access": access})
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def api_logout(request):
+    data, error = _get_request_data(request)
+    if error:
+        return error
+    refresh = data.get("refresh") if data else None
+    if not refresh:
+        return _json_error("refresh is required.", status=400)
+    token_hash = _hash_token(refresh)
+    token_obj = UserRefreshToken.objects.filter(token_hash=token_hash, revoked_at__isnull=True).first()
+    if not token_obj:
+        return _json_error("Invalid token.", status=401)
+    token_obj.revoked_at = timezone.now()
+    token_obj.save(update_fields=["revoked_at"])
+    return JsonResponse({"detail": "Logged out."})
+
+
+@require_http_methods(["GET"])
+def api_me(request):
+    user, error = _get_user_from_access_token(request)
+    if error:
+        return error
+    return JsonResponse(_serialize_user(user))
 
 
 def public_store_list(request):

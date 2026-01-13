@@ -44,6 +44,17 @@ class User(models.Model):
         super().save(*args, **kwargs)
 
 
+class UserRefreshToken(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="refresh_tokens")
+    token_hash = models.CharField(max_length=64, unique=True)
+    issued_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    revoked_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"UserRefreshToken(user_id={self.user_id})"
+
+
 # 店舗オーナー
 class StoreOwner(models.Model):
     owner_id = models.AutoField(primary_key=True)

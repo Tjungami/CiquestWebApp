@@ -26,6 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ============================================================
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-$lb9_cepk#vl@5=8sqp888)=d7r4c+qv^+7yt7ixtz76n^j#5*')
 DEBUG = os.environ.get("DJANGO_DEBUG", "True") == "True"
+ENV = os.environ.get("DJANGO_ENV", "development")
 _default_allowed = [
     "ciquestwebapp.onrender.com",
     "localhost",
@@ -42,6 +43,16 @@ if _render_host:
     _env_allowed.append(_render_host)
 ALLOWED_HOSTS = _env_allowed or _default_allowed
 
+HTTPS_ONLY = os.environ.get("DJANGO_HTTPS_ONLY", "False") == "True"
+if ENV == "production" or HTTPS_ONLY:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = int(os.environ.get("SECURE_HSTS_SECONDS", "31536000"))
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
 
 # ============================================================
 # APPLICATIONS
@@ -53,6 +64,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    "corsheaders",
     
 
     # Ciquest apps
@@ -70,6 +82,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     "whitenoise.middleware.WhiteNoiseMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -108,8 +121,6 @@ TEMPLATES = [
 # ============================================================
 # DATABASE
 # ============================================================
-ENV = os.environ.get("DJANGO_ENV", "development")
-
 if ENV == "production":
     DATABASES = {
         'default': {
@@ -169,9 +180,35 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 
 # ============================================================
+# CORS / CSRF
+# ============================================================
+_cors_origins = [
+    o.strip()
+    for o in os.environ.get("CORS_ALLOWED_ORIGINS", "").split(",")
+    if o.strip()
+]
+CORS_ALLOWED_ORIGINS = _cors_origins
+CORS_ALLOW_ALL_ORIGINS = DEBUG and not _cors_origins
+CORS_ALLOW_CREDENTIALS = os.environ.get("CORS_ALLOW_CREDENTIALS", "0") == "1"
+CSRF_TRUSTED_ORIGINS = [
+    o.strip()
+    for o in os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",")
+    if o.strip()
+]
+
+
+# ============================================================
 # DEFAULTS
 # ============================================================
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# ============================================================
+# JWT
+# ============================================================
+JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY", SECRET_KEY)
+JWT_ALGORITHM = os.environ.get("JWT_ALGORITHM", "HS256")
+JWT_ACCESS_LIFETIME_SECONDS = int(os.environ.get("JWT_ACCESS_LIFETIME_SECONDS", "900"))
+JWT_REFRESH_LIFETIME_SECONDS = int(os.environ.get("JWT_REFRESH_LIFETIME_SECONDS", str(60 * 60 * 24 * 14)))
 
 
 

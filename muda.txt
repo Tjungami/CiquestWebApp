@@ -1,0 +1,14 @@
+﻿ReactアプリからDjangoへは、パスワードは平文のままHTTPSで送信してください。Django側で`set_password`相当の処理によりハッシュ化してDB保存します。
+クライアント側でハッシュ化しないこと（ハッシュが実質パスワードになりうるため）。
+送信データやログにパスワードが残らないよう注意し、HTTP通信は使わないでください。
+
+Userテーブルの項目:
+- `user_id`（自動採番, PK）
+- `username`（string, max 50）
+- `email`（email, max 100, unique）
+- `password`（string, max 255, Djangoでハッシュ化）
+- `rank`（Rank FK, null可）
+- `points`（int, default 0）
+- `created_at`（日時, auto）
+
+参照: `ciquest_model/models.py`
