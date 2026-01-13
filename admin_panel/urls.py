@@ -73,4 +73,10 @@ urlpatterns = [
         views.api_user_delete,
         name='admin_api_user_delete',
     ),
+    path('api/owners/', views.api_owner_list, name='admin_api_owners'),
+    path(
+        'api/owners/<int:owner_id>/delete/',
+        views.api_owner_delete,
+        name='admin_api_owner_delete',
+    ),
 ]

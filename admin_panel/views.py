@@ -20,6 +20,7 @@ from ciquest_model.models import (
     Coupon,
     Notice,
     Store,
+    StoreOwner,
     User,
 )
 from ciquest_model.markdown_utils import render_markdown
@@ -676,4 +677,46 @@ def api_notice_delete(request, notice_id):
 
     notice = get_object_or_404(Notice, pk=notice_id)
     notice.delete()
+    return JsonResponse({"detail": "Deleted."})
+
+
+def _serialize_owner(owner):
+    return {
+        "owner_id": owner.owner_id,
+        "name": owner.name or "",
+        "business_name": owner.business_name or "",
+        "email": owner.email,
+        "approved": owner.approved,
+        "is_verified": owner.is_verified,
+        "onboarding_completed": owner.onboarding_completed,
+        "created_at": owner.created_at.isoformat(),
+    }
+
+
+@require_http_methods(["GET"])
+def api_owner_list(request):
+    unauthorized = _require_admin_for_json(request)
+    if unauthorized:
+        return unauthorized
+
+    keyword = (request.GET.get("search") or "").strip()
+    queryset = StoreOwner.objects.order_by("-created_at")
+    if keyword:
+        queryset = queryset.filter(
+            Q(name__icontains=keyword)
+            | Q(email__icontains=keyword)
+            | Q(business_name__icontains=keyword)
+        )
+    owners = [_serialize_owner(owner) for owner in queryset]
+    return JsonResponse(owners, safe=False)
+
+
+@require_http_methods(["DELETE"])
+def api_owner_delete(request, owner_id):
+    unauthorized = _require_admin_for_json(request)
+    if unauthorized:
+        return unauthorized
+
+    owner = get_object_or_404(StoreOwner, pk=owner_id)
+    owner.delete()
     return JsonResponse({"detail": "Deleted."})

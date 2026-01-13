@@ -48,6 +48,29 @@
   box-shadow: 0 12px 25px rgba(255, 106, 136, 0.35);
 }
 
+.user-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.user-tab {
+  border: none;
+  border-radius: 999px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.75);
+  color: #5c4033;
+  box-shadow: 0 8px 18px rgba(47, 26, 22, 0.12);
+}
+
+.user-tab.active {
+  background: linear-gradient(120deg, #ff9a62, #ff6a88);
+  color: #fff;
+}
+
 .user-list {
   display: flex;
   flex-direction: column;

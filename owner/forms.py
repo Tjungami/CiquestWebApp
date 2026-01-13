@@ -1,6 +1,7 @@
 # C:\Users\j_tagami\CiquestWebApp\owner\forms.py
 
 import datetime
+import re
 from decimal import Decimal, InvalidOperation
 
 from django import forms
@@ -416,19 +417,36 @@ class StoreApplicationForm(forms.ModelForm):
         if value is None:
             return None
 
-        normalized = value.replace("?", ",")
-        if "," not in normalized:
-            return None
+        normalized = (
+            value.replace("，", ",")
+            .replace("、", ",")
+            .replace("､", ",")
+            .replace("　", " ")
+        )
 
-        parts = [part.strip() for part in normalized.split(",") if part.strip()]
-        if len(parts) != 2:
-            return None
-        return parts[0], parts[1]
+        if "," in normalized:
+            parts = [part.strip() for part in normalized.split(",") if part.strip()]
+            if len(parts) == 2:
+                return parts[0], parts[1]
+
+        parts = [part for part in re.split(r"\s+", normalized.strip()) if part]
+        if len(parts) == 2:
+            return parts[0], parts[1]
+
+        return None
 
     def _to_decimal(self, raw_value, error_field, min_value, max_value, range_error_message, sample):
         if raw_value in (None, ""):
             self.add_error(error_field, "この項目を入力してください。")
             return None
+
+        if isinstance(raw_value, str):
+            translation = str.maketrans({
+                '\uFF10': '0', '\uFF11': '1', '\uFF12': '2', '\uFF13': '3', '\uFF14': '4',
+                '\uFF15': '5', '\uFF16': '6', '\uFF17': '7', '\uFF18': '8', '\uFF19': '9',
+                '\uFF0E': '.', '\uFF0D': '-', '\u2212': '-', '\u2015': '-'
+            })
+            raw_value = raw_value.translate(translation)
 
         try:
             decimal_value = Decimal(str(raw_value))
