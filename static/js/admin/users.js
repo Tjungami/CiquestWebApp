@@ -25,7 +25,7 @@ function getCsrfToken() {
 
 async function loadUsers(keyword = "") {
   const container = document.getElementById("userList");
-  container.innerHTML = "<p>Loading...</p>";
+  container.innerHTML = "<p>読み込み中です...</p>";
 
   const query = keyword.trim();
   const url = query ? `${API_BASE}/?search=${encodeURIComponent(query)}` : `${API_BASE}/`;
@@ -36,7 +36,7 @@ async function loadUsers(keyword = "") {
     const data = await res.json();
 
     if (!data.length) {
-      container.innerHTML = '<p class="user-empty">No users found.</p>';
+      container.innerHTML = '<p class="user-empty">該当するユーザーがありません。</p>';
       return;
     }
 
@@ -52,15 +52,15 @@ async function loadUsers(keyword = "") {
               <strong>${user.username}</strong><br>
               <span>${user.email}</span>
             </div>
-            <span class="user-points">${user.points} pts</span>
+            <span class="user-points">${user.points} pt</span>
           </div>
           <div class="user-meta">
-            <span>Rank: ${user.rank || "-"}</span>
-            <span>Created: ${createdAt}</span>
+            <span>ランク: ${user.rank || "-"}</span>
+            <span>登録日: ${createdAt}</span>
           </div>
           <div class="user-actions">
             <button class="delete-btn" data-id="${user.user_id}" data-name="${user.username}">
-              Delete
+              削除
             </button>
           </div>
         </div>
@@ -76,12 +76,12 @@ async function loadUsers(keyword = "") {
     });
   } catch (err) {
     console.error(err);
-    container.innerHTML = '<p class="user-empty">Failed to load users.</p>';
+    container.innerHTML = '<p class="user-empty">ユーザーの取得に失敗しました。</p>';
   }
 }
 
 async function deleteUser(id, name) {
-  const confirmMsg = `Delete user "${name}"? This cannot be undone.`;
+  const confirmMsg = `ユーザー「${name}」を削除しますか？この操作は取り消せません。`;
   if (!confirm(confirmMsg)) return;
 
   try {
@@ -95,9 +95,9 @@ async function deleteUser(id, name) {
       const err = await res.json().catch(() => ({}));
       throw new Error(err.detail || "failed");
     }
-    alert("User deleted.");
+    alert("ユーザーを削除しました。");
     loadUsers(document.getElementById("userSearch").value);
   } catch (err) {
-    alert("Delete failed. " + (err.message || ""));
+    alert("削除に失敗しました。 " + (err.message || ""));
   }
 }

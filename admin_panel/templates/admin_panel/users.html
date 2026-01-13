@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>User Management | Ciquest</title>
+  <title>一般ユーザー管理 | Ciquest</title>
   <link rel="stylesheet" href="{% static 'css/base/base.css' %}">
   <link rel="stylesheet" href="{% static 'css/admin/sunset.css' %}">
   <link rel="stylesheet" href="{% static 'css/admin/users.css' %}">
@@ -12,33 +12,33 @@
 </head>
 <body>
   <header class="admin-header">
-    <h1>User Management</h1>
+    <h1>一般ユーザー管理</h1>
     <nav>
-      <a href="{% url 'admin_dashboard' %}" {% if active_page == 'dashboard' %}class="active"{% endif %}>Dashboard</a>
-      <a href="{% url 'admin_stores' %}" {% if active_page == 'stores' %}class="active"{% endif %}>Stores</a>
-      <a href="{% url 'admin_challenges' %}" {% if active_page == 'challenges' %}class="active"{% endif %}>Challenges</a>
-      <a href="{% url 'admin_coupons' %}" {% if active_page == 'coupons' %}class="active"{% endif %}>Coupons</a>
-      <a href="{% url 'admin_admins' %}" {% if active_page == 'admins' %}class="active"{% endif %}>Admins</a>
-      <a href="{% url 'admin_users' %}" {% if active_page == 'users' %}class="active"{% endif %}>Users</a>
-      <a href="{% url 'admin_inquiries' %}" {% if active_page == 'inquiries' %}class="active"{% endif %}>Inquiries</a>
+      <a href="{% url 'admin_dashboard' %}" {% if active_page == 'dashboard' %}class="active"{% endif %}>ダッシュボード</a>
+      <a href="{% url 'admin_stores' %}" {% if active_page == 'stores' %}class="active"{% endif %}>店舗承認</a>
+      <a href="{% url 'admin_challenges' %}" {% if active_page == 'challenges' %}class="active"{% endif %}>チャレンジ管理</a>
+      <a href="{% url 'admin_coupons' %}" {% if active_page == 'coupons' %}class="active"{% endif %}>クーポン管理</a>
+      <a href="{% url 'admin_admins' %}" {% if active_page == 'admins' %}class="active"{% endif %}>運営ユーザー</a>
+      <a href="{% url 'admin_users' %}" {% if active_page == 'users' %}class="active"{% endif %}>一般ユーザー</a>
+      <a href="{% url 'admin_inquiries' %}" {% if active_page == 'inquiries' %}class="active"{% endif %}>お問い合わせ</a>
     </nav>
-    <a class="logout-btn" href="{% url 'logout' %}">Logout</a>
+    <a class="logout-btn" href="{% url 'logout' %}">ログアウト</a>
   </header>
 
   <main class="users-page">
     <section class="users-panel">
       <header class="users-panel__header">
         <div>
-          <h2>Users</h2>
-          <p>Search and delete registered users.</p>
+          <h2>一般ユーザー</h2>
+          <p>登録済みユーザーの検索・削除ができます。</p>
         </div>
         <div class="search-box">
-          <input id="userSearch" type="text" placeholder="Search by username or email">
-          <button id="userSearchBtn" type="button">Search</button>
+          <input id="userSearch" type="text" placeholder="ユーザー名またはメールアドレスで検索">
+          <button id="userSearchBtn" type="button">検索</button>
         </div>
       </header>
       <div id="userList" class="user-list">
-        <p>Loading...</p>
+        <p>読み込み中です...</p>
       </div>
     </section>
   </main>

@@ -2,10 +2,13 @@
 from django.contrib import admin
 from django.urls import path, include
 from django.shortcuts import redirect
+from django.templatetags.static import static
+from django.views.generic.base import RedirectView
 
 from . import views
 
 urlpatterns = [
+    path('favicon.ico', RedirectView.as_view(url=static('img/common/CIquest.ico'), permanent=True)),
     path('admin/', admin.site.urls),
     path('owner/', include('owner.urls')),
     path('operator/', include('admin_panel.urls')),
