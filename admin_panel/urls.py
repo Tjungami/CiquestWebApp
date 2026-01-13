@@ -10,6 +10,7 @@ urlpatterns = [
     path('inquiries/', views.inquiries_dashboard, name='admin_inquiries'),
     path('admins/', views.admins_dashboard, name='admin_admins'),
     path('users/', views.users_dashboard, name='admin_users'),
+    path('notices/', views.notices_dashboard, name='admin_notices'),
     path('api/stores/', views.api_store_list, name='admin_api_stores'),
     path(
         'api/stores/<int:store_id>/delete/',
@@ -59,6 +60,12 @@ urlpatterns = [
         'api/inquiries/<int:inquiry_id>/update_status/',
         views.api_inquiry_update_status,
         name='admin_api_inquiry_update_status',
+    ),
+    path('api/notices/', views.api_notice_list_create, name='admin_api_notices'),
+    path(
+        'api/notices/<int:notice_id>/delete/',
+        views.api_notice_delete,
+        name='admin_api_notice_delete',
     ),
     path('api/users/', views.api_user_list, name='admin_api_users'),
     path(

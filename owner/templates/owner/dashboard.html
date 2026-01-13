@@ -21,6 +21,25 @@
       </ul>
     {% endif %}
 
+    {% if notices %}
+      <section class="notice-section">
+        <h2>お知らせ</h2>
+        <div class="notice-list">
+          {% for notice in notices %}
+            <article class="notice-card">
+              <header>
+                <h3>{{ notice.title }}</h3>
+                <p class="notice-period">
+                  {{ notice.start_at|date:"Y/m/d H:i" }} 〜 {{ notice.end_at|date:"Y/m/d H:i" }}
+                </p>
+              </header>
+              <div class="notice-body">{{ notice.body_html }}</div>
+            </article>
+          {% endfor %}
+        </div>
+      </section>
+    {% endif %}
+
     <section class="store-application">
       <h2>新しい店舗を申請</h2>
       <p class="help-text">必要事項を入力して送信すると、運営が内容を確認して承認ステータスを更新します。</p>

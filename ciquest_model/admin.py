@@ -6,6 +6,7 @@ from .models import (
     AdminInquiry,
     Challenge,
     Coupon,
+    Notice,
     Rank,
     Store,
     StoreOwner,
@@ -128,3 +129,10 @@ class AdminInquiryAdmin(admin.ModelAdmin):
     list_display = ("category", "store", "related_challenge", "status", "created_at")
     search_fields = ("category", "message", "store__name", "related_challenge__title")
     list_filter = ("status",)
+
+
+@admin.register(Notice)
+class NoticeAdmin(admin.ModelAdmin):
+    list_display = ("title", "target", "is_published", "start_at", "end_at", "created_at")
+    search_fields = ("title", "body_md")
+    list_filter = ("target", "is_published")

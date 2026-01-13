@@ -4,15 +4,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>クーポン管理 | Ciquest</title>
+  <title>お知らせ管理 | Ciquest</title>
   <link rel="stylesheet" href="{% static 'css/base/base.css' %}">
   <link rel="stylesheet" href="{% static 'css/admin/sunset.css' %}">
-  <link rel="stylesheet" href="{% static 'css/admin/coupons.css' %}">
+  <link rel="stylesheet" href="{% static 'css/admin/notices.css' %}">
   <link rel="icon" href="{% static 'img/common/CIquest.ico' %}">
 </head>
 <body>
   <header class="admin-header">
-    <h1>クーポン管理</h1>
+    <h1>お知らせ管理</h1>
     <nav>
       <a href="{% url 'admin_dashboard' %}" {% if active_page == 'dashboard' %}class="active"{% endif %}>ダッシュボード</a>
       <a href="{% url 'admin_stores' %}" {% if active_page == 'stores' %}class="active"{% endif %}>店舗承認</a>
@@ -26,34 +26,44 @@
     <a class="logout-btn" href="{% url 'logout' %}">ログアウト</a>
   </header>
 
-  <main class="coupons-page">
-    <section class="coupon-form">
-      <h2>新しい共通クーポンを追加</h2>
-      <form id="couponForm">
-        <input type="text" id="title" placeholder="タイトル" required>
-        <input type="number" id="required_points" placeholder="必要ポイント" min="1" required>
-        <textarea id="description" placeholder="説明" required></textarea>
-        <input type="date" id="expires_at" required>
+  <main class="notices-page">
+    <section class="notice-form">
+      <h2>お知らせを追加</h2>
+      <form id="noticeForm">
+        <input type="text" id="noticeTitle" placeholder="タイトル" required>
+        <div class="notice-form-row">
+          <label>
+            対象
+            <select id="noticeTarget" required>
+              <option value="all">全員</option>
+              <option value="owner">オーナー</option>
+              <option value="user">ユーザー</option>
+            </select>
+          </label>
+          <label>
+            開始日時
+            <input type="datetime-local" id="noticeStart" required>
+          </label>
+          <label>
+            終了日時
+            <input type="datetime-local" id="noticeEnd" required>
+          </label>
+          <label class="notice-checkbox">
+            <input type="checkbox" id="noticePublished">
+            公開する
+          </label>
+        </div>
+        <textarea id="noticeBody" placeholder="本文（Markdown）" rows="6" required></textarea>
         <button type="submit">追加する</button>
       </form>
     </section>
 
-    <section class="coupon-list">
-      <div class="coupon-list-header">
-        <h2>クーポン一覧</h2>
-        <label class="filter-control">
-          表示フィルタ
-          <select id="couponFilter">
-            <option value="all">すべて</option>
-            <option value="common">共通のみ</option>
-            <option value="store_specific">店舗独自のみ</option>
-          </select>
-        </label>
-      </div>
-      <div id="couponContainer"></div>
+    <section class="notice-list">
+      <h2>お知らせ一覧</h2>
+      <div id="noticeContainer"></div>
     </section>
   </main>
 
-  <script src="{% static 'js/admin/coupons.js' %}"></script>
+  <script src="{% static 'js/admin/notices.js' %}"></script>
 </body>
 </html>

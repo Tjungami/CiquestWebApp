@@ -18,9 +18,11 @@ from ciquest_model.models import (
     AdminInquiry,
     Challenge,
     Coupon,
+    Notice,
     Store,
     User,
 )
+from ciquest_model.markdown_utils import render_markdown
 
 
 def login_view(request):
@@ -582,3 +584,96 @@ def api_user_delete(request, user_id):
     user = get_object_or_404(User, pk=user_id)
     user.delete()
     return JsonResponse({"detail": "削除しました。"})
+
+
+def notices_dashboard(request):
+    redirect_response = _redirect_if_not_admin(request)
+    if redirect_response:
+        return redirect_response
+    return render(request, "admin_panel/notices.html", {"active_page": "notices"})
+
+
+def _parse_datetime_local(value):
+    if not value:
+        return None
+    try:
+        parsed = datetime.strptime(value, "%Y-%m-%dT%H:%M")
+    except ValueError:
+        return None
+    if timezone.is_naive(parsed):
+        return timezone.make_aware(parsed, timezone.get_current_timezone())
+    return parsed
+
+
+def _normalize_bool(value):
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        return value.strip().lower() in {"true", "1", "yes", "on"}
+    return False
+
+
+def _serialize_notice(notice, include_body_html=False):
+    data = {
+        "notice_id": notice.notice_id,
+        "title": notice.title,
+        "body_md": notice.body_md,
+        "target": notice.target,
+        "start_at": notice.start_at.isoformat(),
+        "end_at": notice.end_at.isoformat(),
+        "is_published": notice.is_published,
+        "created_at": notice.created_at.isoformat(),
+    }
+    if include_body_html:
+        data["body_html"] = render_markdown(notice.body_md)
+    return data
+
+
+@require_http_methods(["GET", "POST"])
+def api_notice_list_create(request):
+    unauthorized = _require_admin_for_json(request)
+    if unauthorized:
+        return unauthorized
+
+    if request.method == "GET":
+        notices = Notice.objects.order_by("-start_at", "-created_at")
+        data = [_serialize_notice(notice, include_body_html=True) for notice in notices]
+        return JsonResponse(data, safe=False)
+
+    data = _json_body(request)
+    title = (data.get("title") or "").strip()
+    body_md = (data.get("body_md") or "").strip()
+    target = data.get("target")
+    start_at = _parse_datetime_local(data.get("start_at"))
+    end_at = _parse_datetime_local(data.get("end_at"))
+    is_published = _normalize_bool(data.get("is_published"))
+
+    if not title or not body_md or not target or not start_at or not end_at:
+        return JsonResponse({"detail": "Required fields are missing."}, status=400)
+    if target not in {"all", "owner", "user"}:
+        return JsonResponse({"detail": "Invalid target."}, status=400)
+    if start_at > end_at:
+        return JsonResponse({"detail": "End time must be after start time."}, status=400)
+
+    current_admin = getattr(request, "current_admin", None) or _get_current_admin(request)
+    notice = Notice.objects.create(
+        title=title,
+        body_md=body_md,
+        target=target,
+        start_at=start_at,
+        end_at=end_at,
+        is_published=is_published,
+        created_by=current_admin,
+    )
+    return JsonResponse({"notice_id": notice.notice_id}, status=201)
+
+
+@require_http_methods(["DELETE"])
+def api_notice_delete(request, notice_id):
+    unauthorized = _require_admin_for_json(request)
+    if unauthorized:
+        return unauthorized
+
+    notice = get_object_or_404(Notice, pk=notice_id)
+    notice.delete()
+    return JsonResponse({"detail": "Deleted."})

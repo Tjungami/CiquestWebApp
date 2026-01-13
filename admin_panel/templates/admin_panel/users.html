@@ -21,6 +21,7 @@
       <a href="{% url 'admin_admins' %}" {% if active_page == 'admins' %}class="active"{% endif %}>運営ユーザー</a>
       <a href="{% url 'admin_users' %}" {% if active_page == 'users' %}class="active"{% endif %}>一般ユーザー</a>
       <a href="{% url 'admin_inquiries' %}" {% if active_page == 'inquiries' %}class="active"{% endif %}>お問い合わせ</a>
+      <a href="{% url 'admin_notices' %}" {% if active_page == 'notices' %}class="active"{% endif %}>Notices</a>
     </nav>
     <a class="logout-btn" href="{% url 'logout' %}">ログアウト</a>
   </header>

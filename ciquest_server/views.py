@@ -23,6 +23,7 @@ from ciquest_model.models import (
     AdminAccount,
     Challenge,
     Coupon,
+    Notice,
     Store,
     StoreOwner,
     StoreTag,
@@ -30,6 +31,7 @@ from ciquest_model.models import (
     User,
     UserRefreshToken,
 )
+from ciquest_model.markdown_utils import render_markdown
 from ciquest_server.forms import AdminSignupForm, OwnerProfileForm, OwnerSignupForm
 
 
@@ -503,6 +505,42 @@ def public_challenge_list(request):
             }
         )
 
+    return JsonResponse(results, safe=False)
+
+
+@require_http_methods(["GET"])
+def public_notice_list(request):
+    auth_error = _require_phone_api_key(request)
+    if auth_error:
+        return auth_error
+
+    target = request.GET.get("target")
+    if target in {"owner", "user"}:
+        targets = {"all", target}
+    else:
+        targets = {"all", "user"}
+
+    now = timezone.now()
+    notices = Notice.objects.filter(
+        is_published=True,
+        start_at__lte=now,
+        end_at__gte=now,
+        target__in=targets,
+    ).order_by("-start_at", "-created_at")
+
+    results = []
+    for notice in notices:
+        results.append(
+            {
+                "notice_id": notice.notice_id,
+                "title": notice.title,
+                "body_md": notice.body_md,
+                "body_html": render_markdown(notice.body_md),
+                "target": notice.target,
+                "start_at": notice.start_at.isoformat(),
+                "end_at": notice.end_at.isoformat(),
+            }
+        )
     return JsonResponse(results, safe=False)
 
 

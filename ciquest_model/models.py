@@ -355,3 +355,34 @@ class AdminInquiry(models.Model):
     def __str__(self):
         base = self.category or "問い合わせ"
         return f"{base} - {self.get_status_display()}"
+
+
+class Notice(models.Model):
+    TARGET_CHOICES = [
+        ("all", "全員"),
+        ("owner", "オーナー"),
+        ("user", "ユーザー"),
+    ]
+
+    notice_id = models.AutoField(primary_key=True)
+    title = models.CharField(max_length=120)
+    body_md = models.TextField()
+    target = models.CharField(max_length=20, choices=TARGET_CHOICES, default="all")
+    start_at = models.DateTimeField()
+    end_at = models.DateTimeField()
+    is_published = models.BooleanField(default=False)
+    created_by = models.ForeignKey(
+        AdminAccount,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="created_notices",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-start_at", "-created_at"]
+
+    def __str__(self):
+        return self.title

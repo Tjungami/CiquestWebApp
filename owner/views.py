@@ -3,14 +3,18 @@ import uuid
 
 from django.shortcuts import render, get_object_or_404, redirect
 from django.db import transaction
+from django.utils import timezone
+from django.utils.safestring import mark_safe
 from ciquest_model.models import (
     Store,
     StoreOwner,
     Challenge,
     Coupon,
+    Notice,
     StoreStampSetting,
     StoreStampReward,
 )
+from ciquest_model.markdown_utils import render_markdown
 from django.contrib.auth import logout
 from django.contrib import messages
 from django.views.decorators.http import require_POST
@@ -53,6 +57,18 @@ def dashboard(request):
 
     owner = get_object_or_404(StoreOwner, pk=owner_id)
     stores = Store.objects.filter(owner=owner).order_by("-created_at")
+    now = timezone.now()
+    notices = (
+        Notice.objects.filter(
+            is_published=True,
+            start_at__lte=now,
+            end_at__gte=now,
+            target__in=["all", "owner"],
+        )
+        .order_by("-start_at", "-created_at")
+    )
+    for notice in notices:
+        notice.body_html = mark_safe(render_markdown(notice.body_md))
 
     if request.method == "POST":
         application_form = StoreApplicationForm(request.POST)
@@ -70,7 +86,12 @@ def dashboard(request):
     return render(
         request,
         "owner/dashboard.html",
-        {"owner": owner, "stores": stores, "application_form": application_form},
+        {
+            "owner": owner,
+            "stores": stores,
+            "application_form": application_form,
+            "notices": notices,
+        },
     )
 
 

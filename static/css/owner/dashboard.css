@@ -56,6 +56,58 @@ main {
   color: #c0392b;
 }
 
+.notice-section {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+  padding: 24px;
+  margin-bottom: 32px;
+}
+
+.notice-section h2 {
+  margin-top: 0;
+  color: #1f4e79;
+}
+
+.notice-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.notice-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.notice-card h3 {
+  margin: 0 0 6px;
+  font-size: 1.1rem;
+}
+
+.notice-period {
+  margin: 0 0 10px;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.notice-body {
+  color: #374151;
+  line-height: 1.6;
+}
+
+.notice-body p {
+  text-align: left;
+  margin: 0 0 10px;
+}
+
+.notice-body h1,
+.notice-body h2,
+.notice-body h3 {
+  margin-top: 16px;
+}
+
 .store-application {
   background: #ffffff;
   border-radius: 12px;
