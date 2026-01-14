@@ -56,7 +56,7 @@ function getCsrfToken() {
 
 async function loadUsers() {
   const container = document.getElementById("userList");
-  container.innerHTML = "<p>Loading...</p>";
+  container.innerHTML = "<p>読み込み中です...</p>";
 
   const keyword = document.getElementById("userSearch").value.trim();
   const baseUrl = TYPE_CONFIG[activeType].listUrl;
@@ -68,7 +68,7 @@ async function loadUsers() {
     const data = await res.json();
 
     if (!data.length) {
-      container.innerHTML = '<p class="user-empty">No users found.</p>';
+      container.innerHTML = '<p class="user-empty">該当するユーザーがいません。</p>';
       return;
     }
 
@@ -81,13 +81,14 @@ async function loadUsers() {
     });
   } catch (err) {
     console.error(err);
-    container.innerHTML = '<p class="user-empty">Failed to load users.</p>';
+    container.innerHTML = '<p class="user-empty">ユーザーの取得に失敗しました。</p>';
   }
 }
 
 function renderCard(item) {
   if (activeType === "admin") {
     const createdAt = item.created_at ? new Date(item.created_at).toLocaleString() : "-";
+    const approvalLabel = approvalStatusLabel(item.approval_status);
     return `
       <div class="user-card">
         <div class="user-card__row">
@@ -95,15 +96,15 @@ function renderCard(item) {
             <strong>${escapeHtml(item.name || "")}</strong><br>
             <span>${escapeHtml(item.email || "")}</span>
           </div>
-          <span class="user-points">${escapeHtml(item.approval_status || "")}</span>
+          <span class="user-points">承認状況: ${approvalLabel}</span>
         </div>
         <div class="user-meta">
-          <span>Active: ${item.is_active ? "Yes" : "No"}</span>
-          <span>Deleted: ${item.is_deleted ? "Yes" : "No"}</span>
-          <span>Created: ${createdAt}</span>
+          <span>有効: ${boolLabel(item.is_active)}</span>
+          <span>削除済み: ${boolLabel(item.is_deleted)}</span>
+          <span>登録日: ${createdAt}</span>
         </div>
         <div class="user-actions">
-          <button class="delete-btn" data-id="${item.admin_id}" data-name="${escapeHtml(item.name || "")}">Delete</button>
+          <button class="delete-btn" data-id="${item.admin_id}" data-name="${escapeHtml(item.name || "")}">削除</button>
         </div>
       </div>
     `;
@@ -111,7 +112,7 @@ function renderCard(item) {
 
   if (activeType === "owner") {
     const createdAt = item.created_at ? new Date(item.created_at).toLocaleString() : "-";
-    const displayName = item.business_name || item.name || "(no name)";
+    const displayName = item.business_name || item.name || "(未設定)";
     return `
       <div class="user-card">
         <div class="user-card__row">
@@ -119,15 +120,15 @@ function renderCard(item) {
             <strong>${escapeHtml(displayName)}</strong><br>
             <span>${escapeHtml(item.email || "")}</span>
           </div>
-          <span class="user-points">Approved: ${item.approved ? "Yes" : "No"}</span>
+          <span class="user-points">承認済み: ${boolLabel(item.approved)}</span>
         </div>
         <div class="user-meta">
-          <span>Verified: ${item.is_verified ? "Yes" : "No"}</span>
-          <span>Onboarding: ${item.onboarding_completed ? "Yes" : "No"}</span>
-          <span>Created: ${createdAt}</span>
+          <span>メール確認: ${boolLabel(item.is_verified)}</span>
+          <span>初期設定完了: ${boolLabel(item.onboarding_completed)}</span>
+          <span>登録日: ${createdAt}</span>
         </div>
         <div class="user-actions">
-          <button class="delete-btn" data-id="${item.owner_id}" data-name="${escapeHtml(displayName)}">Delete</button>
+          <button class="delete-btn" data-id="${item.owner_id}" data-name="${escapeHtml(displayName)}">削除</button>
         </div>
       </div>
     `;
@@ -141,21 +142,21 @@ function renderCard(item) {
           <strong>${escapeHtml(item.username || "")}</strong><br>
           <span>${escapeHtml(item.email || "")}</span>
         </div>
-        <span class="user-points">${item.points || 0} pt</span>
+        <span class="user-points">${item.points || 0} ポイント</span>
       </div>
       <div class="user-meta">
-        <span>Rank: ${escapeHtml(item.rank || "-")}</span>
-        <span>Created: ${createdAt}</span>
+        <span>ランク: ${escapeHtml(item.rank || "-")}</span>
+        <span>登録日: ${createdAt}</span>
       </div>
       <div class="user-actions">
-        <button class="delete-btn" data-id="${item.user_id}" data-name="${escapeHtml(item.username || "")}">Delete</button>
+        <button class="delete-btn" data-id="${item.user_id}" data-name="${escapeHtml(item.username || "")}">削除</button>
       </div>
     </div>
   `;
 }
 
 async function deleteUser(id, name) {
-  const confirmMsg = `Delete user "${name}"? This cannot be undone.`;
+  const confirmMsg = `ユーザー「${name}」を削除しますか？この操作は取り消せません。`;
   if (!confirm(confirmMsg)) return;
 
   try {
@@ -169,11 +170,22 @@ async function deleteUser(id, name) {
       const err = await res.json().catch(() => ({}));
       throw new Error(err.detail || "failed");
     }
-    alert("Deleted.");
+    alert("削除しました。");
     loadUsers();
   } catch (err) {
-    alert(`Delete failed. ${err.message || ""}`);
+    alert(`削除に失敗しました。${err.message ? ` ${err.message}` : ""}`);
   }
+}
+
+function boolLabel(value) {
+  return value ? "はい" : "いいえ";
+}
+
+function approvalStatusLabel(status) {
+  if (status === "approved") return "承認済み";
+  if (status === "rejected") return "却下";
+  if (status === "pending") return "申請中";
+  return escapeHtml(status || "-");
 }
 
 function escapeHtml(value) {

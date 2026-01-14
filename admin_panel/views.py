@@ -650,11 +650,11 @@ def api_notice_list_create(request):
     is_published = _normalize_bool(data.get("is_published"))
 
     if not title or not body_md or not target or not start_at or not end_at:
-        return JsonResponse({"detail": "Required fields are missing."}, status=400)
+        return JsonResponse({"detail": "必須項目が不足しています。"}, status=400)
     if target not in {"all", "owner", "user"}:
-        return JsonResponse({"detail": "Invalid target."}, status=400)
+        return JsonResponse({"detail": "対象が不正です。"}, status=400)
     if start_at > end_at:
-        return JsonResponse({"detail": "End time must be after start time."}, status=400)
+        return JsonResponse({"detail": "終了日時は開始日時より後に設定してください。"}, status=400)
 
     current_admin = getattr(request, "current_admin", None) or _get_current_admin(request)
     notice = Notice.objects.create(
@@ -677,7 +677,7 @@ def api_notice_delete(request, notice_id):
 
     notice = get_object_or_404(Notice, pk=notice_id)
     notice.delete()
-    return JsonResponse({"detail": "Deleted."})
+    return JsonResponse({"detail": "削除しました。"})
 
 
 def _serialize_owner(owner):
@@ -719,4 +719,4 @@ def api_owner_delete(request, owner_id):
 
     owner = get_object_or_404(StoreOwner, pk=owner_id)
     owner.delete()
-    return JsonResponse({"detail": "Deleted."})
+    return JsonResponse({"detail": "削除しました。"})

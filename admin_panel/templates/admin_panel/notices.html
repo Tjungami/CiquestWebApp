@@ -18,9 +18,9 @@
       <a href="{% url 'admin_stores' %}" {% if active_page == 'stores' %}class="active"{% endif %}>店舗承認</a>
       <a href="{% url 'admin_challenges' %}" {% if active_page == 'challenges' %}class="active"{% endif %}>チャレンジ管理</a>
       <a href="{% url 'admin_coupons' %}" {% if active_page == 'coupons' %}class="active"{% endif %}>クーポン管理</a>
-      <a href="{% url 'admin_users' %}" {% if active_page == 'users' %}class="active"{% endif %}>Users</a>
+      <a href="{% url 'admin_users' %}" {% if active_page == 'users' %}class="active"{% endif %}>ユーザー管理</a>
       <a href="{% url 'admin_inquiries' %}" {% if active_page == 'inquiries' %}class="active"{% endif %}>お問い合わせ</a>
-      <a href="{% url 'admin_notices' %}" {% if active_page == 'notices' %}class="active"{% endif %}>Notices</a>
+      <a href="{% url 'admin_notices' %}" {% if active_page == 'notices' %}class="active"{% endif %}>お知らせ</a>
     </nav>
     <a class="logout-btn" href="{% url 'logout' %}">ログアウト</a>
   </header>
@@ -52,7 +52,7 @@
             公開する
           </label>
         </div>
-        <textarea id="noticeBody" placeholder="本文（Markdown）" rows="6" required></textarea>
+        <textarea id="noticeBody" placeholder="本文（マークダウン）" rows="6" required></textarea>
         <button type="submit">追加する</button>
       </form>
     </section>
