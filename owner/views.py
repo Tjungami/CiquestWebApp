@@ -417,7 +417,11 @@ def create_stamp_event(request):
 
     coupons = Coupon.objects.filter(store=store)
     if request.method == "POST":
-        form = StampEventForm(request.POST, coupon_queryset=coupons)
+        form = StampEventForm(
+            request.POST,
+            coupon_queryset=coupons,
+            max_stamps=setting.max_stamps,
+        )
         if form.is_valid():
             threshold = form.cleaned_data["stamp_threshold"]
             if setting.rewards.filter(stamp_threshold=threshold).exists():
@@ -435,7 +439,7 @@ def create_stamp_event(request):
                 messages.success(request, "スタンプイベントを追加しました。")
                 return redirect("stamp_settings")
     else:
-        form = StampEventForm(coupon_queryset=coupons)
+        form = StampEventForm(coupon_queryset=coupons, max_stamps=setting.max_stamps)
 
     return render(request, "owner/stamp_event_form.html", {
         "store": store,
@@ -456,7 +460,11 @@ def edit_stamp_event(request, event_id):
     coupons = Coupon.objects.filter(store=store)
 
     if request.method == "POST":
-        form = StampEventForm(request.POST, coupon_queryset=coupons)
+        form = StampEventForm(
+            request.POST,
+            coupon_queryset=coupons,
+            max_stamps=setting.max_stamps,
+        )
         if form.is_valid():
             threshold = form.cleaned_data["stamp_threshold"]
             exists = setting.rewards.exclude(pk=reward.pk).filter(stamp_threshold=threshold).exists()
@@ -481,7 +489,11 @@ def edit_stamp_event(request, event_id):
             "reward_coupon": reward.reward_coupon_id,
             "reward_service_desc": reward.reward_service_desc,
         }
-        form = StampEventForm(initial=initial, coupon_queryset=coupons)
+        form = StampEventForm(
+            initial=initial,
+            coupon_queryset=coupons,
+            max_stamps=setting.max_stamps,
+        )
 
     return render(request, "owner/stamp_event_form.html", {
         "store": store,

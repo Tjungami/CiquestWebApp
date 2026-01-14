@@ -19,6 +19,7 @@ let activeType = "admin";
 document.addEventListener("DOMContentLoaded", () => {
   bindTabs();
   bindSearch();
+  updateAdminCreateLink();
   loadUsers();
 });
 
@@ -29,6 +30,7 @@ function bindTabs() {
       tabs.forEach((t) => t.classList.remove("active"));
       tab.classList.add("active");
       activeType = tab.dataset.type;
+      updateAdminCreateLink();
       loadUsers();
     });
   });
@@ -52,6 +54,12 @@ function getCsrfToken() {
     .map((item) => item.trim())
     .find((item) => item.startsWith("csrftoken="));
   return value ? decodeURIComponent(value.split("=")[1]) : "";
+}
+
+function updateAdminCreateLink() {
+  const link = document.getElementById("adminCreateLink");
+  if (!link) return;
+  link.classList.toggle("is-hidden", activeType !== "admin");
 }
 
 async function loadUsers() {

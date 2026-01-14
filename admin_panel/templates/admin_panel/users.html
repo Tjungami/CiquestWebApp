@@ -38,10 +38,15 @@
         </div>
       </header>
 
-      <div class="user-tabs">
-        <button class="user-tab active" data-type="admin">運営ユーザー</button>
-        <button class="user-tab" data-type="owner">オーナー</button>
-        <button class="user-tab" data-type="user">一般ユーザー</button>
+      <div class="user-toolbar">
+        <div class="user-tabs">
+          <button class="user-tab active" data-type="admin">運営ユーザー</button>
+          <button class="user-tab" data-type="owner">オーナー</button>
+          <button class="user-tab" data-type="user">一般ユーザー</button>
+        </div>
+        <a id="adminCreateLink" class="admin-create-link" href="{% url 'admin_admins' %}">
+          運営ユーザー作成
+        </a>
       </div>
 
       <div id="userList" class="user-list">

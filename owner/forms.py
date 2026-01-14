@@ -322,9 +322,14 @@ class StampEventForm(forms.Form):
 
 
 
-    def __init__(self, *args, coupon_queryset=None, **kwargs):
+    def __init__(self, *args, coupon_queryset=None, max_stamps=None, **kwargs):
 
         super().__init__(*args, **kwargs)
+
+        self.max_stamps = max_stamps
+        if max_stamps is not None:
+            self.fields["stamp_threshold"].max_value = max_stamps
+            self.fields["stamp_threshold"].widget.attrs["max"] = max_stamps
 
         if coupon_queryset is not None:
 
@@ -355,6 +360,12 @@ class StampEventForm(forms.Form):
 
 
         return cleaned_data
+
+    def clean_stamp_threshold(self):
+        value = self.cleaned_data.get("stamp_threshold")
+        if self.max_stamps is not None and value is not None and value > self.max_stamps:
+            raise forms.ValidationError("必要スタンプ数がスタンプカード設定の最高スタンプ数を超えております。")
+        return value
 
 
 

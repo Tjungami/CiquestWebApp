@@ -55,6 +55,33 @@
   margin-bottom: 18px;
 }
 
+.user-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.user-toolbar .user-tabs {
+  margin-bottom: 0;
+}
+
+.admin-create-link {
+  border-radius: 999px;
+  padding: 10px 18px;
+  font-weight: 700;
+  text-decoration: none;
+  background: linear-gradient(120deg, #ff9a62, #ff6a88);
+  color: #fff;
+  box-shadow: 0 12px 25px rgba(255, 106, 136, 0.35);
+}
+
+.admin-create-link.is-hidden {
+  display: none;
+}
+
 .user-tab {
   border: none;
   border-radius: 999px;
