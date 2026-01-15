@@ -1,0 +1,99 @@
+[auth_group]
+record_count: 0
+columns: id, name
+
+[auth_group_permissions]
+record_count: 0
+columns: id, group_id, permission_id
+
+[auth_permission]
+record_count: 84
+columns: id, content_type_id, codename, name
+
+[auth_user]
+record_count: 1
+columns: id, password, last_login, is_superuser, username, last_name, email, is_staff, is_active, date_joined, first_name
+
+[auth_user_groups]
+record_count: 0
+columns: id, user_id, group_id
+
+[auth_user_user_permissions]
+record_count: 0
+columns: id, user_id, permission_id
+
+[ciquest_model_adminaccount]
+record_count: 5
+columns: admin_id, name, email, password, is_active, created_at, approval_status, approved_at, deleted_at, is_deleted, approved_by_id, created_by_id, restore_token, restore_token_expires_at
+
+[ciquest_model_admininquiry]
+record_count: 0
+columns: inquiry_id, category, message, status, created_at, related_challenge_id, store_id
+
+[ciquest_model_challenge]
+record_count: 3
+columns: challenge_id, title, description, reward_points, type, quest_type, reward_type, reward_detail, qr_code, created_at, reward_coupon_id, store_id, is_banned
+
+[ciquest_model_coupon]
+record_count: 4
+columns: coupon_id, title, description, required_points, type, expires_at, store_id, publish_to_shop
+
+[ciquest_model_rank]
+record_count: 3
+columns: rank_id, name, required_points, max_challenges_per_day
+
+[ciquest_model_store]
+record_count: 3
+columns: store_id, name, address, latitude, longitude, business_hours, store_description, qr_code, status, created_at, owner_id, business_hours_json, instagram, is_featured, main_image, phone, priority, updated_at, website
+
+[ciquest_model_storeowner]
+record_count: 4
+columns: owner_id, name, email, password, approved, created_at, is_verified, onboarding_completed, verification_sent_at, verification_token, business_name, contact_phone
+
+[ciquest_model_storestamp]
+record_count: 2
+columns: stamp_id, stamps_count, reward_given, store_id, user_id
+
+[ciquest_model_storestampreward]
+record_count: 1
+columns: id, stamp_threshold, reward_type, reward_service_desc, display_order, reward_coupon_id, setting_id
+
+[ciquest_model_storestampsetting]
+record_count: 1
+columns: id, max_stamps, created_at, updated_at, store_id
+
+[ciquest_model_storetag]
+record_count: 2
+columns: id, created_at, added_by_id, store_id, tag_id
+
+[ciquest_model_tag]
+record_count: 3
+columns: tag_id, name, category, display_order, is_active
+
+[ciquest_model_user]
+record_count: 3
+columns: user_id, username, email, password, points, created_at, rank_id
+
+[ciquest_model_userchallenge]
+record_count: 3
+columns: user_challenge_id, status, proof_image, approved_by_store, cleared_at, challenge_id, user_id
+
+[ciquest_model_usercoupon]
+record_count: 2
+columns: user_coupon_id, is_used, used_at, coupon_id, user_id
+
+[django_admin_log]
+record_count: 0
+columns: id, object_id, object_repr, action_flag, change_message, content_type_id, user_id, action_time
+
+[django_content_type]
+record_count: 21
+columns: id, app_label, model
+
+[django_migrations]
+record_count: 32
+columns: id, app, name, applied
+
+[django_session]
+record_count: 3
+columns: session_key, session_data, expire_date

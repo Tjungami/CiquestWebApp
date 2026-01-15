@@ -23,6 +23,7 @@ urlpatterns = [
     path('api/token/refresh/', views.api_token_refresh, name='api_token_refresh'),
     path('api/logout/', views.api_logout, name='api_logout'),
     path('api/me/', views.api_me, name='api_me'),
+    path('api/user-challenges/clear/', views.api_user_challenge_clear, name='api_user_challenge_clear'),
     path('api/stores/', views.public_store_list, name='public_store_list'),
     path('api/coupons/', views.public_coupon_list, name='public_coupon_list'),
     path('api/challenges/', views.public_challenge_list, name='public_challenge_list'),

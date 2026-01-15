@@ -29,6 +29,7 @@ from ciquest_model.models import (
     StoreTag,
     Tag,
     User,
+    UserChallenge,
     UserRefreshToken,
 )
 from ciquest_model.markdown_utils import render_markdown
@@ -349,6 +350,98 @@ def api_me(request):
     if error:
         return error
     return JsonResponse(_serialize_user(user))
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def api_user_challenge_clear(request):
+    user, error = _get_user_from_access_token(request)
+    if error:
+        return error
+    data, error = _get_request_data(request)
+    if error:
+        return error
+
+    challenge_id = data.get("challenge_id") if data else None
+    qr_code = (data.get("qr_code") or "").strip() if data else ""
+    lat = data.get("lat") if data else None
+    lon = data.get("lon") if data else None
+    if not challenge_id or not qr_code or lat is None or lon is None:
+        return _json_error("challenge_id, qr_code, lat, and lon are required.", status=400)
+    try:
+        challenge_id = int(challenge_id)
+    except (TypeError, ValueError):
+        return _json_error("challenge_id must be an integer.", status=400)
+    try:
+        lat = float(lat)
+        lon = float(lon)
+    except (TypeError, ValueError):
+        return _json_error("lat and lon must be numbers.", status=400)
+
+    challenge = Challenge.objects.filter(pk=challenge_id).first()
+    if not challenge:
+        return _json_error("Challenge not found.", status=404)
+    if not challenge.qr_code:
+        return _json_error("Challenge qr_code is not set.", status=400)
+    if qr_code != challenge.qr_code:
+        return _json_error("qr_code does not match.", status=400)
+    if challenge.store_id is None or challenge.store is None:
+        return _json_error("Challenge store is not set.", status=400)
+    if challenge.store.latitude is None or challenge.store.longitude is None:
+        return _json_error("Store location is not set.", status=400)
+    distance_m = _haversine_km(
+        lat,
+        lon,
+        float(challenge.store.latitude),
+        float(challenge.store.longitude),
+    ) * 1000
+    if distance_m > 50:
+        return _json_error("User is not within 50m of the store.", status=400)
+
+    today = timezone.localdate()
+    already_cleared_today = UserChallenge.objects.filter(
+        user=user,
+        challenge=challenge,
+        status="cleared",
+        cleared_at__date=today,
+    ).exists()
+    if already_cleared_today:
+        return _json_error("Already cleared this challenge today.", status=400)
+
+    daily_cleared_count = UserChallenge.objects.filter(
+        user=user,
+        status="cleared",
+        cleared_at__date=today,
+    ).count()
+    if daily_cleared_count >= 5:
+        return _json_error("Daily clear limit reached.", status=400)
+
+    now = timezone.now()
+    user_challenge, created = UserChallenge.objects.get_or_create(
+        user=user,
+        challenge=challenge,
+        defaults={
+            "status": "cleared",
+            "cleared_at": now,
+        },
+    )
+    if not created:
+        user_challenge.status = "cleared"
+        user_challenge.cleared_at = now
+        user_challenge.save(update_fields=["status", "cleared_at"])
+
+    # TODO: Confirm reward rules when reward_type is coupon/service or re-clearing a challenge.
+    if challenge.reward_points:
+        user.points = (user.points or 0) + challenge.reward_points
+        user.save(update_fields=["points"])
+
+    response = {
+        "user_challenge_id": user_challenge.user_challenge_id,
+        "challenge_id": challenge.challenge_id,
+        "status": user_challenge.status,
+        "cleared_at": user_challenge.cleared_at.isoformat() if user_challenge.cleared_at else None,
+    }
+    return JsonResponse(response, status=201 if created else 200)
 
 
 def public_store_list(request):
