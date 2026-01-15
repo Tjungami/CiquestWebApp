@@ -594,6 +594,7 @@ def public_challenge_list(request):
                 "reward_coupon_id": challenge.reward_coupon_id,
                 "store_id": challenge.store_id,
                 "store_name": challenge.store.name if challenge.store else "",
+                "qr_code": challenge.qr_code or "",
                 "created_at": challenge.created_at.isoformat(),
             }
         )
