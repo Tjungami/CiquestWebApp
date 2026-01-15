@@ -80,6 +80,7 @@ def dashboard(request):
             new_store.save()
             messages.success(request, "店舗申請を受け付けました。審査結果をお待ちください。")
             return redirect("owner_dashboard")
+        messages.error(request, f"Store application failed: {application_form.errors}")
     else:
         application_form = StoreApplicationForm()
 
