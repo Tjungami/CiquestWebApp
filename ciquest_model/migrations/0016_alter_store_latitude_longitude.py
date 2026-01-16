@@ -11,11 +11,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="store",
             name="latitude",
-            field=models.DecimalField(decimal_places=12, max_digits=15),
+            field=models.DecimalField(decimal_places=15, max_digits=20),
         ),
         migrations.AlterField(
             model_name="store",
             name="longitude",
-            field=models.DecimalField(decimal_places=12, max_digits=15),
+            field=models.DecimalField(decimal_places=15, max_digits=20),
         ),
     ]
