@@ -85,6 +85,23 @@
           {{ form.quest_type|attr:"id:quest_type" }}
         </div>
 
+        <div class="nfc-info">
+          <h3>NFC利用について</h3>
+          <p>NFCはQRコードと同じ値を使います。</p>
+          <ul>
+            <li>NFCチップはとても小さく、背景に溶け込みやすい</li>
+            <li>タッチだけで読み取れるので操作が早い</li>
+          </ul>
+          <p>作成後にQRコードを表示し、NFC書き込みアプリで同じ値をタグに書き込んでください。</p>
+          <p class="nfc-links">
+            NFC書き込みアプリ:
+            <a href="https://apps.apple.com/jp/app/nfc-tools/id1252962749" target="_blank" rel="noopener">iOS</a>
+            /
+            <a href="https://play.google.com/store/apps/details?id=com.wakdev.wdnfc&pcampaignid=web_share" target="_blank" rel="noopener">Android</a>
+          </p>
+          <img src="{% static 'img/common/QR_NFC_ comparison.png' %}" alt="QRとNFCの比較" class="nfc-compare">
+        </div>
+
         <!-- 共通クエスト -->
         <div id="commonReward" class="reward-section">
           <p class="fixed-info">報酬：20ポイント（固定）</p>
