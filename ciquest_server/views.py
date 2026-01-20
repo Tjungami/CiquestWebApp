@@ -31,6 +31,8 @@ from ciquest_model.models import (
     User,
     UserChallenge,
     UserCoupon,
+    UserCouponUsageHistory,
+    StoreCouponUsageHistory,
     UserRefreshToken,
 )
 from ciquest_model.markdown_utils import render_markdown
@@ -468,8 +470,133 @@ def api_user_challenge_clear(request):
         "reward_granted": reward_granted,
         "user_points": user.points,
     }
-    print("api_user_challenge_clear response:", response)
     return JsonResponse(response, status=201 if created else 200)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def api_user_coupon_use(request):
+    user, error = _get_user_from_access_token(request)
+    if error:
+        return error
+    data, error = _get_request_data(request)
+    if error:
+        return error
+
+    coupon_id = data.get("coupon_id") if data else None
+    store_qr = (data.get("store_qr") or "").strip() if data else ""
+    if not coupon_id or not store_qr:
+        return _json_error("coupon_id and store_qr are required.", status=400)
+    try:
+        coupon_id = int(coupon_id)
+    except (TypeError, ValueError):
+        return _json_error("coupon_id must be an integer.", status=400)
+
+    coupon = Coupon.objects.select_related("store").filter(pk=coupon_id).first()
+    if not coupon:
+        return _json_error("Coupon not found.", status=404)
+    store = Store.objects.filter(qr_code=store_qr).first()
+    if not store:
+        return _json_error("Store not found.", status=404)
+    if coupon.type == "store_specific":
+        if not coupon.store_id or coupon.store_id != store.store_id:
+            return _json_error("Coupon is not valid for this store.", status=400)
+
+    user_coupon = UserCoupon.objects.filter(user=user, coupon=coupon).first()
+    if not user_coupon:
+        return _json_error("Coupon is not owned by user.", status=404)
+    if user_coupon.is_used:
+        return _json_error("Coupon already used.", status=400)
+
+    now = timezone.now()
+    user_coupon.is_used = True
+    user_coupon.used_at = now
+    user_coupon.save(update_fields=["is_used", "used_at"])
+
+    UserCouponUsageHistory.objects.create(
+        user=user,
+        coupon=coupon,
+        store=store,
+        coupon_type=coupon.type,
+        used_at=now,
+    )
+    StoreCouponUsageHistory.objects.create(
+        store=store,
+        user=user,
+        coupon=coupon,
+        coupon_type=coupon.type,
+        used_at=now,
+    )
+
+    response = {
+        "user_coupon_id": user_coupon.user_coupon_id,
+        "coupon_id": coupon.coupon_id,
+        "coupon_title": coupon.title,
+        "coupon_type": coupon.type,
+        "store_id": store.store_id,
+        "store_name": store.name,
+        "used_at": now.isoformat(),
+    }
+    return JsonResponse(response)
+
+
+@require_http_methods(["GET"])
+def api_user_coupon_history(request):
+    user, error = _get_user_from_access_token(request)
+    if error:
+        return error
+    history = (
+        UserCouponUsageHistory.objects.select_related("coupon", "store")
+        .filter(user=user)
+        .order_by("-used_at")
+    )
+    results = []
+    for entry in history:
+        results.append(
+            {
+                "coupon_id": entry.coupon.coupon_id,
+                "coupon_title": entry.coupon.title,
+                "coupon_type": entry.coupon_type,
+                "store_id": entry.store.store_id,
+                "store_name": entry.store.name,
+                "used_at": entry.used_at.isoformat(),
+            }
+        )
+    return JsonResponse(results, safe=False)
+
+
+@require_http_methods(["GET"])
+def api_store_coupon_history(request):
+    auth_error = _require_phone_api_key(request)
+    if auth_error:
+        return auth_error
+    store_id = request.GET.get("store_id")
+    if not store_id:
+        return _json_error("store_id is required.", status=400)
+    try:
+        store_id = int(store_id)
+    except (TypeError, ValueError):
+        return _json_error("store_id must be an integer.", status=400)
+    history = (
+        StoreCouponUsageHistory.objects.select_related("coupon", "user", "store")
+        .filter(store_id=store_id)
+        .order_by("-used_at")
+    )
+    results = []
+    for entry in history:
+        results.append(
+            {
+                "coupon_id": entry.coupon.coupon_id,
+                "coupon_title": entry.coupon.title,
+                "coupon_type": entry.coupon_type,
+                "user_id": entry.user.user_id,
+                "username": entry.user.username,
+                "store_id": entry.store.store_id,
+                "store_name": entry.store.name,
+                "used_at": entry.used_at.isoformat(),
+            }
+        )
+    return JsonResponse(results, safe=False)
 
 
 def public_store_list(request):

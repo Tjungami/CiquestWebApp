@@ -221,6 +221,36 @@ class UserCoupon(models.Model):
         return f"{self.user.username} - {self.coupon.title}"
 
 
+class UserCouponUsageHistory(models.Model):
+    user_coupon_usage_history_id = models.AutoField(primary_key=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    coupon = models.ForeignKey(Coupon, on_delete=models.CASCADE)
+    store = models.ForeignKey(Store, on_delete=models.CASCADE)
+    coupon_type = models.CharField(max_length=20, choices=Coupon.TYPE_CHOICES)
+    used_at = models.DateTimeField()
+
+    class Meta:
+        ordering = ["-used_at"]
+
+    def __str__(self):
+        return f"{self.user.username} - {self.coupon.title} ({self.used_at})"
+
+
+class StoreCouponUsageHistory(models.Model):
+    store_coupon_usage_history_id = models.AutoField(primary_key=True)
+    store = models.ForeignKey(Store, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    coupon = models.ForeignKey(Coupon, on_delete=models.CASCADE)
+    coupon_type = models.CharField(max_length=20, choices=Coupon.TYPE_CHOICES)
+    used_at = models.DateTimeField()
+
+    class Meta:
+        ordering = ["-used_at"]
+
+    def __str__(self):
+        return f"{self.store.name} - {self.coupon.title} ({self.used_at})"
+
+
 # スタンプカード
 class StoreStampSetting(models.Model):
     store = models.OneToOneField(Store, on_delete=models.CASCADE, related_name="stamp_setting")

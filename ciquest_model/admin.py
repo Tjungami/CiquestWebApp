@@ -18,6 +18,8 @@ from .models import (
     User,
     UserChallenge,
     UserCoupon,
+    UserCouponUsageHistory,
+    StoreCouponUsageHistory,
 )
 
 
@@ -82,6 +84,20 @@ class UserCouponAdmin(admin.ModelAdmin):
     list_display = ("user", "coupon", "is_used", "used_at")
     search_fields = ("user__username", "coupon__title")
     list_filter = ("is_used",)
+
+
+@admin.register(UserCouponUsageHistory)
+class UserCouponUsageHistoryAdmin(admin.ModelAdmin):
+    list_display = ("user", "coupon", "store", "coupon_type", "used_at")
+    search_fields = ("user__username", "coupon__title", "store__name")
+    list_filter = ("coupon_type",)
+
+
+@admin.register(StoreCouponUsageHistory)
+class StoreCouponUsageHistoryAdmin(admin.ModelAdmin):
+    list_display = ("store", "user", "coupon", "coupon_type", "used_at")
+    search_fields = ("store__name", "user__username", "coupon__title")
+    list_filter = ("coupon_type",)
 
 
 @admin.register(StoreStampSetting)
