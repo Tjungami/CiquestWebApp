@@ -79,23 +79,31 @@ def dashboard(request):
 
         has_error = False
         if not store_id or not category or not message:
-            messages.error(request, "???????????????????????")
+            messages.error(request, "お問い合わせは店舗・カテゴリ・内容が必須です。")
+            has_error = True
+        elif not store_id.isdigit():
+            messages.error(request, "店舗IDが不正です。")
             has_error = True
         else:
-            store = Store.objects.filter(pk=store_id, owner=owner).first()
+            store = Store.objects.filter(pk=int(store_id), owner=owner).first()
             if not store:
-                messages.error(request, "???????????????")
+                messages.error(request, "指定した店舗が見つかりません。")
                 has_error = True
             else:
                 related_challenge = None
                 if related_challenge_id:
-                    related_challenge = Challenge.objects.filter(
-                        pk=related_challenge_id,
-                        store=store,
-                    ).first()
-                    if not related_challenge:
-                        messages.error(request, "??????????????????")
+                    if not related_challenge_id.isdigit():
+                        messages.error(request, "関連チャレンジIDが不正です。")
                         has_error = True
+                    else:
+                        related_challenge_id = int(related_challenge_id)
+                        related_challenge = Challenge.objects.filter(
+                            pk=related_challenge_id,
+                            store=store,
+                        ).first()
+                        if not related_challenge:
+                            messages.error(request, "指定したチャレンジが見つかりません。")
+                            has_error = True
                 if not has_error:
                     AdminInquiry.objects.create(
                         store=store,
@@ -103,7 +111,7 @@ def dashboard(request):
                         category=category,
                         message=message,
                     )
-                    messages.success(request, "??????????????")
+                    messages.success(request, "お問い合わせを送信しました。")
                     return redirect("owner_dashboard")
 
     if request.method == "POST" and request.POST.get("form_type") != "inquiry":
