@@ -175,6 +175,9 @@ class ChallengeForm(forms.ModelForm):
 
         reward_detail = cleaned_data.get('reward_detail')
 
+        if quest_type == 'store_specific' and reward_type == 'points':
+            self.add_error('reward_type', "店�E独自チャレンジではポイント報酬を選択できません。")
+
 
 
         if quest_type == 'store_specific' and reward_type == 'coupon' and not reward_coupon:

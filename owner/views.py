@@ -208,8 +208,7 @@ def create_challenge(request):
             challenge.reward_type = 'points'
             challenge.reward_coupon = None
         else:
-            if not challenge.reward_points:
-                challenge.reward_points = 0
+            challenge.reward_points = 0
             if challenge.reward_type != 'coupon':
                 challenge.reward_coupon = None
         if not challenge.qr_code:
@@ -448,8 +447,7 @@ def edit_challenge(request, challenge_id):
             challenge.reward_type = 'points'
             challenge.reward_coupon = None
         else:
-            if not challenge.reward_points:
-                challenge.reward_points = 0
+            challenge.reward_points = 0
             if challenge.reward_type != 'coupon':
                 challenge.reward_coupon = None
         if not challenge.qr_code:

@@ -5,13 +5,34 @@ function toggleRewardFields() {
   const questType = document.getElementById("quest_type").value;
   const commonReward = document.getElementById("commonReward");
   const storeSpecificReward = document.getElementById("storeSpecificReward");
+  const rewardType = document.getElementById("reward_type");
 
   if (questType === "common") {
     commonReward.classList.remove("hidden");
     storeSpecificReward.classList.add("hidden");
+    if (rewardType) {
+      const pointsOption = rewardType.querySelector('option[value="points"]');
+      if (pointsOption) {
+        pointsOption.disabled = false;
+        pointsOption.hidden = false;
+      }
+    }
   } else {
     commonReward.classList.add("hidden");
     storeSpecificReward.classList.remove("hidden");
+    if (rewardType) {
+      const pointsOption = rewardType.querySelector('option[value="points"]');
+      if (pointsOption) {
+        pointsOption.disabled = true;
+        pointsOption.hidden = true;
+      }
+      if (rewardType.value === "points") {
+        const fallback = rewardType.querySelector('option[value="coupon"]') || rewardType.querySelector('option[value="service"]');
+        if (fallback) {
+          rewardType.value = fallback.value;
+        }
+      }
+    }
   }
 }
 

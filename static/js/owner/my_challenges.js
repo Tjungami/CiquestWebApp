@@ -93,8 +93,12 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const openQrModal = (id, code) => {
-    qrId.textContent = id || "--";
-    qrCodeText.textContent = code || "--";
+    if (qrId) {
+      qrId.textContent = id || "--";
+    }
+    if (qrCodeText) {
+      qrCodeText.textContent = code || "--";
+    }
     setStatus("");
     if (qrCanvas) {
       qrCanvas.innerHTML = "";
@@ -124,7 +128,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (qrCopyBtn) {
     qrCopyBtn.addEventListener("click", async () => {
       try {
-        const text = qrCodeText.textContent;
+        const text = qrCodeText ? qrCodeText.textContent : "";
         const ok = await copyText(text);
         setStatus(ok ? "コピーしました。" : "コピーに失敗しました。");
       } catch (error) {
@@ -135,7 +139,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (qrPrintBtn) {
     qrPrintBtn.addEventListener("click", () => {
-      const ok = openPrintWindow(qrId.textContent, qrCodeText.textContent);
+      const ok = openPrintWindow(
+        qrId ? qrId.textContent : "--",
+        qrCodeText ? qrCodeText.textContent : "--"
+      );
       if (!ok) {
         setStatus("印刷に失敗しました。");
       }
