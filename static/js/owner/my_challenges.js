@@ -1,8 +1,6 @@
 // C:\Users\j_tagami\CiquestWebApp\static\js\owner\my_challenges.js
 document.addEventListener("DOMContentLoaded", () => {
   const qrModal = document.getElementById("qrModal");
-  const qrId = document.getElementById("qrId");
-  const qrCodeText = document.getElementById("qrCodeText");
   const qrCanvas = document.getElementById("qrCanvas");
   const qrCopyBtn = document.getElementById("qrCopyBtn");
   const qrCopyImageBtn = document.getElementById("qrCopyImageBtn");
@@ -11,6 +9,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const qrStatus = document.getElementById("qrStatus");
   const closeBtn = document.querySelector("#qrModal .close");
   let qrInstance = null;
+  let currentId = "--";
+  let currentCode = "";
 
   const setStatus = (message) => {
     if (qrStatus) {
@@ -93,12 +93,8 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const openQrModal = (id, code) => {
-    if (qrId) {
-      qrId.textContent = id || "--";
-    }
-    if (qrCodeText) {
-      qrCodeText.textContent = code || "--";
-    }
+    currentId = id || "--";
+    currentCode = code || "";
     setStatus("");
     if (qrCanvas) {
       qrCanvas.innerHTML = "";
@@ -128,8 +124,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (qrCopyBtn) {
     qrCopyBtn.addEventListener("click", async () => {
       try {
-        const text = qrCodeText ? qrCodeText.textContent : "";
-        const ok = await copyText(text);
+        const ok = await copyText(currentCode);
         setStatus(ok ? "コピーしました。" : "コピーに失敗しました。");
       } catch (error) {
         setStatus("コピーに失敗しました。");
@@ -139,10 +134,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (qrPrintBtn) {
     qrPrintBtn.addEventListener("click", () => {
-      const ok = openPrintWindow(
-        qrId ? qrId.textContent : "--",
-        qrCodeText ? qrCodeText.textContent : "--"
-      );
+      const ok = openPrintWindow(currentId, currentCode);
       if (!ok) {
         setStatus("印刷に失敗しました。");
       }

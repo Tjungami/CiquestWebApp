@@ -30,6 +30,7 @@ from ciquest_model.models import (
     Tag,
     User,
     UserChallenge,
+    UserCoupon,
     UserRefreshToken,
 )
 from ciquest_model.markdown_utils import render_markdown
@@ -430,16 +431,42 @@ def api_user_challenge_clear(request):
         user_challenge.cleared_at = now
         user_challenge.save(update_fields=["status", "cleared_at"])
 
-    # TODO: Confirm reward rules when reward_type is coupon/service or re-clearing a challenge.
-    if challenge.reward_points:
-        user.points = (user.points or 0) + challenge.reward_points
-        user.save(update_fields=["points"])
+    reward_points_awarded = 0
+    reward_coupon = None
+    reward_granted = False
+    if challenge.reward_type == "points":
+        if challenge.reward_points:
+            reward_points_awarded = challenge.reward_points
+            user.points = (user.points or 0) + reward_points_awarded
+            user.save(update_fields=["points"])
+            reward_granted = True
+    elif challenge.reward_type == "coupon" and challenge.reward_coupon_id:
+        reward_coupon = challenge.reward_coupon
+        user_coupon, created_coupon = UserCoupon.objects.get_or_create(
+            user=user,
+            coupon=reward_coupon,
+            defaults={"is_used": False, "used_at": None},
+        )
+        reward_granted = created_coupon
+    elif challenge.reward_type == "service":
+        reward_granted = True
+
+    reward_detail = challenge.reward_detail or ""
+    if not reward_detail and reward_coupon:
+        reward_detail = reward_coupon.title
 
     response = {
         "user_challenge_id": user_challenge.user_challenge_id,
         "challenge_id": challenge.challenge_id,
         "status": user_challenge.status,
         "cleared_at": user_challenge.cleared_at.isoformat() if user_challenge.cleared_at else None,
+        "reward_type": challenge.reward_type,
+        "reward_points": reward_points_awarded,
+        "reward_detail": reward_detail,
+        "reward_coupon_id": reward_coupon.coupon_id if reward_coupon else None,
+        "reward_coupon_title": reward_coupon.title if reward_coupon else "",
+        "reward_granted": reward_granted,
+        "user_points": user.points,
     }
     return JsonResponse(response, status=201 if created else 200)
 

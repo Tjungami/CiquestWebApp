@@ -40,12 +40,6 @@ nav a.active {
   color: #0f52ba;
 }
 
-.nav-secondary {
-  display: flex;
-  justify-content: center;
-  margin: 10px 0 0;
-}
-
 .nav-secondary__link {
   background: #fef3c7;
   color: #92400e;
@@ -58,6 +52,10 @@ nav a.active {
 
 .nav-secondary__link:hover {
   background: #fde68a;
+}
+
+.nav-secondary__link--inline {
+  margin-left: 12px;
 }
 
 main {

@@ -232,7 +232,8 @@ class CouponForm(forms.ModelForm):
 
                 'min': 0,
 
-                'step': 10
+                'step': 10,
+                'value': 0
 
             }),
 
