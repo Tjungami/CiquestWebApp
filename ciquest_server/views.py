@@ -468,6 +468,7 @@ def api_user_challenge_clear(request):
         "reward_granted": reward_granted,
         "user_points": user.points,
     }
+    print("api_user_challenge_clear response:", response)
     return JsonResponse(response, status=201 if created else 200)
 
 
