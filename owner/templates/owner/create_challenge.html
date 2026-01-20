@@ -61,7 +61,7 @@
         {% csrf_token %}
 
         <div class="form-field">
-          <label for="title">タイトル</label>
+          <label for="title">タイトル（最大100文字）</label>
           {{ form.title }}
           {% if form.title.errors %}
             <div class="error">{{ form.title.errors }}</div>
@@ -69,7 +69,7 @@
         </div>
 
         <div class="form-field">
-          <label for="description">説明</label>
+          <label for="description">説明（最大500文字）</label>
           {{ form.description }}
           {% if form.description.errors %}
             <div class="error">{{ form.description.errors }}</div>
@@ -124,7 +124,7 @@
           </div>
 
           <div id="reward_service" class="hidden">
-            <label for="reward_detail">サービス内容は説明の欄に記載してください。</label>
+            <label for="reward_detail">サービス内容（最大255文字）</label>
             {{ form.reward_detail }}
             {% if form.reward_detail.errors %}
               <div class="error">{{ form.reward_detail.errors }}</div>

@@ -27,6 +27,8 @@ from ciquest_model.models import (
     Store,
     StoreOwner,
     StoreTag,
+    StoreStamp,
+    StoreStampSetting,
     Tag,
     User,
     UserChallenge,
@@ -710,6 +712,59 @@ def public_coupon_list(request):
         )
 
     return JsonResponse(results, safe=False)
+
+
+@require_http_methods(["GET"])
+def public_stamp_setting(request):
+    auth_error = _require_phone_api_key(request)
+    if auth_error:
+        return auth_error
+    store_id = request.GET.get("store_id")
+    if not store_id:
+        return _json_error("store_id is required.", status=400)
+    try:
+        store_id = int(store_id)
+    except (TypeError, ValueError):
+        return _json_error("store_id must be an integer.", status=400)
+
+    setting = (
+        StoreStampSetting.objects.select_related("store")
+        .prefetch_related("rewards", "rewards__reward_coupon")
+        .filter(store_id=store_id)
+        .first()
+    )
+    if not setting:
+        return JsonResponse({"exists": False, "store_id": store_id})
+
+    rewards = []
+    for reward in setting.rewards.all():
+        rewards.append(
+            {
+                "stamp_threshold": reward.stamp_threshold,
+                "reward_type": reward.reward_type,
+                "reward_coupon_id": reward.reward_coupon_id,
+                "reward_coupon_title": reward.reward_coupon.title if reward.reward_coupon else "",
+                "reward_service_desc": reward.reward_service_desc or "",
+            }
+        )
+
+    response = {
+        "exists": True,
+        "store_id": setting.store.store_id,
+        "store_name": setting.store.name,
+        "max_stamps": setting.max_stamps,
+        "rewards": rewards,
+    }
+
+    user, error = _get_user_from_access_token(request)
+    if not error and user:
+        user_stamp = StoreStamp.objects.filter(user=user, store_id=store_id).first()
+        response["user_stamps"] = {
+            "stamps_count": user_stamp.stamps_count if user_stamp else 0,
+            "reward_given": user_stamp.reward_given if user_stamp else False,
+        }
+
+    return JsonResponse(response)
 
 
 def public_challenge_list(request):

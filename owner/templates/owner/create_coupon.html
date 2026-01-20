@@ -75,7 +75,7 @@
         {% csrf_token %}
 
         <div class="form-field">
-          <label for="{{ form.title.id_for_label }}">クーポン名</label>
+          <label for="{{ form.title.id_for_label }}">クーポン名（最大100文字）</label>
           {{ form.title }}
           {% if form.title.errors %}
             <div class="error">{{ form.title.errors }}</div>
@@ -83,7 +83,7 @@
         </div>
 
         <div class="form-field">
-          <label for="{{ form.description.id_for_label }}">詳細・利用条件</label>
+          <label for="{{ form.description.id_for_label }}">詳細・利用条件（最大500文字）</label>
           {{ form.description }}
           {% if form.description.errors %}
             <div class="error">{{ form.description.errors }}</div>

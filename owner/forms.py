@@ -380,6 +380,7 @@ class StoreApplicationForm(forms.ModelForm):
         widget=forms.TextInput(
             attrs={
                 "inputmode": "tel",
+                "maxlength": 30,
                 "placeholder": "例：090-1234-5678",
             }
         ),
@@ -390,6 +391,7 @@ class StoreApplicationForm(forms.ModelForm):
         widget=forms.TextInput(
             attrs={
                 "inputmode": "decimal",
+                "maxlength": 50,
                 "placeholder": "36.558219721380816, 139.90246302270646 のようにカンマ区切りで入力",
             }
         ),

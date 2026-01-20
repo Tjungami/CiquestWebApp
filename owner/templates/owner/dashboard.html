@@ -55,28 +55,28 @@
         {% endif %}
         <div class="form-grid">
           <div class="form-field">
-            <label for="{{ application_form.name.id_for_label }}">店舗名</label>
+            <label for="{{ application_form.name.id_for_label }}">店舗名（最大100文字）</label>
             {{ application_form.name }}
             {% if application_form.name.errors %}
               <span class="error">{{ application_form.name.errors.0 }}</span>
             {% endif %}
           </div>
           <div class="form-field">
-            <label for="{{ application_form.address.id_for_label }}">住所</label>
+            <label for="{{ application_form.address.id_for_label }}">住所（最大255文字）</label>
             {{ application_form.address }}
             {% if application_form.address.errors %}
               <span class="error">{{ application_form.address.errors.0 }}</span>
             {% endif %}
           </div>
           <div class="form-field">
-            <label for="{{ application_form.phone.id_for_label }}">電話番号</label>
+            <label for="{{ application_form.phone.id_for_label }}">電話番号（最大30文字）</label>
             {{ application_form.phone }}
             {% if application_form.phone.errors %}
               <span class="error">{{ application_form.phone.errors.0 }}</span>
             {% endif %}
           </div>
           <div class="form-field">
-            <label for="{{ application_form.latlng.id_for_label }}">緯度・経度（カンマ区切り）</label>
+            <label for="{{ application_form.latlng.id_for_label }}">緯度・経度（最大50文字・カンマ区切り）</label>
             {{ application_form.latlng }}
             {{ application_form.latitude }}{{ application_form.longitude }}
             {% if application_form.latlng.errors %}
@@ -89,14 +89,14 @@
             </p>
           </div>
           <div class="form-field">
-            <label for="{{ application_form.business_hours.id_for_label }}">営業時間</label>
+            <label for="{{ application_form.business_hours.id_for_label }}">営業時間（最大100文字）</label>
             {{ application_form.business_hours }}
             {% if application_form.business_hours.errors %}
               <span class="error">{{ application_form.business_hours.errors.0 }}</span>
             {% endif %}
           </div>
           <div class="form-field full">
-            <label for="{{ application_form.store_description.id_for_label }}">店舗説明</label>
+            <label for="{{ application_form.store_description.id_for_label }}">店舗説明（最大500文字）</label>
             {{ application_form.store_description }}
             {% if application_form.store_description.errors %}
               <span class="error">{{ application_form.store_description.errors.0 }}</span>
@@ -124,16 +124,16 @@
             </select>
           </div>
           <div class="form-field">
-            <label for="inquiryCategory">カテゴリ</label>
-            <input id="inquiryCategory" type="text" name="category" placeholder="例：審査/掲載/QR" required>
+            <label for="inquiryCategory">カテゴリ（最大50文字）</label>
+            <input id="inquiryCategory" type="text" name="category" placeholder="例：審査/掲載/QR" maxlength="50" required>
           </div>
           <div class="form-field full">
-            <label for="inquiryMessage">内容</label>
-            <textarea id="inquiryMessage" name="message" rows="4" required></textarea>
+            <label for="inquiryMessage">内容（最大500文字）</label>
+            <textarea id="inquiryMessage" name="message" rows="4" maxlength="500" required></textarea>
           </div>
           <div class="form-field">
-            <label for="inquiryChallenge">関連チャレンジID（任意）</label>
-            <input id="inquiryChallenge" type="text" name="related_challenge_id" placeholder="任意">
+            <label for="inquiryChallenge">関連チャレンジID（任意・最大10文字）</label>
+            <input id="inquiryChallenge" type="text" name="related_challenge_id" placeholder="任意" maxlength="10">
           </div>
         </div>
         <button type="submit" class="btn submit-btn">送信</button>

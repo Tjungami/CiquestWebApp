@@ -18,12 +18,12 @@
 
     <form method="post" class="login-form">
       {% csrf_token %}
-      <label for="email">メールアドレス</label>
-      <input type="email" name="email" id="email" autocomplete="email" required>
+      <label for="email">メールアドレス（最大100文字）</label>
+      <input type="email" name="email" id="email" autocomplete="email" maxlength="100" required>
 
 
-      <label for="password">パスワード</label>
-      <input type="password" name="password" id="password" autocomplete="current-password" required>
+      <label for="password">パスワード（最大255文字）</label>
+      <input type="password" name="password" id="password" autocomplete="current-password" maxlength="255" required>
 
       <button type="submit">ログイン</button>
     </form>

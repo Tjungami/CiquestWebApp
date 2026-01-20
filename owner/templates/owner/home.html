@@ -78,11 +78,11 @@
       <h2>店舗情報を編集</h2>
       <form method="post" action="">
         {% csrf_token %}
-        <label>営業時間：</label>
-        <input type="text" name="business_hours" value="{{ store.business_hours }}">
+        <label>営業時間（最大100文字）：</label>
+        <input type="text" name="business_hours" value="{{ store.business_hours }}" maxlength="100">
 
-        <label>店舗説明：</label>
-        <textarea name="store_description">{{ store.store_description }}</textarea>
+        <label>店舗説明（最大500文字）：</label>
+        <textarea name="store_description" maxlength="500">{{ store.store_description }}</textarea>
 
         <button type="submit">保存</button>
       </form>
