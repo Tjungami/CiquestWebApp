@@ -5,6 +5,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const qrCodeText = document.getElementById("qrCodeText");
   const qrCanvas = document.getElementById("qrCanvas");
   const qrCopyBtn = document.getElementById("qrCopyBtn");
+  const qrCopyImageBtn = document.getElementById("qrCopyImageBtn");
+  const qrDownloadBtn = document.getElementById("qrDownloadBtn");
   const qrPrintBtn = document.getElementById("qrPrintBtn");
   const qrStatus = document.getElementById("qrStatus");
   const closeBtn = document.querySelector("#qrModal .close");
@@ -41,6 +43,27 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     const img = qrCanvas.querySelector("img");
     return img ? img.src : "";
+  };
+
+  const downloadPng = (dataUrl, filename) => {
+    if (!dataUrl) return false;
+    const link = document.createElement("a");
+    link.href = dataUrl;
+    link.download = filename || "qr-code.png";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    return true;
+  };
+
+  const copyImage = async (dataUrl) => {
+    if (!dataUrl) return false;
+    if (!navigator.clipboard || !window.ClipboardItem) return false;
+    const response = await fetch(dataUrl);
+    const blob = await response.blob();
+    const item = new ClipboardItem({ [blob.type]: blob });
+    await navigator.clipboard.write([item]);
+    return true;
   };
 
   const openPrintWindow = (id, code) => {
@@ -115,6 +138,26 @@ document.addEventListener("DOMContentLoaded", () => {
       const ok = openPrintWindow(qrId.textContent, qrCodeText.textContent);
       if (!ok) {
         setStatus("印刷に失敗しました。");
+      }
+    });
+  }
+
+  if (qrDownloadBtn) {
+    qrDownloadBtn.addEventListener("click", () => {
+      const ok = downloadPng(getQrDataUrl(), "challenge-qr.png");
+      if (!ok) {
+        setStatus("保存に失敗しました。");
+      }
+    });
+  }
+
+  if (qrCopyImageBtn) {
+    qrCopyImageBtn.addEventListener("click", async () => {
+      try {
+        const ok = await copyImage(getQrDataUrl());
+        setStatus(ok ? "画像をコピーしました。" : "画像コピーに失敗しました。");
+      } catch (error) {
+        setStatus("画像コピーに失敗しました。");
       }
     });
   }

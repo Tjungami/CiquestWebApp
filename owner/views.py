@@ -71,6 +71,7 @@ def dashboard(request):
     for notice in notices:
         notice.body_html = mark_safe(render_markdown(notice.body_md))
 
+    # Inquiry form submission lives on the dashboard page.
     if request.method == "POST" and request.POST.get("form_type") == "inquiry":
         store_id = (request.POST.get("store_id") or "").strip()
         category = (request.POST.get("category") or "").strip()
@@ -114,6 +115,7 @@ def dashboard(request):
                     messages.success(request, "お問い合わせを送信しました。")
                     return redirect("owner_dashboard")
 
+    # Store application form (default dashboard POST).
     if request.method == "POST" and request.POST.get("form_type") != "inquiry":
         application_form = StoreApplicationForm(request.POST)
         if application_form.is_valid():
@@ -184,6 +186,7 @@ def create_challenge(request):
     if request.method == 'POST' and form.is_valid():
         challenge = form.save(commit=False)
         challenge.store = store
+        # Enforce: exactly one common challenge per store.
         existing_common = Challenge.objects.filter(store=store, quest_type='common')
         if challenge.quest_type == 'common':
             if existing_common.exists():
@@ -424,6 +427,7 @@ def edit_challenge(request, challenge_id):
         original_quest_type = challenge.quest_type
         challenge = form.save(commit=False)
         challenge.store = store
+        # Enforce: exactly one common challenge per store.
         other_common = Challenge.objects.filter(store=store, quest_type='common').exclude(pk=challenge.challenge_id)
         if challenge.quest_type == 'common':
             if other_common.exists():

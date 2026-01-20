@@ -13,6 +13,8 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   const copyBtn = document.getElementById("storeQrCopyBtn");
+  const copyImageBtn = document.getElementById("storeQrCopyImageBtn");
+  const downloadBtn = document.getElementById("storeQrDownloadBtn");
   const printBtn = document.getElementById("storeQrPrintBtn");
   const statusEl = document.getElementById("storeQrStatus");
 
@@ -46,6 +48,27 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     const img = qrContainer.querySelector("img");
     return img ? img.src : "";
+  };
+
+  const downloadPng = (dataUrl, filename) => {
+    if (!dataUrl) return false;
+    const link = document.createElement("a");
+    link.href = dataUrl;
+    link.download = filename || "qr-code.png";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    return true;
+  };
+
+  const copyImage = async (dataUrl) => {
+    if (!dataUrl) return false;
+    if (!navigator.clipboard || !window.ClipboardItem) return false;
+    const response = await fetch(dataUrl);
+    const blob = await response.blob();
+    const item = new ClipboardItem({ [blob.type]: blob });
+    await navigator.clipboard.write([item]);
+    return true;
   };
 
   const openPrintWindow = (code) => {
@@ -89,6 +112,26 @@ document.addEventListener("DOMContentLoaded", () => {
       const ok = openPrintWindow(qrData);
       if (!ok) {
         setStatus("印刷に失敗しました。");
+      }
+    });
+  }
+
+  if (downloadBtn) {
+    downloadBtn.addEventListener("click", () => {
+      const ok = downloadPng(getQrDataUrl(), "store-qr.png");
+      if (!ok) {
+        setStatus("保存に失敗しました。");
+      }
+    });
+  }
+
+  if (copyImageBtn) {
+    copyImageBtn.addEventListener("click", async () => {
+      try {
+        const ok = await copyImage(getQrDataUrl());
+        setStatus(ok ? "画像をコピーしました。" : "画像コピーに失敗しました。");
+      } catch (error) {
+        setStatus("画像コピーに失敗しました。");
       }
     });
   }
