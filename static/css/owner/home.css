@@ -15,6 +15,26 @@
   color: #333;
 }
 
+.nav-secondary {
+  display: flex;
+  justify-content: center;
+  margin: 10px 0 0;
+}
+
+.nav-secondary__link {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fcd34d;
+  padding: 6px 16px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.nav-secondary__link:hover {
+  background: #fde68a;
+}
+
 .qr-btn {
   background: #0078d7;
   color: #fff;

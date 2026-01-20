@@ -27,7 +27,6 @@
       {% else %}
         <a href="{% url 'owner_dashboard' %}">ホーム</a>
       {% endif %}
-      <a href="{% url 'owner_dashboard' %}">店舗一覧</a>
       <a href="{% url 'create_challenge' %}">チャレンジ作成</a>
       <a href="{% url 'create_coupon' %}">クーポン作成</a>
       <a href="{% url 'coupon_list' %}">クーポン一覧</a>
@@ -36,6 +35,9 @@
       <a href="{% url 'stats' %}">統計</a>
     </nav>
 
+    <div class="nav-secondary">
+      <a href="{% url 'owner_dashboard' %}" class="nav-secondary__link">店舗一覧</a>
+    </div>
   </header>
 
   <main>
