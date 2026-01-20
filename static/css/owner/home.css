@@ -29,6 +29,35 @@
   background: #005ea8;
 }
 
+.qr-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.qr-action-btn {
+  border: none;
+  border-radius: 6px;
+  padding: 8px 14px;
+  cursor: pointer;
+  color: #fff;
+  font-weight: 600;
+  background: #0078d7;
+}
+
+.qr-action-btn--outline {
+  background: #fff;
+  color: #0078d7;
+  border: 1px solid #0078d7;
+}
+
+.qr-status {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #6b7280;
+  min-height: 16px;
+}
+
 /* --- チャレンジ一覧 --- */
 
 .challenges table {

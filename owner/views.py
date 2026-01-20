@@ -10,6 +10,7 @@ from ciquest_model.models import (
     StoreOwner,
     Challenge,
     Coupon,
+    AdminInquiry,
     Notice,
     StoreStampSetting,
     StoreStampReward,
@@ -70,7 +71,42 @@ def dashboard(request):
     for notice in notices:
         notice.body_html = mark_safe(render_markdown(notice.body_md))
 
-    if request.method == "POST":
+    if request.method == "POST" and request.POST.get("form_type") == "inquiry":
+        store_id = (request.POST.get("store_id") or "").strip()
+        category = (request.POST.get("category") or "").strip()
+        message = (request.POST.get("message") or "").strip()
+        related_challenge_id = (request.POST.get("related_challenge_id") or "").strip()
+
+        has_error = False
+        if not store_id or not category or not message:
+            messages.error(request, "???????????????????????")
+            has_error = True
+        else:
+            store = Store.objects.filter(pk=store_id, owner=owner).first()
+            if not store:
+                messages.error(request, "???????????????")
+                has_error = True
+            else:
+                related_challenge = None
+                if related_challenge_id:
+                    related_challenge = Challenge.objects.filter(
+                        pk=related_challenge_id,
+                        store=store,
+                    ).first()
+                    if not related_challenge:
+                        messages.error(request, "??????????????????")
+                        has_error = True
+                if not has_error:
+                    AdminInquiry.objects.create(
+                        store=store,
+                        related_challenge=related_challenge,
+                        category=category,
+                        message=message,
+                    )
+                    messages.success(request, "??????????????")
+                    return redirect("owner_dashboard")
+
+    if request.method == "POST" and request.POST.get("form_type") != "inquiry":
         application_form = StoreApplicationForm(request.POST)
         if application_form.is_valid():
             new_store = application_form.save(commit=False)
@@ -140,6 +176,22 @@ def create_challenge(request):
     if request.method == 'POST' and form.is_valid():
         challenge = form.save(commit=False)
         challenge.store = store
+        existing_common = Challenge.objects.filter(store=store, quest_type='common')
+        if challenge.quest_type == 'common':
+            if existing_common.exists():
+                form.add_error('quest_type', "共通チャレンジは1店舗1件までです。")
+        else:
+            if not existing_common.exists():
+                form.add_error('quest_type', "共通チャレンジを先に1件作成してください。")
+        if form.errors:
+            return render(request, 'owner/create_challenge.html', {
+                'form': form,
+                'store': store,
+                'coupons': coupons,
+                'challenge_limit': challenge_limit,
+                'current_challenges': current_challenges,
+                'limit_reached': limit_reached,
+            })
         if challenge.quest_type == 'common':
             challenge.reward_points = 20
             challenge.reward_type = 'points'
@@ -341,6 +393,14 @@ def edit_challenge(request, challenge_id):
         return redirect("owner_dashboard")
 
     challenge = get_object_or_404(Challenge, pk=challenge_id, store=store)
+    if challenge.quest_type == 'common':
+        has_other_common = Challenge.objects.filter(
+            store=store,
+            quest_type='common',
+        ).exclude(pk=challenge.challenge_id).exists()
+        if not has_other_common:
+            messages.error(request, "共通チャレンジは必ず1件必要です。")
+            return redirect('my_challenges')
 
     if request.method == 'POST':
         form = ChallengeForm(request.POST, instance=challenge)
@@ -353,8 +413,24 @@ def edit_challenge(request, challenge_id):
         form.fields['reward_coupon'].empty_label = "クーポンを選択"
 
     if request.method == 'POST' and form.is_valid():
+        original_quest_type = challenge.quest_type
         challenge = form.save(commit=False)
         challenge.store = store
+        other_common = Challenge.objects.filter(store=store, quest_type='common').exclude(pk=challenge.challenge_id)
+        if challenge.quest_type == 'common':
+            if other_common.exists():
+                form.add_error('quest_type', "共通チャレンジは1店舗1件までです。")
+        else:
+            if original_quest_type == 'common' and not other_common.exists():
+                form.add_error('quest_type', "共通チャレンジは必ず1件必要です。")
+            elif original_quest_type != 'common' and not other_common.exists():
+                form.add_error('quest_type', "共通チャレンジを先に1件作成してください。")
+        if form.errors:
+            return render(request, 'owner/edit_challenge.html', {
+                'store': store,
+                'form': form,
+                'challenge': challenge,
+            })
         if challenge.quest_type == 'common':
             challenge.reward_points = 20
             challenge.reward_type = 'points'

@@ -45,6 +45,7 @@
       <p class="help-text">必要事項を入力して送信すると、運営が内容を確認して承認ステータスを更新します。</p>
       <form method="post" class="application-form">
         {% csrf_token %}
+        <input type="hidden" name="form_type" value="store_application">
         {% if application_form.non_field_errors %}
           <div class="form-errors">
             {% for error in application_form.non_field_errors %}
@@ -96,6 +97,39 @@
           </div>
         </div>
         <button type="submit" class="btn submit-btn">申請する</button>
+      </form>
+    </section>
+
+    <section class="store-application">
+      <h2>お問い合わせ</h2>
+      <p class="help-text">店舗に関する内容やチャレンジの確認事項を送信できます。</p>
+      <form method="post" class="application-form">
+        {% csrf_token %}
+        <input type="hidden" name="form_type" value="inquiry">
+        <div class="form-grid">
+          <div class="form-field">
+            <label for="inquiryStore">店舗</label>
+            <select id="inquiryStore" name="store_id" required>
+              <option value="">店舗を選択</option>
+              {% for store in stores %}
+                <option value="{{ store.store_id }}">{{ store.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="inquiryCategory">カテゴリ</label>
+            <input id="inquiryCategory" type="text" name="category" placeholder="例：審査/掲載/QR" required>
+          </div>
+          <div class="form-field full">
+            <label for="inquiryMessage">内容</label>
+            <textarea id="inquiryMessage" name="message" rows="4" required></textarea>
+          </div>
+          <div class="form-field">
+            <label for="inquiryChallenge">関連チャレンジID（任意）</label>
+            <input id="inquiryChallenge" type="text" name="related_challenge_id" placeholder="任意">
+          </div>
+        </div>
+        <button type="submit" class="btn submit-btn">送信</button>
       </form>
     </section>
 

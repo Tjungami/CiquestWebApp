@@ -27,6 +27,7 @@
       {% else %}
         <a href="{% url 'owner_dashboard' %}">ホーム</a>
       {% endif %}
+      <a href="{% url 'owner_dashboard' %}">店舗一覧</a>
       <a href="{% url 'create_challenge' %}">チャレンジ作成</a>
       <a href="{% url 'create_coupon' %}">クーポン作成</a>
       <a href="{% url 'coupon_list' %}">クーポン一覧</a>
@@ -61,6 +62,11 @@
       <h2>QRコード</h2>
       {% if store.qr_code %}
         <div id="storeQRCode" data-qr="{{ store.qr_code }}"></div>
+        <div class="qr-actions">
+          <button type="button" id="storeQrCopyBtn" class="qr-action-btn">コピー</button>
+          <button type="button" id="storeQrPrintBtn" class="qr-action-btn qr-action-btn--outline">印刷</button>
+        </div>
+        <p class="qr-status" id="storeQrStatus" aria-live="polite"></p>
       {% else %}
         <p>まだQRコードが発行されていません。</p>
       {% endif %}

@@ -111,6 +111,11 @@
       <p>ID: <span id="qrId">--</span></p>
       <p>コード: <span id="qrCodeText">--</span></p>
       <div id="qrCanvas"></div>
+      <div class="qr-actions">
+        <button type="button" id="qrCopyBtn" class="qr-action-btn">コピー</button>
+        <button type="button" id="qrPrintBtn" class="qr-action-btn qr-action-btn--outline">印刷</button>
+      </div>
+      <p class="qr-status" id="qrStatus" aria-live="polite"></p>
     </div>
   </div>
 

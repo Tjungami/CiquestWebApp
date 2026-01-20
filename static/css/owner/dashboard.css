@@ -156,7 +156,8 @@ main {
 }
 
 .form-field input,
-.form-field textarea {
+.form-field textarea,
+.form-field select {
   border: 1px solid #d5d9e2;
   border-radius: 8px;
   padding: 10px 12px;
