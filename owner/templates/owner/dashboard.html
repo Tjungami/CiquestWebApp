@@ -69,6 +69,13 @@
             {% endif %}
           </div>
           <div class="form-field">
+            <label for="{{ application_form.phone.id_for_label }}">電話番号</label>
+            {{ application_form.phone }}
+            {% if application_form.phone.errors %}
+              <span class="error">{{ application_form.phone.errors.0 }}</span>
+            {% endif %}
+          </div>
+          <div class="form-field">
             <label for="{{ application_form.latlng.id_for_label }}">緯度・経度（カンマ区切り）</label>
             {{ application_form.latlng }}
             {{ application_form.latitude }}{{ application_form.longitude }}

@@ -604,15 +604,15 @@ def public_challenge_list(request):
 
 @require_http_methods(["GET"])
 def public_notice_list(request):
-    auth_error = _require_phone_api_key(request)
-    if auth_error:
-        return auth_error
+    expected_key = getattr(settings, "PHONE_API_KEY", "")
+    provided_key = request.headers.get("phone-API-key") or request.META.get("HTTP_PHONE_API_KEY")
+    is_phone_client = bool(expected_key and provided_key and secrets.compare_digest(provided_key, expected_key))
 
     target = request.GET.get("target")
-    if target in {"owner", "user"}:
-        targets = {"all", target}
-    else:
+    if target == "user" and is_phone_client:
         targets = {"all", "user"}
+    else:
+        targets = {"all"}
 
     now = timezone.now()
     notices = Notice.objects.filter(

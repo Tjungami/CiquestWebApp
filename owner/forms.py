@@ -370,6 +370,16 @@ class StampEventForm(forms.Form):
 
 
 class StoreApplicationForm(forms.ModelForm):
+    phone = forms.CharField(
+        required=True,
+        label="電話番号",
+        widget=forms.TextInput(
+            attrs={
+                "inputmode": "tel",
+                "placeholder": "例：090-1234-5678",
+            }
+        ),
+    )
     latlng = forms.CharField(
         required=True,
         label="緯度・経度",
@@ -388,6 +398,7 @@ class StoreApplicationForm(forms.ModelForm):
         fields = [
             "name",
             "address",
+            "phone",
             "latlng",
             "latitude",
             "longitude",
