@@ -1,64 +1,36 @@
 /* C:\Users\j_tagami\CiquestWebApp\static\css\owner\dashboard.css */
-/* Frutiger Aero用: theme tokens */
-:root {
-  --aero-sky-1: #bfe6ff;
-  --aero-sky-2: #8cc8f5;
-  --aero-sky-3: #6fb4ea;
-  --aero-ink: #1f2a3a;
-  --aero-ink-soft: #405069;
-  --aero-card: rgba(255, 255, 255, 0.68);
-  --aero-card-strong: rgba(255, 255, 255, 0.78);
-  --aero-line: rgba(255, 255, 255, 0.55);
-  --aero-shadow: 0 12px 28px rgba(40, 80, 140, 0.18);
-  --aero-shadow-soft: 0 6px 16px rgba(40, 80, 140, 0.14);
-}
+/* ==============================
+   店舗ダッシュボード画面
+   ============================== */
 
 body {
-  font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-  background: linear-gradient(160deg, var(--aero-sky-1) 0%, var(--aero-sky-2) 45%, var(--aero-sky-3) 100%);
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  background: #f2f5fa;
   margin: 0;
   padding: 0;
-  color: var(--aero-ink);
-  min-height: 100vh;
-  position: relative;
-  overflow-x: hidden;
+  color: #333;
 }
 
-/* Frutiger Aero用: soft light wash */
-body::before {
-  content: "";
-  position: fixed;
-  inset: -20% -10% auto -10%;
-  height: 60vh;
-  background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0));
-  pointer-events: none;
-}
-
-/* --- Header --- */
+/* --- ヘッダー --- */
 header {
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.65), rgba(210, 238, 255, 0.7));
-  color: var(--aero-ink);
+  background: linear-gradient(90deg, #A7CEE6 0%, #89BDDE 100%);
+  color: #fff;
   text-align: center;
-  padding: 20px 0;
-  box-shadow: var(--aero-shadow-soft);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  padding: 18px 0;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
 }
 
 header h1 {
   margin: 0;
   font-size: 1.8rem;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
 }
 
-/* --- Main container --- */
+/* --- メインコンテンツ --- */
 main {
   max-width: 1000px;
-  margin: 44px auto 60px;
+  margin: 40px auto;
   padding: 0 20px;
-  position: relative;
-  z-index: 1;
 }
 
 .messages {
@@ -67,54 +39,29 @@ main {
   margin: 0 0 24px;
 }
 
-/* Frutiger Aero用: glass message banners */
 .messages li {
   padding: 12px 16px;
-  border-radius: 12px;
+  border-radius: 8px;
   margin-bottom: 10px;
   font-weight: 600;
-  background: var(--aero-card);
-  border: 1px solid var(--aero-line);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  box-shadow: var(--aero-shadow-soft);
 }
 
 .messages .success {
-  background: rgba(226, 247, 236, 0.8);
+  background: #e9f7ef;
   color: #1e824c;
 }
 
 .messages .error {
-  background: rgba(253, 236, 234, 0.85);
-  color: #b33427;
+  background: #fdecea;
+  color: #c0392b;
 }
 
-/* Frutiger Aero用: glass cards */
-.notice-section,
-.store-application,
-.store-card {
-  background: var(--aero-card);
-  border-radius: 16px;
-  box-shadow: var(--aero-shadow);
+.notice-section {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
   padding: 24px;
   margin-bottom: 32px;
-  border: 1px solid var(--aero-line);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  position: relative;
-}
-
-/* Frutiger Aero用: top highlight */
-.notice-section::before,
-.store-application::before,
-.store-card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 16px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0));
-  pointer-events: none;
 }
 
 .notice-section h2 {
@@ -128,15 +75,10 @@ main {
   gap: 16px;
 }
 
-/* Frutiger Aero用: inner glass */
 .notice-card {
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  border-radius: 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
   padding: 16px;
-  background: var(--aero-card-strong);
-  box-shadow: var(--aero-shadow-soft);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
 }
 
 .notice-card h3 {
@@ -147,11 +89,11 @@ main {
 .notice-period {
   margin: 0 0 10px;
   font-size: 0.85rem;
-  color: var(--aero-ink-soft);
+  color: #6b7280;
 }
 
 .notice-body {
-  color: #2b3b52;
+  color: #374151;
   line-height: 1.6;
 }
 
@@ -166,6 +108,14 @@ main {
   margin-top: 16px;
 }
 
+.store-application {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+  padding: 24px;
+  margin-bottom: 32px;
+}
+
 .store-application h2 {
   margin-top: 0;
   margin-bottom: 8px;
@@ -175,7 +125,7 @@ main {
 .store-application .help-text {
   margin-top: 0;
   margin-bottom: 20px;
-  color: var(--aero-ink-soft);
+  color: #6b7280;
   font-size: 0.95rem;
 }
 
@@ -203,58 +153,54 @@ main {
 .form-field label {
   font-weight: 600;
   margin-bottom: 6px;
-  color: var(--aero-ink);
 }
 
-/* Frutiger Aero用: glass inputs */
 .form-field input,
 .form-field textarea,
 .form-field select {
-  border: 1px solid rgba(255, 255, 255, 0.7);
-  border-radius: 12px;
+  border: 1px solid #d5d9e2;
+  border-radius: 8px;
   padding: 10px 12px;
   font-size: 0.95rem;
-  background: rgba(255, 255, 255, 0.82);
-  color: var(--aero-ink);
-  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
-  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.8);
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .form-field input:focus,
-.form-field textarea:focus,
-.form-field select:focus {
-  border-color: rgba(120, 190, 235, 0.9);
+.form-field textarea:focus {
+  border-color: #89bdde;
   outline: none;
-  box-shadow: 0 0 0 3px rgba(137, 189, 222, 0.35);
-  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 0 0 3px rgba(137, 189, 222, 0.3);
 }
 
 .form-field .error {
   margin-top: 4px;
-  color: #c43a2e;
+  color: #e74c3c;
   font-size: 0.85rem;
 }
 
 .form-errors {
-  background: rgba(253, 236, 234, 0.85);
+  background: #fdecea;
   border-left: 4px solid #e74c3c;
   padding: 12px 16px;
-  border-radius: 12px;
-  color: #b33427;
+  border-radius: 8px;
+  color: #c0392b;
   font-size: 0.9rem;
 }
 
-/* --- Store list --- */
+/* --- 店舗リスト --- */
 .store-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 24px;
 }
 
-/* --- Store card --- */
+/* --- 店舗カード --- */
 .store-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
   padding: 20px;
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -262,72 +208,70 @@ main {
 
 .store-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 16px 30px rgba(40, 90, 150, 0.2);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
 }
 
 .store-card h2 {
   margin: 0 0 8px;
-  color: #0b63b0;
+  color: #0078d7;
   font-size: 1.4rem;
 }
 
 .store-card p {
   margin: 5px 0;
   font-size: 0.95rem;
-  color: #3a4a61;
+  color: #555;
 }
 
-/* Frutiger Aero用: status accents */
+/* --- ステータス表示 --- */
 .approved {
-  color: #1f9b56;
+  color: #27ae60; /* 緑 */
   font-weight: bold;
 }
 
 .pending {
-  color: #d78912;
+  color: #f39c12; /* ゴールド */
   font-weight: bold;
 }
 
 .rejected {
-  color: #cf3c2f;
+  color: #e74c3c; /* 赤 */
   font-weight: bold;
 }
 
-/* Frutiger Aero用: glossy buttons */
+/* --- ボタン --- */
 .btn {
   display: inline-block;
   text-align: center;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.75), rgba(109, 176, 231, 0.9));
-  color: #0e365d;
-  padding: 10px 18px;
-  border-radius: 12px;
+  background: #0078d7;
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 6px;
   margin-top: 12px;
   font-size: 1rem;
   text-decoration: none;
-  border: 1px solid rgba(255, 255, 255, 0.7);
-  box-shadow: var(--aero-shadow-soft);
-  transition: transform 0.12s ease, box-shadow 0.2s ease;
+  transition: background 0.2s, transform 0.1s;
 }
 
 .btn:hover {
+  background: #005ea8;
   transform: translateY(-1px);
-  box-shadow: 0 10px 20px rgba(40, 90, 150, 0.22);
 }
 
 .submit-btn {
   align-self: flex-start;
-  padding: 12px 26px;
+  padding: 12px 24px;
 }
 
-/* --- Empty state --- */
+/* --- 空リスト時 --- */
 main p {
   text-align: center;
-  color: var(--aero-ink-soft);
+  color: #777;
   font-size: 1rem;
   margin-top: 60px;
 }
 
-/* --- Responsive --- */
+/* --- レスポンシブ --- */
 @media (max-width: 600px) {
   header h1 {
     font-size: 1.4rem;
