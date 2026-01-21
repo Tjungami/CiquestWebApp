@@ -26,6 +26,35 @@ class Rank(models.Model):
 
 
 # ユーザー情報
+
+# ???
+class Badge(models.Model):
+    badge_id = models.AutoField(primary_key=True)
+    code = models.CharField(max_length=50, unique=True)
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+    category = models.CharField(max_length=50, default="general")
+    is_hidden = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
+
+# ???????
+class UserBadge(models.Model):
+    user = models.ForeignKey("User", on_delete=models.CASCADE)
+    badge = models.ForeignKey(Badge, on_delete=models.CASCADE)
+    awarded_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["user", "badge"], name="uq_user_badge"),
+        ]
+
+    def __str__(self):
+        return f"UserBadge(user_id={self.user_id}, badge={self.badge_id})"
+
 class User(models.Model):
     user_id = models.AutoField(primary_key=True)
     username = models.CharField(max_length=50)

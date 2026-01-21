@@ -21,6 +21,7 @@ from django.views.decorators.http import require_http_methods
 
 from ciquest_model.models import (
     AdminAccount,
+    Badge,
     Challenge,
     Coupon,
     Rank,
@@ -37,6 +38,7 @@ from ciquest_model.models import (
     UserChallenge,
     UserCoupon,
     UserCouponUsageHistory,
+    UserBadge,
     StoreCouponUsageHistory,
     UserRefreshToken,
 )
@@ -255,6 +257,134 @@ def _ensure_user_rank(user):
     if fields_to_update:
         user.save(update_fields=sorted(set(fields_to_update)))
     return current_rank, clears
+
+
+BADGE_DEFINITIONS = [
+    {"code": "quest_1", "name": "??????", "description": "?????1????", "category": "quest", "hidden": False},
+    {"code": "quest_10", "name": "???", "description": "?????10????", "category": "quest", "hidden": False},
+    {"code": "quest_50", "name": "???", "description": "?????50????", "category": "quest", "hidden": False},
+    {"code": "quest_200", "name": "??", "description": "?????200????", "category": "quest", "hidden": False},
+    {"code": "stamp_5", "name": "?????", "description": "?????5???", "category": "stamp", "hidden": False},
+    {"code": "stamp_20", "name": "???", "description": "?????20???", "category": "stamp", "hidden": False},
+    {"code": "stamp_100", "name": "????", "description": "?????100???", "category": "stamp", "hidden": False},
+    {"code": "store_3", "name": "???", "description": "3???????????", "category": "store", "hidden": False},
+    {"code": "store_10", "name": "???", "description": "10???????????", "category": "store", "hidden": False},
+    {"code": "store_30", "name": "????", "description": "30???????????", "category": "store", "hidden": False},
+    {"code": "night_owl", "name": "???????", "description": "???????????", "category": "hidden", "hidden": True},
+    {"code": "streak_7", "name": "?????", "description": "7????????????", "category": "hidden", "hidden": True},
+    {"code": "stamp_artisan", "name": "??????", "description": "??????????10???", "category": "hidden", "hidden": True},
+]
+
+
+def _ensure_badge_catalog():
+    badges = {}
+    for definition in BADGE_DEFINITIONS:
+        badge, created = Badge.objects.get_or_create(
+            code=definition["code"],
+            defaults={
+                "name": definition["name"],
+                "description": definition["description"],
+                "category": definition["category"],
+                "is_hidden": definition["hidden"],
+            },
+        )
+        if not created:
+            updates = []
+            if badge.name != definition["name"]:
+                badge.name = definition["name"]
+                updates.append("name")
+            if badge.description != definition["description"]:
+                badge.description = definition["description"]
+                updates.append("description")
+            if badge.category != definition["category"]:
+                badge.category = definition["category"]
+                updates.append("category")
+            if badge.is_hidden != definition["hidden"]:
+                badge.is_hidden = definition["hidden"]
+                updates.append("is_hidden")
+            if updates:
+                badge.save(update_fields=updates)
+        badges[definition["code"]] = badge
+    return badges
+
+
+def _serialize_badge(badge, awarded_at=None):
+    return {
+        "id": badge.badge_id,
+        "code": badge.code,
+        "name": badge.name,
+        "description": badge.description or "",
+        "category": badge.category,
+        "awarded_at": awarded_at.isoformat() if awarded_at else None,
+    }
+
+
+def _grant_badge(user, badge):
+    user_badge, created = UserBadge.objects.get_or_create(user=user, badge=badge)
+    if not created:
+        return None
+    return _serialize_badge(badge, awarded_at=user_badge.awarded_at)
+
+
+def _has_streak(user, days):
+    cleared_dates = set(
+        UserChallenge.objects.filter(user=user, status="cleared")
+        .values_list("cleared_at__date", flat=True)
+        .distinct()
+    )
+    if not cleared_dates:
+        return False
+    current = timezone.localdate()
+    for _ in range(days):
+        if current not in cleared_dates:
+            return False
+        current -= datetime.timedelta(days=1)
+    return True
+
+
+def _award_badges_for_user(user, cleared_at=None, store_id=None):
+    badges = _ensure_badge_catalog()
+    new_badges = []
+
+    def maybe_award(code, condition):
+        if not condition:
+            return
+        payload = _grant_badge(user, badges[code])
+        if payload:
+            new_badges.append(payload)
+
+    total_clears = UserChallenge.objects.filter(user=user, status="cleared").count()
+    maybe_award("quest_1", total_clears >= 1)
+    maybe_award("quest_10", total_clears >= 10)
+    maybe_award("quest_50", total_clears >= 50)
+    maybe_award("quest_200", total_clears >= 200)
+
+    total_stamps = StoreStampHistory.objects.filter(user=user).count()
+    maybe_award("stamp_5", total_stamps >= 5)
+    maybe_award("stamp_20", total_stamps >= 20)
+    maybe_award("stamp_100", total_stamps >= 100)
+
+    unique_stores = (
+        UserChallenge.objects.filter(user=user, status="cleared")
+        .values("challenge__store_id")
+        .distinct()
+        .count()
+    )
+    maybe_award("store_3", unique_stores >= 3)
+    maybe_award("store_10", unique_stores >= 10)
+    maybe_award("store_30", unique_stores >= 30)
+
+    if cleared_at:
+        local_time = timezone.localtime(cleared_at)
+        maybe_award("night_owl", 0 <= local_time.hour < 5)
+        maybe_award("streak_7", _has_streak(user, 7))
+
+    if store_id:
+        user_stamp = StoreStamp.objects.filter(user=user, store_id=store_id).first()
+        if user_stamp and user_stamp.stamps_count >= 10:
+            maybe_award("stamp_artisan", True)
+
+    return new_badges
 
 
 def _hash_token(raw_token):
@@ -567,6 +697,12 @@ def api_user_challenge_clear(request):
     if not reward_detail and reward_coupon:
         reward_detail = reward_coupon.title
 
+    new_badges = _award_badges_for_user(
+        user,
+        cleared_at=user_challenge.cleared_at,
+        store_id=challenge.store_id,
+    )
+
     response = {
         "user_challenge_id": user_challenge.user_challenge_id,
         "challenge_id": challenge.challenge_id,
@@ -585,6 +721,7 @@ def api_user_challenge_clear(request):
         "previous_rank": previous_rank.name if previous_rank else None,
         "previous_rank_id": previous_rank.rank_id if previous_rank else None,
         "rank_up": rank_up,
+        "new_badges": new_badges,
     }
     return JsonResponse(response, status=201 if created else 200)
 
@@ -678,6 +815,22 @@ def api_user_coupon_history(request):
                 "used_at": entry.used_at.isoformat(),
             }
         )
+    return JsonResponse(results, safe=False)
+
+
+@require_http_methods(["GET"])
+def api_user_badges(request):
+    user, error = _get_user_from_access_token(request)
+    if error:
+        return error
+    entries = (
+        UserBadge.objects.select_related("badge")
+        .filter(user=user)
+        .order_by("-awarded_at")
+    )
+    results = []
+    for entry in entries:
+        results.append(_serialize_badge(entry.badge, awarded_at=entry.awarded_at))
     return JsonResponse(results, safe=False)
 
 
@@ -963,11 +1116,14 @@ def api_store_stamp_scan(request):
                 }
             )
 
+    new_badges = _award_badges_for_user(user, store_id=store_id)
+
     response = {
         "store_id": store.store_id,
         "store_name": store.name,
         "stamps_count": user_stamp.stamps_count,
         "stamped_at": now.isoformat(),
+        "new_badges": new_badges,
         **reward_payload,
     }
     return JsonResponse(response, status=201)
