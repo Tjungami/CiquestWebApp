@@ -33,6 +33,7 @@ class User(models.Model):
     password = models.CharField(max_length=255)
     rank = models.ForeignKey(Rank, on_delete=models.SET_NULL, null=True)
     points = models.IntegerField(default=0)
+    last_rank_reset_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

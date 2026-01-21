@@ -23,6 +23,7 @@ from ciquest_model.models import (
     AdminAccount,
     Challenge,
     Coupon,
+    Rank,
     Notice,
     Store,
     StoreOwner,
@@ -157,9 +158,103 @@ def _serialize_user(user):
         "email": user.email,
         "rank_id": user.rank_id,
         "rank": user.rank.name if user.rank else None,
+        "rank_multiplier": _rank_multiplier(user.rank),
         "points": user.points,
         "created_at": user.created_at.isoformat() if user.created_at else None,
     }
+
+
+RANK_DEFINITIONS = [
+    {"name": "ブロンズ", "threshold": 0, "multiplier": 1.0},
+    {"name": "シルバー", "threshold": 25, "multiplier": 1.1},
+    {"name": "ゴールド", "threshold": 50, "multiplier": 1.2},
+    {"name": "レジェンド", "threshold": 100, "multiplier": 1.3},
+    {"name": "エリート", "threshold": 200, "multiplier": 1.4},
+]
+RANK_ORDER = [definition["name"] for definition in RANK_DEFINITIONS]
+
+
+def _rank_period_start(now=None):
+    current = timezone.localtime(now or timezone.now())
+    start_month = current.month if current.month % 2 == 1 else current.month - 1
+    start_year = current.year
+    start_date = datetime.datetime(start_year, start_month, 1)
+    return timezone.make_aware(start_date, timezone.get_current_timezone())
+
+
+def _ensure_rank_catalog():
+    ranks = {}
+    for definition in RANK_DEFINITIONS:
+        rank, created = Rank.objects.get_or_create(
+            name=definition["name"],
+            defaults={"required_points": definition["threshold"]},
+        )
+        if not created and rank.required_points != definition["threshold"]:
+            rank.required_points = definition["threshold"]
+            rank.save(update_fields=["required_points"])
+        ranks[definition["name"]] = rank
+    return ranks
+
+
+def _rank_index(rank):
+    if not rank:
+        return 0
+    try:
+        return RANK_ORDER.index(rank.name)
+    except ValueError:
+        return 0
+
+
+def _rank_multiplier(rank):
+    if not rank:
+        return 1.0
+    for definition in RANK_DEFINITIONS:
+        if definition["name"] == rank.name:
+            return definition["multiplier"]
+    return 1.0
+
+
+def _rank_from_clears(clears, ranks):
+    for definition in reversed(RANK_DEFINITIONS):
+        if clears >= definition["threshold"]:
+            return ranks[definition["name"]]
+    return ranks[RANK_ORDER[0]]
+
+
+def _ensure_user_rank(user):
+    ranks = _ensure_rank_catalog()
+    fields_to_update = []
+
+    if not user.rank_id:
+        user.rank = ranks[RANK_ORDER[0]]
+        fields_to_update.append("rank")
+    current_rank = user.rank or ranks[RANK_ORDER[0]]
+
+    period_start = _rank_period_start()
+    if user.last_rank_reset_at is None or user.last_rank_reset_at < period_start:
+        new_index = max(_rank_index(current_rank) - 1, 0)
+        new_rank = ranks[RANK_ORDER[new_index]]
+        if current_rank.rank_id != new_rank.rank_id:
+            user.rank = new_rank
+            fields_to_update.append("rank")
+            current_rank = new_rank
+        user.last_rank_reset_at = period_start
+        fields_to_update.append("last_rank_reset_at")
+
+    clears = UserChallenge.objects.filter(
+        user=user,
+        status="cleared",
+        cleared_at__gte=period_start,
+    ).count()
+    target_rank = _rank_from_clears(clears, ranks)
+    if _rank_index(target_rank) > _rank_index(current_rank):
+        user.rank = target_rank
+        fields_to_update.append("rank")
+        current_rank = target_rank
+
+    if fields_to_update:
+        user.save(update_fields=sorted(set(fields_to_update)))
+    return current_rank, clears
 
 
 def _hash_token(raw_token):
@@ -278,6 +373,7 @@ def api_user_create(request):
         return _json_error("Email already exists.", status=400)
 
     user = User.objects.create(username=username, email=email, password=password)
+    _ensure_user_rank(user)
     return JsonResponse(_serialize_user(user), status=201)
 
 
@@ -297,6 +393,7 @@ def api_login(request):
     if not user or not _verify_password(password, user.password, user):
         return _json_error("Email address or password is incorrect.", status=401)
 
+    _ensure_user_rank(user)
     access = _create_access_token(user)
     refresh = _create_refresh_token(user)
     return JsonResponse({"user": _serialize_user(user), "access": access, "refresh": refresh})
@@ -356,6 +453,7 @@ def api_me(request):
     user, error = _get_user_from_access_token(request)
     if error:
         return error
+    _ensure_user_rank(user)
     return JsonResponse(_serialize_user(user))
 
 
@@ -437,12 +535,20 @@ def api_user_challenge_clear(request):
         user_challenge.cleared_at = now
         user_challenge.save(update_fields=["status", "cleared_at"])
 
+    previous_rank = user.rank
+    previous_rank_index = _rank_index(previous_rank)
+    _ensure_user_rank(user)
+    current_rank = user.rank
+    current_rank_index = _rank_index(current_rank)
+    rank_multiplier = _rank_multiplier(current_rank)
+    rank_up = current_rank_index > previous_rank_index
+
     reward_points_awarded = 0
     reward_coupon = None
     reward_granted = False
     if challenge.reward_type == "points":
         if challenge.reward_points:
-            reward_points_awarded = challenge.reward_points
+            reward_points_awarded = int(round(challenge.reward_points * rank_multiplier))
             user.points = (user.points or 0) + reward_points_awarded
             user.save(update_fields=["points"])
             reward_granted = True
@@ -473,6 +579,12 @@ def api_user_challenge_clear(request):
         "reward_coupon_title": reward_coupon.title if reward_coupon else "",
         "reward_granted": reward_granted,
         "user_points": user.points,
+        "rank": current_rank.name if current_rank else None,
+        "rank_id": current_rank.rank_id if current_rank else None,
+        "rank_multiplier": rank_multiplier,
+        "previous_rank": previous_rank.name if previous_rank else None,
+        "previous_rank_id": previous_rank.rank_id if previous_rank else None,
+        "rank_up": rank_up,
     }
     return JsonResponse(response, status=201 if created else 200)
 
