@@ -27,6 +27,7 @@ urlpatterns = [
     path('api/user-coupons/use/', views.api_user_coupon_use, name='api_user_coupon_use'),
     path('api/user-coupons/history/', views.api_user_coupon_history, name='api_user_coupon_history'),
     path('api/store-coupons/history/', views.api_store_coupon_history, name='api_store_coupon_history'),
+    path('api/stamps/scan/', views.api_store_stamp_scan, name='api_store_stamp_scan'),
     path('api/stores/', views.public_store_list, name='public_store_list'),
     path('api/stamp-settings/', views.public_stamp_setting, name='public_stamp_setting'),
     path('api/coupons/', views.public_coupon_list, name='public_coupon_list'),

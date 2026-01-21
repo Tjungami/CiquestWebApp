@@ -43,14 +43,11 @@
           <p>カードは店舗ごとに1つだけです。最大スタンプ数を設定し、保存するとカードが作成／更新されます。</p>
         </div>
         {% if setting %}
-          <form method="post" action="{% url 'delete_stamp_settings' %}" onsubmit="return confirm('スタンプカードを削除すると、登録済みイベントも全て削除されます。よろしいですか？');">
-            {% csrf_token %}
-            <button type="submit" class="btn danger outline">カードを削除</button>
-          </form>
+          <p class="hint">スタンプカードは作成後に削除できません。</p>
         {% endif %}
       </div>
 
-      <form method="post" action="{% url 'stamp_settings' %}" class="card-settings-form">
+      <form method="post" action="{% url 'stamp_settings' %}" class="card-settings-form" {% if not setting %}onsubmit="return confirm('スタンプカードは作成後に削除できません。作成してもよろしいですか？');"{% endif %}>
         {% csrf_token %}
         <input type="hidden" name="intent" value="update_card">
         <label for="max_stamps">最高スタンプ数（1〜30）</label>

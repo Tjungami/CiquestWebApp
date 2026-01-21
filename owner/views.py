@@ -482,13 +482,7 @@ def delete_stamp_settings(request):
         messages.error(request, "店舗情報が見つかりません。先に店舗登録を完了させてください。")
         return redirect("owner_dashboard")
 
-    setting = StoreStampSetting.objects.filter(store=store).first()
-    if not setting:
-        messages.info(request, "削除できるスタンプカードはありません。")
-        return redirect("stamp_settings")
-
-    setting.delete()
-    messages.success(request, "スタンプカードを削除しました。必要に応じて新しく作成してください。")
+    messages.error(request, "スタンプカードは作成後に削除できません。")
     return redirect("stamp_settings")
 
 def create_stamp_event(request):

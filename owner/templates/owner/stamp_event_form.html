@@ -21,6 +21,9 @@
       {% endif %}
     </h1>
     <p>スタンプ数と報酬内容を設定してください。保存するとスタンプカードに反映されます。</p>
+    {% if mode == 'edit' %}
+      <p class="hint">既に取得されたスタンプ数・報酬には影響しません。</p>
+    {% endif %}
 
     <form method="post">
       {% csrf_token %}

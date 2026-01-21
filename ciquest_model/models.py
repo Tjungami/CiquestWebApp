@@ -301,6 +301,22 @@ class StoreStamp(models.Model):
         return f"{self.user.username} - {self.store.name}"
 
 
+class StoreStampHistory(models.Model):
+    store_stamp_history_id = models.AutoField(primary_key=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    store = models.ForeignKey(Store, on_delete=models.CASCADE)
+    stamp_date = models.DateField()
+    stamped_at = models.DateTimeField()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["user", "store", "stamp_date"], name="uq_store_stamp_day"),
+        ]
+
+    def __str__(self):
+        return f"{self.user.username} - {self.store.name} ({self.stamp_date})"
+
+
 # タグ
 class Tag(models.Model):
     tag_id = models.AutoField(primary_key=True)

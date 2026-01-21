@@ -29,6 +29,7 @@ from ciquest_model.models import (
     StoreTag,
     StoreStamp,
     StoreStampSetting,
+    StoreStampHistory,
     Tag,
     User,
     UserChallenge,
@@ -765,6 +766,59 @@ def public_stamp_setting(request):
         }
 
     return JsonResponse(response)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def api_store_stamp_scan(request):
+    user, error = _get_user_from_access_token(request)
+    if error:
+        return error
+    data, error = _get_request_data(request)
+    if error:
+        return error
+
+    store_id = data.get("store_id") if data else None
+    store_qr = (data.get("store_qr") or "").strip() if data else ""
+    if not store_id or not store_qr:
+        return _json_error("store_id and store_qr are required.", status=400)
+    try:
+        store_id = int(store_id)
+    except (TypeError, ValueError):
+        return _json_error("store_id must be an integer.", status=400)
+
+    store = Store.objects.filter(store_id=store_id).first()
+    if not store:
+        return _json_error("Store not found.", status=404)
+    if store.qr_code != store_qr:
+        return _json_error("Store QR does not match.", status=400)
+
+    setting = StoreStampSetting.objects.filter(store_id=store_id).first()
+    if not setting:
+        return _json_error("Stamp setting not found.", status=404)
+
+    today = timezone.localdate()
+    if StoreStampHistory.objects.filter(user=user, store_id=store_id, stamp_date=today).exists():
+        return _json_error("Already stamped today.", status=400)
+
+    now = timezone.now()
+    StoreStampHistory.objects.create(
+        user=user,
+        store=store,
+        stamp_date=today,
+        stamped_at=now,
+    )
+    user_stamp, _ = StoreStamp.objects.get_or_create(user=user, store=store)
+    user_stamp.stamps_count = (user_stamp.stamps_count or 0) + 1
+    user_stamp.save(update_fields=["stamps_count"])
+
+    response = {
+        "store_id": store.store_id,
+        "store_name": store.name,
+        "stamps_count": user_stamp.stamps_count,
+        "stamped_at": now.isoformat(),
+    }
+    return JsonResponse(response, status=201)
 
 
 def public_challenge_list(request):
