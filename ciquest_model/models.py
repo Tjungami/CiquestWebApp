@@ -308,11 +308,6 @@ class StoreStampHistory(models.Model):
     stamp_date = models.DateField()
     stamped_at = models.DateTimeField()
 
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=["user", "store", "stamp_date"], name="uq_store_stamp_day"),
-        ]
-
     def __str__(self):
         return f"{self.user.username} - {self.store.name} ({self.stamp_date})"
 

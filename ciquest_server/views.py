@@ -798,15 +798,19 @@ def api_store_stamp_scan(request):
     if not setting:
         return _json_error("Stamp setting not found.", status=404)
 
-    today = timezone.localdate()
-    if StoreStampHistory.objects.filter(user=user, store_id=store_id, stamp_date=today).exists():
-        return _json_error("Already stamped today.", status=400)
-
     now = timezone.now()
+    last_stamp = (
+        StoreStampHistory.objects.filter(user=user, store_id=store_id)
+        .order_by("-stamped_at")
+        .first()
+    )
+    if last_stamp and (now - last_stamp.stamped_at).total_seconds() < 4 * 3600:
+        return _json_error("Already stamped within 4 hours.", status=400)
+
     StoreStampHistory.objects.create(
         user=user,
         store=store,
-        stamp_date=today,
+        stamp_date=timezone.localdate(),
         stamped_at=now,
     )
     user_stamp, _ = StoreStamp.objects.get_or_create(user=user, store=store)
