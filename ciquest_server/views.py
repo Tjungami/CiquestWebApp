@@ -30,6 +30,7 @@ from ciquest_model.models import (
     StoreStamp,
     StoreStampSetting,
     StoreStampHistory,
+    StoreStampReward,
     Tag,
     User,
     UserChallenge,
@@ -812,11 +813,46 @@ def api_store_stamp_scan(request):
     user_stamp.stamps_count = (user_stamp.stamps_count or 0) + 1
     user_stamp.save(update_fields=["stamps_count"])
 
+    reward = (
+        StoreStampReward.objects.filter(setting=setting, stamp_threshold=user_stamp.stamps_count)
+        .select_related("reward_coupon")
+        .first()
+    )
+    reward_payload = {
+        "reward_type": "",
+        "reward_detail": "",
+        "reward_coupon_id": None,
+        "reward_coupon_title": "",
+    }
+    if reward:
+        if reward.reward_type == "coupon" and reward.reward_coupon_id:
+            user_coupon, _ = UserCoupon.objects.get_or_create(
+                user=user,
+                coupon=reward.reward_coupon,
+                defaults={"is_used": False, "used_at": None},
+            )
+            reward_payload.update(
+                {
+                    "reward_type": "coupon",
+                    "reward_detail": reward.reward_coupon.title,
+                    "reward_coupon_id": reward.reward_coupon.coupon_id,
+                    "reward_coupon_title": reward.reward_coupon.title,
+                }
+            )
+        elif reward.reward_type == "service":
+            reward_payload.update(
+                {
+                    "reward_type": "service",
+                    "reward_detail": reward.reward_service_desc or "サービス",
+                }
+            )
+
     response = {
         "store_id": store.store_id,
         "store_name": store.name,
         "stamps_count": user_stamp.stamps_count,
         "stamped_at": now.isoformat(),
+        **reward_payload,
     }
     return JsonResponse(response, status=201)
 

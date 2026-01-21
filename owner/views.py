@@ -1,8 +1,10 @@
 # C:\Users\j_tagami\CiquestWebApp\owner\views.py
+import datetime
 import uuid
 
 from django.shortcuts import render, get_object_or_404, redirect
 from django.db import transaction
+from django.db.models import Count, Sum
 from django.utils import timezone
 from django.utils.safestring import mark_safe
 from ciquest_model.models import (
@@ -12,6 +14,10 @@ from ciquest_model.models import (
     Coupon,
     AdminInquiry,
     Notice,
+    UserChallenge,
+    StoreStamp,
+    StoreStampHistory,
+    StoreCouponUsageHistory,
     StoreStampSetting,
     StoreStampReward,
 )
@@ -603,15 +609,49 @@ def stats(request):
         messages.error(request, "店舗情報が見つかりません。先に店舗登録を完了させてください。")
         return redirect("owner_dashboard")
 
-    overview = {
-        "total_participants": 0,
-        "clear_rate": 0,
-        "total_stamps": 0,
-        "coupon_usage": 0,
-    }
-    ranking = []
+    total_attempts = UserChallenge.objects.filter(challenge__store=store).count()
+    cleared_qs = UserChallenge.objects.filter(challenge__store=store, status="cleared")
+    cleared_count = cleared_qs.count()
+    total_participants = cleared_qs.values("user_id").distinct().count()
+    clear_rate = round((cleared_count / total_attempts) * 100, 1) if total_attempts else 0
+
+    total_stamps = (
+        StoreStamp.objects.filter(store=store).aggregate(total=Sum("stamps_count")).get("total") or 0
+    )
+    if total_stamps == 0:
+        total_stamps = StoreStampHistory.objects.filter(store=store).count()
+
+    coupon_usage = StoreCouponUsageHistory.objects.filter(store=store).count()
+
+    ranking_qs = (
+        cleared_qs.values("challenge__title")
+        .annotate(count=Count("id"))
+        .order_by("-count", "challenge__title")[:5]
+    )
+    ranking = [f"{item['challenge__title']}（{item['count']}件）" for item in ranking_qs]
+
+    today = timezone.localdate()
+    days = 14
+    start_date = today - datetime.timedelta(days=days - 1)
+    history_qs = (
+        StoreStampHistory.objects.filter(store=store, stamp_date__range=(start_date, today))
+        .values("stamp_date")
+        .annotate(count=Count("id"))
+    )
+    history_map = {item["stamp_date"]: item["count"] for item in history_qs}
     chart_labels = []
     chart_values = []
+    for i in range(days):
+        current = start_date + datetime.timedelta(days=i)
+        chart_labels.append(current.strftime("%m/%d"))
+        chart_values.append(history_map.get(current, 0))
+
+    overview = {
+        "total_participants": total_participants,
+        "clear_rate": clear_rate,
+        "total_stamps": total_stamps,
+        "coupon_usage": coupon_usage,
+    }
 
     return render(request, "owner/stats.html", {
         "store": store,
