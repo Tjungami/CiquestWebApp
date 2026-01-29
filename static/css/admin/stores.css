@@ -85,6 +85,61 @@
   background: linear-gradient(120deg, #ff5f5f, #ff9b9b);
 }
 
+.detail-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 8px 20px;
+  font-weight: 600;
+  color: #5c4033;
+  background: #fff3e0;
+  text-decoration: none;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.detail-link:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 22px rgba(0, 0, 0, 0.16);
+}
+
+.store-detail .detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 18px;
+  margin-top: 16px;
+}
+
+.store-detail .detail-card {
+  background: var(--sunset-card);
+  border-radius: 18px;
+  padding: 18px 20px;
+  box-shadow: var(--shadow);
+}
+
+.store-detail h3 {
+  margin: 0 0 12px;
+  color: var(--sunset-deep);
+}
+
+.store-detail dl {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 10px 12px;
+  font-size: 0.95rem;
+  color: #5c4033;
+}
+
+.store-detail dt {
+  font-weight: 600;
+}
+
+.detail-link--back {
+  margin-left: auto;
+}
+
 .store-item {
   background: var(--sunset-card);
   border-radius: 16px;

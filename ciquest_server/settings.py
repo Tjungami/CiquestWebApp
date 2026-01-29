@@ -227,6 +227,12 @@ ADMIN_LOGIN_ACCOUNTS = [
 # Public API key for phone clients (header: phone-API-key)
 PHONE_API_KEY = os.environ.get("PHONE_API_KEY", "")
 
+# Google OAuth (owner login)
+GOOGLE_OAUTH_CLIENT_ID = os.environ.get("GOOGLE_OAUTH_CLIENT_ID", "")
+GOOGLE_OAUTH_CLIENT_SECRET = os.environ.get("GOOGLE_OAUTH_CLIENT_SECRET", "")
+GOOGLE_OAUTH_SCOPES = os.environ.get("GOOGLE_OAUTH_SCOPES", "openid email profile")
+GOOGLE_OAUTH_REDIRECT_URI = os.environ.get("GOOGLE_OAUTH_REDIRECT_URI", "")
+
 
 
 # メール送信設定（本番では環境変数で上書き）

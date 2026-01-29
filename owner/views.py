@@ -123,6 +123,9 @@ def dashboard(request):
 
     # Store application form (default dashboard POST).
     if request.method == "POST" and request.POST.get("form_type") != "inquiry":
+        if not owner.contact_phone:
+            messages.error(request, "店舗申請には連絡先電話番号が必要です。先にオーナー情報で電話番号を登録してください。")
+            return redirect("owner_onboarding")
         application_form = StoreApplicationForm(request.POST)
         if application_form.is_valid():
             new_store = application_form.save(commit=False)

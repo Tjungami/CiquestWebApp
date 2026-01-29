@@ -32,7 +32,7 @@ async function loadStores(status) {
     const data = await res.json();
 
     if (!data.length) {
-      container.innerHTML = "<p>該当する店舗はありません。</p>";
+      container.innerHTML = "<p>該当する店�Eはありません、E/p>";
       return;
     }
 
@@ -46,11 +46,12 @@ async function loadStores(status) {
             <small>登録日: ${new Date(store.created_at).toLocaleDateString()}</small>
           </div>
           <div class="store-actions">
+            <a class="detail-link" href="/operator/stores/${store.store_id}/">�ڍ�</a>
             ${
               status === "pending"
                 ? `
-                  <button class="approve-btn" data-store="${store.store_id}" data-next="approved">承認</button>
-                  <button class="reject-btn" data-store="${store.store_id}" data-next="rejected">却下</button>
+                  <button class="approve-btn" data-store="${store.store_id}" data-next="approved">承誁E/button>
+                  <button class="reject-btn" data-store="${store.store_id}" data-next="rejected">却丁E/button>
                 `
                 : ""
             }
@@ -85,7 +86,7 @@ async function loadStores(status) {
     }
   } catch (err) {
     console.error(err);
-    container.innerHTML = "<p>データの取得に失敗しました。</p>";
+    container.innerHTML = "<p>チE�Eタの取得に失敗しました、E/p>";
   }
 }
 
@@ -101,22 +102,22 @@ async function updateStatus(id, newStatus) {
     const activeTab = document.querySelector(".tab.active").dataset.status;
     loadStores(activeTab);
   } catch (err) {
-    alert("店舗ステータスの更新に失敗しました。");
+    alert("店�EスチE�Eタスの更新に失敗しました、E);
   }
 }
 
 function confirmDelete(storeName) {
-  if (!confirm(`この店舗を削除します。本当によろしいですか？\n${storeName}`)) {
+  if (!confirm(`こ�E店�Eを削除します。本当によろしいですか�E�\n${storeName}`)) {
     return false;
   }
   const typed = prompt(
-    `削除を実行するには、DELETE と入力してください。\n${storeName}`
+    `削除を実行するには、DELETE と入力してください、En${storeName}`
   );
   if (typed !== "DELETE") {
-    alert("削除を中止しました。");
+    alert("削除を中止しました、E);
     return false;
   }
-  return confirm(`最終確認です。本当に削除しますか？\n${storeName}`);
+  return confirm(`最終確認です。本当に削除しますか�E�\n${storeName}`);
 }
 
 async function requestDelete(id, storeName) {
@@ -134,6 +135,6 @@ async function requestDelete(id, storeName) {
     const activeTab = document.querySelector(".tab.active").dataset.status;
     loadStores(activeTab);
   } catch (err) {
-    alert("削除に失敗しました。時間を置いて再試行してください。");
+    alert("削除に失敗しました。時間を置ぁE��再試行してください、E);
   }
 }

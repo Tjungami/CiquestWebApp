@@ -88,6 +88,19 @@ def stores_dashboard(request):
     return render(request, "admin_panel/stores.html", {"active_page": "stores"})
 
 
+def store_detail(request, store_id):
+    redirect_response = _redirect_if_not_admin(request)
+    if redirect_response:
+        return redirect_response
+
+    store = get_object_or_404(Store.objects.select_related("owner"), pk=store_id)
+    return render(
+        request,
+        "admin_panel/store_detail.html",
+        {"active_page": "stores", "store": store, "owner": store.owner},
+    )
+
+
 def challenges_dashboard(request):
     redirect_response = _redirect_if_not_admin(request)
     if redirect_response:

@@ -25,19 +25,21 @@
 
     <form method="post" class="login-form">
       {% csrf_token %}
-      <label for="identifier">メールアドレス / アカウントID</label>
+      <label for="identifier">メールアドレス / アカウンチED</label>
       <input type="text" name="identifier" id="identifier" autocomplete="username" required>
-      <label for="password">パスワード</label>
+      <label for="password">パスワーチE/label>
       <input type="password" name="password" id="password" autocomplete="current-password" required>
       <button type="submit">ログイン</button>
     </form>
+    <div class="oauth-divider"><span>or</span></div>
+    <a class="google-login" href="{% url 'google_owner_login' %}">Continue with Google (Owner)</a>
 
     <div class="signup-button-wrapper">
-      <a href="{% url 'signup' %}" class="signup-button">オーナー新規登録</a>
+      <a href="{% url 'signup' %}" class="signup-button">オーナ�E新規登録</a>
     </div>
 
     <div class="register-link">
-      <p>アカウントに関するお問い合わせは運営までご連絡ください。</p>
+      <p>アカウントに関するお問ぁE��わせは運営までご連絡ください、E/p>
     </div>
   </div>
 </body>

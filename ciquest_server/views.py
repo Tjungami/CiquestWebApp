@@ -3,6 +3,9 @@ import hashlib
 import json
 import math
 import secrets
+import urllib.parse
+import urllib.request
+from urllib.error import HTTPError, URLError
 
 import jwt
 
@@ -22,6 +25,7 @@ from django.views.decorators.http import require_http_methods
 from ciquest_model.models import (
     AdminAccount,
     Badge,
+    AdminInquiry,
     Challenge,
     Coupon,
     Rank,
@@ -111,6 +115,139 @@ def unified_login(request):
 def unified_logout(request):
     django_logout(request)
     request.session.flush()
+    return redirect("login")
+
+
+def _google_oauth_configured():
+    return bool(settings.GOOGLE_OAUTH_CLIENT_ID and settings.GOOGLE_OAUTH_CLIENT_SECRET)
+
+
+def _google_redirect_uri(request):
+    return settings.GOOGLE_OAUTH_REDIRECT_URI or request.build_absolute_uri(reverse("google_owner_callback"))
+
+
+def google_owner_login(request):
+    if not _google_oauth_configured():
+        messages.error(request, "Google login is not configured.")
+        return redirect("login")
+
+    state = secrets.token_urlsafe(24)
+    request.session["google_oauth_state"] = state
+    params = {
+        "client_id": settings.GOOGLE_OAUTH_CLIENT_ID,
+        "redirect_uri": _google_redirect_uri(request),
+        "response_type": "code",
+        "scope": settings.GOOGLE_OAUTH_SCOPES,
+        "state": state,
+        "prompt": "select_account",
+        "access_type": "online",
+        "include_granted_scopes": "true",
+    }
+    auth_url = "https://accounts.google.com/o/oauth2/v2/auth?" + urllib.parse.urlencode(params)
+    return redirect(auth_url)
+
+
+def google_owner_callback(request):
+    if not _google_oauth_configured():
+        messages.error(request, "Google login is not configured.")
+        return redirect("login")
+
+    error = request.GET.get("error")
+    if error:
+        messages.error(request, f"Google login failed: {error}")
+        return redirect("login")
+
+    state = request.GET.get("state")
+    stored_state = request.session.get("google_oauth_state")
+    if not state or not stored_state or state != stored_state:
+        messages.error(request, "Invalid OAuth state. Please try again.")
+        return redirect("login")
+    request.session.pop("google_oauth_state", None)
+
+    code = request.GET.get("code")
+    if not code:
+        messages.error(request, "Missing OAuth code. Please try again.")
+        return redirect("login")
+
+    token_payload = {
+        "code": code,
+        "client_id": settings.GOOGLE_OAUTH_CLIENT_ID,
+        "client_secret": settings.GOOGLE_OAUTH_CLIENT_SECRET,
+        "redirect_uri": _google_redirect_uri(request),
+        "grant_type": "authorization_code",
+    }
+    token_req = urllib.request.Request(
+        "https://oauth2.googleapis.com/token",
+        data=urllib.parse.urlencode(token_payload).encode("utf-8"),
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(token_req, timeout=8) as response:
+            token_data = json.loads(response.read().decode("utf-8"))
+    except (HTTPError, URLError, json.JSONDecodeError):
+        messages.error(request, "Failed to exchange OAuth token.")
+        return redirect("login")
+
+    access_token = token_data.get("access_token")
+    if not access_token:
+        messages.error(request, "Missing access token from Google.")
+        return redirect("login")
+
+    userinfo_req = urllib.request.Request(
+        "https://openidconnect.googleapis.com/v1/userinfo",
+        headers={"Authorization": f"Bearer {access_token}"},
+        method="GET",
+    )
+    try:
+        with urllib.request.urlopen(userinfo_req, timeout=8) as response:
+            userinfo = json.loads(response.read().decode("utf-8"))
+    except (HTTPError, URLError, json.JSONDecodeError):
+        messages.error(request, "Failed to fetch Google profile.")
+        return redirect("login")
+
+    email = (userinfo.get("email") or "").strip().lower()
+    email_verified = userinfo.get("email_verified", False)
+    name = (userinfo.get("name") or userinfo.get("given_name") or "").strip()
+
+    if not email or not email_verified:
+        messages.error(request, "Google account email is not verified.")
+        return redirect("login")
+
+    owner = StoreOwner.objects.filter(email__iexact=email).first()
+    if not owner:
+        owner = StoreOwner(
+            email=email,
+            name=name,
+            password=secrets.token_urlsafe(18),
+            is_verified=True,
+        )
+        owner.save()
+    else:
+        update_fields = []
+        if not owner.is_verified:
+            owner.is_verified = True
+            update_fields.append("is_verified")
+        if name and not owner.name:
+            owner.name = name
+            update_fields.append("name")
+        if update_fields:
+            owner.save(update_fields=update_fields)
+
+    if not owner.onboarding_completed:
+        request.session.flush()
+        request.session["owner_id"] = owner.owner_id
+        request.session["admin_authenticated"] = False
+        messages.info(request, "Please complete your account setup.")
+        return redirect("owner_onboarding")
+
+    if owner.approved:
+        request.session.flush()
+        request.session["owner_id"] = owner.owner_id
+        request.session["admin_authenticated"] = False
+        return redirect("owner_dashboard")
+
+    messages.error(request, "Your store is awaiting approval. Please wait for the review.")
     return redirect("login")
 
 
@@ -260,19 +397,19 @@ def _ensure_user_rank(user):
 
 
 BADGE_DEFINITIONS = [
-    {"code": "quest_1", "name": "??????", "description": "?????1????", "category": "quest", "hidden": False},
-    {"code": "quest_10", "name": "???", "description": "?????10????", "category": "quest", "hidden": False},
-    {"code": "quest_50", "name": "???", "description": "?????50????", "category": "quest", "hidden": False},
-    {"code": "quest_200", "name": "??", "description": "?????200????", "category": "quest", "hidden": False},
-    {"code": "stamp_5", "name": "?????", "description": "?????5???", "category": "stamp", "hidden": False},
-    {"code": "stamp_20", "name": "???", "description": "?????20???", "category": "stamp", "hidden": False},
-    {"code": "stamp_100", "name": "????", "description": "?????100???", "category": "stamp", "hidden": False},
-    {"code": "store_3", "name": "???", "description": "3???????????", "category": "store", "hidden": False},
-    {"code": "store_10", "name": "???", "description": "10???????????", "category": "store", "hidden": False},
-    {"code": "store_30", "name": "????", "description": "30???????????", "category": "store", "hidden": False},
-    {"code": "night_owl", "name": "???????", "description": "???????????", "category": "hidden", "hidden": True},
-    {"code": "streak_7", "name": "?????", "description": "7????????????", "category": "hidden", "hidden": True},
-    {"code": "stamp_artisan", "name": "??????", "description": "??????????10???", "category": "hidden", "hidden": True},
+    {"code": "quest_1", "name": "はじめの一歩", "description": "クエストを1回クリア", "category": "quest", "hidden": False},
+    {"code": "quest_10", "name": "冒険者", "description": "クエストを10回クリア", "category": "quest", "hidden": False},
+    {"code": "quest_50", "name": "熟練者", "description": "クエストを50回クリア", "category": "quest", "hidden": False},
+    {"code": "quest_200", "name": "伝説", "description": "クエストを200回クリア", "category": "quest", "hidden": False},
+    {"code": "stamp_5", "name": "コレクター", "description": "スタンプを5回獲得", "category": "stamp", "hidden": False},
+    {"code": "stamp_20", "name": "マニア", "description": "スタンプを20回獲得", "category": "stamp", "hidden": False},
+    {"code": "stamp_100", "name": "マスター", "description": "スタンプを100回獲得", "category": "stamp", "hidden": False},
+    {"code": "store_3", "name": "探索者", "description": "3店舗でクエストをクリア", "category": "store", "hidden": False},
+    {"code": "store_10", "name": "放浪者", "description": "10店舗でクエストをクリア", "category": "store", "hidden": False},
+    {"code": "store_30", "name": "世界見聞", "description": "30店舗でクエストをクリア", "category": "store", "hidden": False},
+    {"code": "night_owl", "name": "夜更かし冒険者", "description": "深夜にクエストをクリア", "category": "hidden", "hidden": True},
+    {"code": "streak_7", "name": "連続挑戦者", "description": "7日連続でクエストをクリア", "category": "hidden", "hidden": True},
+    {"code": "stamp_artisan", "name": "スタンプ職人", "description": "同じ店舗でスタンプを10回獲得", "category": "hidden", "hidden": True},
 ]
 
 
@@ -834,6 +971,59 @@ def api_user_badges(request):
     return JsonResponse(results, safe=False)
 
 
+@csrf_exempt
+@require_http_methods(["POST"])
+def api_user_inquiry_create(request):
+    user, error = _get_user_from_access_token(request)
+    if error:
+        return error
+    data, error = _get_request_data(request)
+    if error:
+        return error
+    category = (data.get("category") or "").strip() if data else ""
+    message = (data.get("message") or "").strip() if data else ""
+    store_id = data.get("store_id") if data else None
+    related_challenge_id = data.get("related_challenge_id") if data else None
+
+    if not category or not message:
+        return _json_error("category and message are required.", status=400)
+
+    store = None
+    if store_id:
+        try:
+            store_id = int(store_id)
+            store = Store.objects.filter(store_id=store_id).first()
+        except (TypeError, ValueError):
+            return _json_error("store_id must be an integer.", status=400)
+
+    related_challenge = None
+    if related_challenge_id:
+        try:
+            related_challenge_id = int(related_challenge_id)
+            related_challenge = Challenge.objects.filter(challenge_id=related_challenge_id).first()
+        except (TypeError, ValueError):
+            return _json_error("related_challenge_id must be an integer.", status=400)
+
+    formatted_message = f"[user_id:{user.user_id}] {user.username} {user.email}\\n{message}"
+    inquiry = AdminInquiry.objects.create(
+        store=store,
+        related_challenge=related_challenge,
+        category=category,
+        message=formatted_message,
+        status="unread",
+    )
+    return JsonResponse(
+        {
+            "inquiry_id": inquiry.inquiry_id,
+            "category": inquiry.category,
+            "message": inquiry.message,
+            "status": inquiry.status,
+            "created_at": inquiry.created_at.isoformat(),
+        },
+        status=201,
+    )
+
+
 @require_http_methods(["GET"])
 def api_store_coupon_history(request):
     auth_error = _require_phone_api_key(request)
@@ -1299,7 +1489,7 @@ def onboarding_view(request):
         messages.error(request, "メール確認を完了した後に設定を行ってください。")
         return redirect("signup")
 
-    if owner.onboarding_completed:
+    if owner.onboarding_completed and owner.contact_phone:
         return redirect("owner_dashboard")
 
     initial = {
@@ -1308,8 +1498,11 @@ def onboarding_view(request):
         "contact_phone": owner.contact_phone,
     }
 
+    needs_phone = not owner.contact_phone
     if request.method == "POST":
         form = OwnerProfileForm(request.POST)
+        if needs_phone:
+            form.fields["contact_phone"].required = True
         if form.is_valid():
             owner.name = form.cleaned_data["name"]
             owner.business_name = form.cleaned_data["business_name"]
@@ -1326,6 +1519,8 @@ def onboarding_view(request):
             return redirect("owner_dashboard")
     else:
         form = OwnerProfileForm(initial=initial)
+        if needs_phone:
+            form.fields["contact_phone"].required = True
 
     return render(request, "common/onboarding.html", {"form": form, "owner": owner})
 
