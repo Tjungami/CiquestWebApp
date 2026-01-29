@@ -1,15 +1,15 @@
-{% load static %}
+﻿{% load static %}
 <!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>CiQuest 繝ｭ繧ｰ繧､繝ｳ</title>
+  <title>CiQuest ログイン</title>
   <link rel="icon" href="{% static 'img/common/CIquest.ico' %}" type="image/x-icon">
   <link rel="stylesheet" href="{% static 'css/owner/login.css' %}">
 </head>
 <body>
   <div class="login-container">
-    <h1>CiQuest 繝ｭ繧ｰ繧､繝ｳ</h1>
+    <h1>CiQuest ログイン</h1>
 
     {% if messages %}
       <ul class="messages">
@@ -25,21 +25,21 @@
 
     <form method="post" class="login-form">
       {% csrf_token %}
-      <label for="identifier">繝｡繝ｼ繝ｫ繧｢繝峨Ξ繧ｹ / 繧｢繧ｫ繧ｦ繝ｳ繝・D</label>
+      <label for="identifier">メールアドレス / アカウントID</label>
       <input type="text" name="identifier" id="identifier" autocomplete="username" required>
-      <label for="password">繝代せ繝ｯ繝ｼ繝・/label>
+      <label for="password">パスワード</label>
       <input type="password" name="password" id="password" autocomplete="current-password" required>
-      <button type="submit">繝ｭ繧ｰ繧､繝ｳ</button>
+      <button type="submit">ログイン</button>
     </form>
     <div class="oauth-divider"><span>or</span></div>
     <a class="google-login" href="{% url 'google_owner_login' %}">Continue with Google (Owner)</a>
 
     <div class="signup-button-wrapper">
-      <a href="{% url 'signup' %}" class="signup-button">繧ｪ繝ｼ繝翫・譁ｰ隕冗匳骭ｲ</a>
+      <a href="{% url 'signup' %}" class="signup-button">オーナー新規登録</a>
     </div>
 
     <div class="register-link">
-      <p>繧｢繧ｫ繧ｦ繝ｳ繝医↓髢｢縺吶ｋ縺雁撫縺・粋繧上○縺ｯ驕句霧縺ｾ縺ｧ縺秘｣邨｡縺上□縺輔＞縲・/p>
+      <p>アカウントに関するお問い合わせは管理者までご連絡ください。</p>
     </div>
   </div>
 </body>
