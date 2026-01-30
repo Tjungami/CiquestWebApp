@@ -1,3 +1,5 @@
+import re
+
 from django import forms
 
 from ciquest_model.models import AdminAccount, StoreOwner
@@ -54,6 +56,41 @@ class OwnerProfileForm(forms.Form):
         widget=forms.TextInput(attrs={"placeholder": "090-1234-5678"}),
         help_text="ハイフンあり/なし、どちらでも構いません。",
     )
+
+    def clean_contact_phone(self):
+        value = self.cleaned_data.get("contact_phone", "") or ""
+        value = value.strip()
+        if not value:
+            return value
+
+        translation = str.maketrans({
+            "\uFF10": "0",
+            "\uFF11": "1",
+            "\uFF12": "2",
+            "\uFF13": "3",
+            "\uFF14": "4",
+            "\uFF15": "5",
+            "\uFF16": "6",
+            "\uFF17": "7",
+            "\uFF18": "8",
+            "\uFF19": "9",
+            "\uFF0D": "-",
+            "\u2212": "-",
+            "\u2015": "-",
+            "\u30FC": "-",
+            "\u2010": "-",
+        })
+        normalized = value.translate(translation)
+        normalized = re.sub(r"\s+", "", normalized)
+
+        if not re.fullmatch(r"[0-9-]+", normalized):
+            raise forms.ValidationError("????????????????????????")
+
+        digits = re.sub(r"\D", "", normalized)
+        if len(digits) not in (10, 11):
+            raise forms.ValidationError("?????10????11???????????")
+
+        return normalized
 
 
 class AdminSignupForm(forms.Form):
