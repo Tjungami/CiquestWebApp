@@ -126,6 +126,31 @@ def _google_redirect_uri(request):
     return settings.GOOGLE_OAUTH_REDIRECT_URI or request.build_absolute_uri(reverse("google_owner_callback"))
 
 
+def _google_mobile_client_ids():
+    mobile_ids = list(getattr(settings, "GOOGLE_OAUTH_MOBILE_CLIENT_IDS", []) or [])
+    if settings.GOOGLE_OAUTH_CLIENT_ID:
+        mobile_ids.append(settings.GOOGLE_OAUTH_CLIENT_ID)
+    return [value for value in mobile_ids if value]
+
+
+def _fetch_google_tokeninfo(id_token=None, access_token=None):
+    if id_token:
+        url = "https://oauth2.googleapis.com/tokeninfo?id_token=" + urllib.parse.quote(
+            id_token
+        )
+    elif access_token:
+        url = "https://oauth2.googleapis.com/tokeninfo?access_token=" + urllib.parse.quote(
+            access_token
+        )
+    else:
+        return None
+    try:
+        with urllib.request.urlopen(url, timeout=8) as response:
+            return json.loads(response.read().decode("utf-8"))
+    except (HTTPError, URLError, json.JSONDecodeError):
+        return None
+
+
 def google_owner_login(request):
     if not _google_oauth_configured():
         messages.error(request, "Google login is not configured.")
@@ -249,6 +274,59 @@ def google_owner_callback(request):
 
     messages.error(request, "Your store is awaiting approval. Please wait for the review.")
     return redirect("login")
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def api_google_login(request):
+    data, error = _get_request_data(request)
+    if error:
+        return error
+    id_token = (data.get("id_token") or "").strip() if data else ""
+    access_token = (data.get("access_token") or "").strip() if data else ""
+    if not id_token and not access_token:
+        return _json_error("id_token or access_token is required.", status=400)
+
+    tokeninfo = _fetch_google_tokeninfo(id_token=id_token or None, access_token=access_token or None)
+    if not tokeninfo:
+        return _json_error("Failed to verify Google token.", status=401)
+
+    email = (tokeninfo.get("email") or "").strip().lower()
+    email_verified = tokeninfo.get("email_verified", False)
+    aud = tokeninfo.get("aud")
+    if isinstance(email_verified, str):
+        email_verified = email_verified.lower() == "true"
+
+    if not email or not email_verified:
+        return _json_error("Google account email is not verified.", status=401)
+
+    allowed_aud = _google_mobile_client_ids()
+    if allowed_aud and aud not in allowed_aud:
+        return _json_error("Invalid Google client.", status=401)
+
+    user = User.objects.select_related("rank").filter(email__iexact=email).first()
+    if not user:
+        base_name = (
+            tokeninfo.get("name")
+            or tokeninfo.get("given_name")
+            or email.split("@")[0]
+        )
+        base_name = (base_name or email.split("@")[0]).strip()
+        username = base_name or email.split("@")[0]
+        candidate = username
+        suffix = 1
+        while User.objects.filter(username=candidate).exists():
+            suffix += 1
+            candidate = f"{username}{suffix}"
+        user = User.objects.create(
+            username=candidate,
+            email=email,
+            password=make_password(secrets.token_urlsafe(18)),
+        )
+    _ensure_user_rank(user)
+    access = _create_access_token(user)
+    refresh = _create_refresh_token(user)
+    return JsonResponse({"user": _serialize_user(user), "access": access, "refresh": refresh})
 
 
 def _haversine_km(lat1, lon1, lat2, lon2):

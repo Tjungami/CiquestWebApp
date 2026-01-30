@@ -22,6 +22,7 @@ urlpatterns = [
     path('logout/', views.unified_logout, name='logout'),
     path('api/users/', views.api_user_create, name='api_user_create'),
     path('api/login/', views.api_login, name='api_login'),
+    path('api/login/google/', views.api_google_login, name='api_google_login'),
     path('api/token/refresh/', views.api_token_refresh, name='api_token_refresh'),
     path('api/logout/', views.api_logout, name='api_logout'),
     path('api/me/', views.api_me, name='api_me'),

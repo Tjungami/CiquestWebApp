@@ -232,6 +232,12 @@ GOOGLE_OAUTH_CLIENT_ID = os.environ.get("GOOGLE_OAUTH_CLIENT_ID", "")
 GOOGLE_OAUTH_CLIENT_SECRET = os.environ.get("GOOGLE_OAUTH_CLIENT_SECRET", "")
 GOOGLE_OAUTH_SCOPES = os.environ.get("GOOGLE_OAUTH_SCOPES", "openid email profile")
 GOOGLE_OAUTH_REDIRECT_URI = os.environ.get("GOOGLE_OAUTH_REDIRECT_URI", "")
+# Google OAuth (mobile app login)
+GOOGLE_OAUTH_MOBILE_CLIENT_IDS = [
+    value.strip()
+    for value in os.environ.get("GOOGLE_OAUTH_MOBILE_CLIENT_IDS", "").split(",")
+    if value.strip()
+]
 
 
 
