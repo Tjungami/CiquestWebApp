@@ -197,18 +197,20 @@ button:hover {
   display: block;
   text-align: center;
   width: 100%;
-  padding: 12px;
-  border-radius: 6px;
-  font-size: 1rem;
-  background-color: #fff;
-  color: #2c3e50;
   text-decoration: none;
-  border: 1px solid #dfe6e9;
-  box-sizing: border-box;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: none;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .google-login:hover {
   transform: translateY(-1px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.google-btn {
+  width: 280px;
+  max-width: 100%;
+  height: auto;
+  display: inline-block;
 }

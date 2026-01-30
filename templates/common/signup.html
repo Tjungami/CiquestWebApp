@@ -59,6 +59,14 @@
 
       <button type="submit">確認メールを送信</button>
     </form>
+    <div class="oauth-divider"><span>or</span></div>
+    <a class="google-login" href="{% url 'google_owner_login' %}">
+      <img
+        src="{% static 'img/common/web_light_rd_SU@2x.png' %}"
+        alt="Googleで登録"
+        class="google-btn"
+      >
+    </a>
 
     <div class="signup-button-wrapper">
       <a href="{% url 'login' %}" class="signup-button">ログイン画面に戻る</a>
