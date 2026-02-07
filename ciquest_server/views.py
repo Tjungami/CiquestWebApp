@@ -375,7 +375,7 @@ def _json_error(message, status=400):
 def phone_web(request, path=""):
     base_dir = str(getattr(settings, "PHONE_WEB_DIR", ""))
     if not base_dir:
-        raise Http404("Phone web build is not configured.")
+        return redirect("ciquest_phone_home")
 
     if path:
         try:
@@ -388,7 +388,7 @@ def phone_web(request, path=""):
     index_path = os.path.join(base_dir, "index.html")
     if os.path.isfile(index_path):
         return FileResponse(open(index_path, "rb"))
-    raise Http404("Phone web build not found.")
+    return redirect("ciquest_phone_home")
 
 
 def _get_request_data(request):
