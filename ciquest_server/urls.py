@@ -1,6 +1,6 @@
 # C:\Users\j_tagami\CiquestWebApp\ciquest_server\urls.py
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.shortcuts import redirect
 from django.templatetags.static import static
 from django.views.generic.base import RedirectView
@@ -12,6 +12,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('owner/', include('owner.urls')),
     path('operator/', include('admin_panel.urls')),
+    path('phone-django/', include('ciquest_phone.urls')),
+    path('owner-entry/', views.owner_entry, name='owner_entry'),
     path('signup/', views.signup_view, name='signup'),
     path('admin-signup/', views.admin_signup_view, name='admin_signup'),
     path('signup/verify/', views.signup_verify_view, name='signup_verify'),
@@ -38,5 +40,6 @@ urlpatterns = [
     path('api/coupons/', views.public_coupon_list, name='public_coupon_list'),
     path('api/challenges/', views.public_challenge_list, name='public_challenge_list'),
     path('api/notices/', views.public_notice_list, name='public_notice_list'),
-    path('', lambda request: redirect('login')),
+    re_path(r'^phone(?:/(?P<path>.*))?$', views.phone_web, name='phone_web'),
+    path('', views.landing, name='landing'),
 ]

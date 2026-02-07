@@ -71,6 +71,7 @@ INSTALLED_APPS = [
     'owner',
     'admin_panel',
     'ciquest_model', 
+    'ciquest_phone',
     'django_extensions',
     "widget_tweaks",
 ]
@@ -179,6 +180,11 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 
+
+# Phone web build (Expo web export) directory
+PHONE_WEB_DIR = Path(
+    os.environ.get("PHONE_WEB_DIR", str(BASE_DIR / "static" / "phone_web"))
+)
 # ============================================================
 # CORS / CSRF
 # ============================================================
@@ -233,6 +239,8 @@ GOOGLE_OAUTH_CLIENT_SECRET = os.environ.get("GOOGLE_OAUTH_CLIENT_SECRET", "")
 GOOGLE_OAUTH_SCOPES = os.environ.get("GOOGLE_OAUTH_SCOPES", "openid email profile")
 GOOGLE_OAUTH_REDIRECT_URI = os.environ.get("GOOGLE_OAUTH_REDIRECT_URI", "")
 # Google OAuth (mobile app login)
+GOOGLE_MAPS_JS_API_KEY = os.environ.get("GOOGLE_MAPS_JS_API_KEY", "")
+
 GOOGLE_OAUTH_MOBILE_CLIENT_IDS = [
     value.strip()
     for value in os.environ.get("GOOGLE_OAUTH_MOBILE_CLIENT_IDS", "").split(",")

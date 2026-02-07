@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ciquest | はじめに</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg-top: #f5f1ea;
+        --bg-bottom: #e5eff6;
+        --ink: #1c2333;
+        --muted: #51607a;
+        --accent: #0f6df5;
+        --accent-soft: rgba(15, 109, 245, 0.12);
+        --card: rgba(255, 255, 255, 0.88);
+        --stroke: rgba(28, 35, 51, 0.12);
+        --shadow: 0 24px 50px rgba(15, 31, 66, 0.12);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Avenir Next", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+        background: radial-gradient(circle at top left, #ffffff 0%, var(--bg-top) 40%, var(--bg-bottom) 100%);
+        color: var(--ink);
+        min-height: 100vh;
+      }
+
+      .shell {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 72px 24px 96px;
+      }
+
+      .hero {
+        display: grid;
+        gap: 32px;
+      }
+
+      .hero h1 {
+        margin: 0;
+        font-size: clamp(28px, 4.2vw, 44px);
+        letter-spacing: 0.04em;
+      }
+
+      .hero p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 16px;
+        line-height: 1.7;
+        max-width: 640px;
+      }
+
+      .cards {
+        display: grid;
+        gap: 20px;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        margin-top: 28px;
+      }
+
+      .card {
+        background: var(--card);
+        border: 1px solid var(--stroke);
+        border-radius: 18px;
+        padding: 22px 22px 20px;
+        box-shadow: var(--shadow);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .card::after {
+        content: "";
+        position: absolute;
+        inset: auto -40% -40% auto;
+        width: 220px;
+        height: 220px;
+        background: var(--accent-soft);
+        border-radius: 50%;
+        filter: blur(1px);
+      }
+
+      .card h2 {
+        margin: 0 0 8px;
+        font-size: 20px;
+      }
+
+      .card p {
+        margin: 0 0 18px;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+
+      .cta {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px 18px;
+        border-radius: 999px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-decoration: none;
+        border: 1px solid transparent;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .cta:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 14px 30px rgba(15, 109, 245, 0.16);
+      }
+
+      .cta.user {
+        background: var(--accent);
+        color: #fff;
+      }
+
+      .cta.owner {
+        background: #fff;
+        border-color: var(--stroke);
+        color: var(--ink);
+      }
+
+      .note {
+        margin-top: 36px;
+        padding: 14px 18px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.72);
+        border: 1px dashed var(--stroke);
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      @media (max-width: 680px) {
+        .shell {
+          padding: 56px 18px 72px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero">
+        <div>
+          <h1>Ciquest はじめに</h1>
+          <p>
+            ユーザー向けスマホ体験と、オーナー向け管理画面を分けてご案内します。
+            目的に合わせて入口を選択してください。
+          </p>
+        </div>
+        <div class="cards">
+          <div class="card">
+            <h2>ユーザー向け</h2>
+            <p>
+              React のスマホアプリと同じ画面構成で体験できます。クエスト・クーポン・
+              ランクやバッジなど、ユーザー機能はこちらから。
+            </p>
+            <a class="cta user" href="{% url 'phone_web' %}">ユーザーはこちら</a>
+          </div>
+          <div class="card">
+            <h2>オーナー向け</h2>
+            <p>
+              店舗の管理やクーポン・チャレンジ作成はオーナー専用画面から操作できます。
+              ログイン済みならダッシュボードへ、未ログインならログインへ移動します。
+            </p>
+            <a class="cta owner" href="{% url 'owner_entry' %}">オーナーはこちら</a>
+          </div>
+        </div>
+        <div class="note">
+          ユーザー向け画面はブラウザ版です。位置情報の権限が許可されない場合はアプリを利用できません。
+          不正対策のため必須となります。
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
+

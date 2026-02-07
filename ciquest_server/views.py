@@ -2,6 +2,7 @@ import datetime
 import hashlib
 import json
 import math
+import os
 import secrets
 import urllib.parse
 import urllib.request
@@ -13,12 +14,14 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import logout as django_logout
 from django.contrib.auth.hashers import check_password, make_password
+from django.core.exceptions import SuspiciousFileOperation
 from django.core.mail import get_connection, send_mail
 from django.db.models import Q
-from django.http import JsonResponse
+from django.http import FileResponse, Http404, JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.utils._os import safe_join
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
@@ -48,6 +51,17 @@ from ciquest_model.models import (
 )
 from ciquest_model.markdown_utils import render_markdown
 from ciquest_server.forms import AdminSignupForm, OwnerProfileForm, OwnerSignupForm
+
+
+def landing(request):
+    return render(request, "common/landing.html")
+
+
+def owner_entry(request):
+    owner_id = request.session.get("owner_id")
+    if owner_id:
+        return redirect("owner_dashboard")
+    return redirect("login")
 
 
 def unified_login(request):
@@ -355,6 +369,26 @@ def _verify_password(raw_password, stored_password, user_obj):
 
 def _json_error(message, status=400):
     return JsonResponse({"detail": message}, status=status)
+
+
+@require_http_methods(["GET"])
+def phone_web(request, path=""):
+    base_dir = str(getattr(settings, "PHONE_WEB_DIR", ""))
+    if not base_dir:
+        raise Http404("Phone web build is not configured.")
+
+    if path:
+        try:
+            candidate = safe_join(base_dir, path)
+        except SuspiciousFileOperation:
+            raise Http404("Invalid path.")
+        if os.path.isfile(candidate):
+            return FileResponse(open(candidate, "rb"))
+
+    index_path = os.path.join(base_dir, "index.html")
+    if os.path.isfile(index_path):
+        return FileResponse(open(index_path, "rb"))
+    raise Http404("Phone web build not found.")
 
 
 def _get_request_data(request):

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ciquest | お知らせ</title>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap');
+      :root {
+        --sky-light: #e6f8ff;
+        --sky-mid: #bfe7ff;
+        --sky-deep: #1f87d4;
+        --text-primary: #0c2d44;
+        --text-secondary: #41607a;
+        --glass: rgba(255, 255, 255, 0.6);
+        --glass-strong: rgba(255, 255, 255, 0.85);
+        --border: rgba(255, 255, 255, 0.7);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: 'Zen Kaku Gothic New', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', sans-serif;
+        background: linear-gradient(180deg, var(--sky-light) 0%, var(--sky-mid) 55%, #f7fbff 100%);
+        min-height: 100vh;
+        color: var(--text-primary);
+      }
+      .shell {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 28px 18px 60px;
+      }
+      .title-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 18px;
+      }
+      .title-row h1 {
+        margin: 0;
+        font-size: 22px;
+      }
+      .back-link {
+        text-decoration: none;
+        color: var(--sky-deep);
+        font-weight: 700;
+      }
+      .card {
+        background: var(--glass-strong);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 18px;
+        margin-bottom: 14px;
+      }
+      .card h2 {
+        margin: 0 0 8px;
+        font-size: 16px;
+      }
+      .card time {
+        display: block;
+        font-size: 12px;
+        color: var(--text-secondary);
+        margin-bottom: 8px;
+      }
+      .card .body {
+        color: var(--text-secondary);
+        line-height: 1.6;
+      }
+      .empty {
+        text-align: center;
+        color: var(--text-secondary);
+        padding: 40px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <div class="title-row">
+        <h1>お知らせ</h1>
+        <a class="back-link" href="{% url 'ciquest_phone_home' %}">ホームへ戻る</a>
+      </div>
+
+      {% if notices %}
+        {% for notice in notices %}
+          <article class="card">
+            <h2>{{ notice.title }}</h2>
+            <time>{{ notice.start_at|date:"Y/m/d" }} - {{ notice.end_at|date:"Y/m/d" }}</time>
+            <div class="body">{{ notice.body_html|safe }}</div>
+          </article>
+        {% endfor %}
+      {% else %}
+        <div class="empty">現在お知らせはありません。</div>
+      {% endif %}
+    </div>
+  </body>
+</html>
