@@ -2,6 +2,7 @@ import datetime
 import hashlib
 import json
 import math
+import mimetypes
 import os
 import secrets
 import urllib.parse
@@ -371,24 +372,55 @@ def _json_error(message, status=400):
     return JsonResponse({"detail": message}, status=status)
 
 
+def _file_response(file_path):
+    content_type, _ = mimetypes.guess_type(file_path)
+    if not content_type:
+        ext = os.path.splitext(file_path)[1].lower()
+        if ext in {".js", ".mjs"}:
+            content_type = "application/javascript"
+        elif ext == ".css":
+            content_type = "text/css"
+        elif ext == ".json":
+            content_type = "application/json"
+        elif ext == ".svg":
+            content_type = "image/svg+xml"
+        else:
+            content_type = "application/octet-stream"
+    return FileResponse(open(file_path, "rb"), content_type=content_type)
+
+
 @require_http_methods(["GET"])
 def phone_web(request, path=""):
     base_dir = str(getattr(settings, "PHONE_WEB_DIR", ""))
     if not base_dir:
         return redirect("landing")
 
+    request_path = request.path or ""
     if path:
-        try:
-            candidate = safe_join(base_dir, path)
-        except SuspiciousFileOperation:
-            raise Http404("Invalid path.")
-        if os.path.isfile(candidate):
-            return FileResponse(open(candidate, "rb"))
+        candidate_rel_paths = [path]
+        if request_path.startswith("/_expo/") and not path.startswith("_expo/"):
+            candidate_rel_paths.insert(0, os.path.join("_expo", path))
+        if request_path.startswith("/assets/") and not path.startswith("assets/"):
+            candidate_rel_paths.insert(0, os.path.join("assets", path))
+
+        for candidate_rel in candidate_rel_paths:
+            try:
+                candidate = safe_join(base_dir, candidate_rel)
+            except SuspiciousFileOperation:
+                continue
+            if os.path.isfile(candidate):
+                return _file_response(candidate)
+
+        if request_path.startswith("/phone"):
+            index_path = os.path.join(base_dir, "index.html")
+            if os.path.isfile(index_path):
+                return _file_response(index_path)
+
         raise Http404("Asset not found.")
 
     index_path = os.path.join(base_dir, "index.html")
     if os.path.isfile(index_path):
-        return FileResponse(open(index_path, "rb"))
+        return _file_response(index_path)
     return redirect("landing")
 
 
