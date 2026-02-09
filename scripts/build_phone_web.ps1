@@ -1,6 +1,6 @@
 Param(
-  [string]$PhoneAppPath = "C:\Users\j_tagami\CiquestPhoneApp\app",
-  [string]$OutDir = "C:\Users\j_tagami\CiquestWebApp\static\phone_web"
+  [string]$PhoneAppPath = "C:\Users\j_tagami\CiquestWebApp\phone_app",
+  [string]$OutDir = "C:\Users\j_tagami\CiquestWebApp\ciquest_phone"
 )
 
 if (-Not (Test-Path $PhoneAppPath)) {

@@ -3,3 +3,10 @@ ciquest_phone/_expo/
 ciquest_phone/assets/
 ciquest_phone/index.html
 ciquest_phone/metadata.json
+
+# Expo app source workspace (local dev artifacts)
+phone_app/node_modules/
+phone_app/.expo/
+phone_app/.env
+phone_app/.env.*
+phone_app/app/
