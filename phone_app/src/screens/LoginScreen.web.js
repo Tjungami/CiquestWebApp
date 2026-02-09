@@ -52,7 +52,7 @@ export default function LoginScreen({ navigation, route }) {
       const idToken = response?.authentication?.idToken || '';
       const accessToken = response?.authentication?.accessToken || '';
       if (!idToken && !accessToken) {
-        setError('Googleéš±å´ï½¨ï½¼ç¸ºï½«èŸï½±è¬¨åŠ±ï¼ ç¸ºï½¾ç¸ºåŠ±â—†ç¸²ï¿½');
+        setError('Google”FØ‚É¸”s‚µ‚Ü‚µ‚½B');
         return;
       }
       setGoogleLoading(true);
@@ -66,7 +66,7 @@ export default function LoginScreen({ navigation, route }) {
           routes: [{ name: 'Tabs' }],
         });
       } catch (err) {
-        setError(err?.message || 'Googleç¹ï½­ç¹§ï½°ç¹§ï½¤ç¹ï½³ç¸ºï½«èŸï½±è¬¨åŠ±ï¼ ç¸ºï½¾ç¸ºåŠ±â—†ç¸²ï¿½');
+        setError(err?.message || 'GoogleƒƒOƒCƒ“‚É¸”s‚µ‚Ü‚µ‚½B');
       } finally {
         setGoogleLoading(false);
       }
@@ -79,19 +79,19 @@ export default function LoginScreen({ navigation, route }) {
     setError('');
     const trimmedEmail = email.trim();
     if (!trimmedEmail || !password) {
-      setError('ç¹ï½¡ç¹ï½¼ç¹ï½«ç¹§ï½¢ç¹å³¨Îç¹§ï½¹ç¸ºï½¨ç¹ä»£ã›ç¹ï½¯ç¹ï½¼ç¹å³¨ï½’èœˆï½¥èœ‰å¸™ï¼ ç¸ºï½¦ç¸ºä¸Šâ–¡ç¸ºè¼”ï¼ç¸²ï¿½');
+      setError('ƒ[ƒ‹ƒAƒhƒŒƒX‚ÆƒpƒXƒ[ƒh‚ğ“ü—Í‚µ‚Ä‚­‚¾‚³‚¢B');
       return;
     }
     if (trimmedEmail.length > EMAIL_MAX) {
-      setError(`ç¹ï½¡ç¹ï½¼ç¹ï½«ç¹§ï½¢ç¹å³¨Îç¹§ï½¹ç¸ºï½¯${EMAIL_MAX}è­ï¿½èŸ„å¶ºï½»ï½¥èœ€ï¿½ç¸ºï½«ç¸ºåŠ±â€»ç¸ºä¸Šâ–¡ç¸ºè¼”ï¼ç¸²ï¼¡);
+      setError(`ƒ[ƒ‹ƒAƒhƒŒƒX‚Í${EMAIL_MAX}•¶šˆÈ“à‚Å“ü—Í‚µ‚Ä‚­‚¾‚³‚¢B`);
       return;
     }
     if (!EMAIL_PATTERN.test(trimmedEmail)) {
-      setError('ç¹ï½¡ç¹ï½¼ç¹ï½«ç¹§ï½¢ç¹å³¨Îç¹§ï½¹ç¸ºï½®è –ï½¢è ‘ä¸Šâ€²è±ï½£ç¸ºåŠ±ï¿¥ç¸ºã‚…ï½Šç¸ºï½¾ç¸ºå¸™ï½“ç¸²ï¿½');
+      setError('ƒ[ƒ‹ƒAƒhƒŒƒX‚ÌŒ`®‚ª³‚µ‚­‚ ‚è‚Ü‚¹‚ñB');
       return;
     }
     if (password.length > PASSWORD_MAX) {
-      setError(`ç¹ä»£ã›ç¹ï½¯ç¹ï½¼ç¹å³¨ï¿½ï½¯${PASSWORD_MAX}è­ï¿½èŸ„å¶ºï½»ï½¥èœ€ï¿½ç¸ºï½«ç¸ºåŠ±â€»ç¸ºä¸Šâ–¡ç¸ºè¼”ï¼ç¸²ï¼¡);
+      setError(`ƒpƒXƒ[ƒh‚Í${PASSWORD_MAX}•¶šˆÈ“à‚Å“ü—Í‚µ‚Ä‚­‚¾‚³‚¢B`);
       return;
     }
     setLoading(true);
@@ -104,7 +104,7 @@ export default function LoginScreen({ navigation, route }) {
         routes: [{ name: 'Tabs' }],
       });
     } catch (err) {
-      setError(err?.message || 'ç¹ï½­ç¹§ï½°ç¹§ï½¤ç¹ï½³ç¸ºï½«èŸï½±è¬¨åŠ±ï¼ ç¸ºï½¾ç¸ºåŠ±â—†ç¸²ï¿½');
+      setError(err?.message || 'ƒƒOƒCƒ“‚É¸”s‚µ‚Ü‚µ‚½B');
     } finally {
       setLoading(false);
       setPassword('');
@@ -115,13 +115,13 @@ export default function LoginScreen({ navigation, route }) {
     if (googleLoading) return;
     setError('');
     if (!googleConfigured) {
-      setError('Googleç¹ï½­ç¹§ï½°ç¹§ï½¤ç¹ï½³ç¸ºï½®éšªï½­è³å£¹â€²è³å´ï½¶ï½³ç¸ºåŠ±â€»ç¸ºï¿½ç¸ºï½¾ç¸ºå¶Â€ï¿½');
+      setError('GoogleƒƒOƒCƒ“‚ª–¢İ’è‚Å‚·B');
       return;
     }
     try {
       await promptAsync({ useProxy: Constants.appOwnership === 'expo' });
     } catch (err) {
-      setError(err?.message || 'Googleç¹ï½­ç¹§ï½°ç¹§ï½¤ç¹ï½³ç¸ºï½«èŸï½±è¬¨åŠ±ï¼ ç¸ºï½¾ç¸ºåŠ±â—†ç¸²ï¿½');
+      setError(err?.message || 'GoogleƒƒOƒCƒ“‚É¸”s‚µ‚Ü‚µ‚½B');
     }
   };
 
@@ -139,12 +139,12 @@ export default function LoginScreen({ navigation, route }) {
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
             <Ionicons name="chevron-back" size={20} color={colors.textPrimary} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>ç¹ï½­ç¹§ï½°ç¹§ï½¤ç¹ï½³</Text>
+          <Text style={styles.headerTitle}>ƒƒOƒCƒ“</Text>
           <View style={styles.headerSpacer} />
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.label}>ç¹ï½¡ç¹ï½¼ç¹ï½«ç¹§ï½¢ç¹å³¨Îç¹§ï½¹ï¿½ï½¼åŸŸæ€™èŸï½§{EMAIL_MAX}è­ï¿½èŸ„æš¦ï½¼ï¿½</Text>
+          <Text style={styles.label}>ƒ[ƒ‹ƒAƒhƒŒƒXiÅ‘å{EMAIL_MAX}•¶šj</Text>
           <TextInput
             value={email}
             onChangeText={setEmail}
@@ -158,12 +158,12 @@ export default function LoginScreen({ navigation, route }) {
             style={styles.input}
           />
 
-          <Text style={styles.label}>ç¹ä»£ã›ç¹ï½¯ç¹ï½¼ç¹ä¼šï½¼åŸŸæ€™èŸï½§{PASSWORD_MAX}è­ï¿½èŸ„æš¦ï½¼ï¿½</Text>
+          <Text style={styles.label}>ƒpƒXƒ[ƒhiÅ‘å{PASSWORD_MAX}•¶šj</Text>
           <View style={styles.passwordRow}>
             <TextInput
               value={password}
               onChangeText={setPassword}
-              placeholder="ç¹ä»£ã›ç¹ï½¯ç¹ï½¼ç¹å³¨ï½’èœˆï½¥èœ‰ï¿½"
+              placeholder="ƒpƒXƒ[ƒh‚ğ“ü—Í"
               placeholderTextColor="#8fa0b2"
               secureTextEntry={!showPassword}
               autoCapitalize="none"
@@ -175,7 +175,7 @@ export default function LoginScreen({ navigation, route }) {
             <TouchableOpacity
               style={styles.passwordToggle}
               onPress={() => setShowPassword((prev) => !prev)}
-              accessibilityLabel="ç¹ä»£ã›ç¹ï½¯ç¹ï½¼ç¹å³¨ï½’é™¦ï½¨é‰ï½º"
+              accessibilityLabel="ƒpƒXƒ[ƒh‚ğ•\¦"
             >
               <Ionicons
                 name={showPassword ? 'eye-off-outline' : 'eye-outline'}
@@ -189,7 +189,7 @@ export default function LoginScreen({ navigation, route }) {
 
           <TouchableOpacity style={styles.primaryButton} onPress={handleLogin} disabled={loading}>
             <Text style={styles.primaryButtonText}>
-              {loading ? 'ç¹ï½­ç¹§ï½°ç¹§ï½¤ç¹ï½³è³ï½­...' : 'ç¹ï½­ç¹§ï½°ç¹§ï½¤ç¹ï½³'}
+              {loading ? 'ƒƒOƒCƒ“’†...' : 'ƒƒOƒCƒ“'}
             </Text>
           </TouchableOpacity>
 
@@ -200,20 +200,20 @@ export default function LoginScreen({ navigation, route }) {
             ]}
             onPress={handleGoogleLogin}
             disabled={googleLoading || !googleConfigured || !request}
-            accessibilityLabel="Googleç¸ºï½§ç¹ï½­ç¹§ï½°ç¹§ï½¤ç¹ï½³"
+            accessibilityLabel="Google‚ÅƒƒOƒCƒ“"
           >
             <Ionicons name="logo-google" size={18} color={colors.textPrimary} />
             <Text style={styles.googleButtonText}>
-              {googleLoading ? 'Googleç¸ºï½§ç¹ï½­ç¹§ï½°ç¹§ï½¤ç¹ï½³è³ï½­...' : 'Googleç¸ºï½§ç¹ï½­ç¹§ï½°ç¹§ï½¤ç¹ï½³'}
+              {googleLoading ? 'Google‚ÅƒƒOƒCƒ“’†...' : 'Google‚ÅƒƒOƒCƒ“'}
             </Text>
           </TouchableOpacity>
 
           {!googleConfigured && (
-            <Text style={styles.notice}>Googleç¹ï½­ç¹§ï½°ç¹§ï½¤ç¹ï½³ç¸ºï½®éšªï½­è³å£¹â€²è³å´ï½¶ï½³ç¸ºåŠ±â€»ç¸ºï¿½ç¸ºï½¾ç¸ºå¶Â€ï¿½</Text>
+            <Text style={styles.notice}>GoogleƒƒOƒCƒ“‚ª–¢İ’è‚Å‚·B</Text>
           )}
 
           <TouchableOpacity style={styles.linkButton} onPress={goToRegister}>
-            <Text style={styles.linkText}>è­ï½°éš•å†—åŒ³éª­ï½²ç¸ºï½¯ç¸ºè–™â– ç¹§ï¿½</Text>
+            <Text style={styles.linkText}>V‹K“o˜^‚Í‚±‚¿‚ç</Text>
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
@@ -280,12 +280,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 12,
     color: colors.textPrimary,
-    width: '100%',
+    width: '100%'
   },
   passwordRow: {
     position: 'relative',
     justifyContent: 'center',
-    width: '100%',
+    width: '100%'
   },
   passwordInput: {
     paddingRight: 44,
@@ -312,11 +312,11 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 6 },
     shadowRadius: 10,
     elevation: 6,
-    width: '100%',
+    width: '100%'
   },
   primaryButtonText: {
     color: '#fff',
-    fontWeight: '800',
+    fontWeight: '800'
   },
   googleButton: {
     marginTop: 8,
@@ -329,27 +329,27 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     paddingVertical: 12,
-    paddingHorizontal: 16,
+    paddingHorizontal: 16
   },
   googleButtonDisabled: {
-    opacity: 0.6,
+    opacity: 0.6
   },
   googleButtonText: {
     color: colors.textPrimary,
-    fontWeight: '700',
+    fontWeight: '700'
   },
   linkButton: {
     marginTop: 8,
-    alignItems: 'center',
+    alignItems: 'center'
   },
   linkText: {
     color: colors.skyDeep,
-    fontWeight: '700',
+    fontWeight: '700'
   },
   notice: {
     marginTop: 10,
     color: colors.textSecondary,
     fontSize: 12,
-    lineHeight: 18,
+    lineHeight: 18
   },
 });
