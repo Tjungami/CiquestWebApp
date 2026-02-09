@@ -41,6 +41,7 @@ export default {
     extra: {
       apiBaseUrl: process.env.API_BASE_URL,
       publicApiKey: process.env.PHONE_API_KEY,
+      googleMapsWebKey: process.env.GOOGLE_MAPS_JS_API_KEY,
       googleAuth: {
         androidClientId: process.env.GOOGLE_ANDROID_CLIENT_ID,
         iosClientId: process.env.GOOGLE_IOS_CLIENT_ID,

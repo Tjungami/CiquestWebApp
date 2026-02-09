@@ -8,5 +8,8 @@ ciquest_phone/metadata.json
 phone_app/node_modules/
 phone_app/.expo/
 phone_app/.env
-phone_app/.env.*
+phone_app/.env.local
+phone_app/.env.development
+phone_app/.env.production
+phone_app/.env.test
 phone_app/app/
