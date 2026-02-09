@@ -1,0 +1,5 @@
+# Expo web build output (kept out of git)
+ciquest_phone/_expo/
+ciquest_phone/assets/
+ciquest_phone/index.html
+ciquest_phone/metadata.json

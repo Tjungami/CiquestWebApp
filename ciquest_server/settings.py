@@ -71,7 +71,6 @@ INSTALLED_APPS = [
     'owner',
     'admin_panel',
     'ciquest_model', 
-    'ciquest_phone',
     'django_extensions',
     "widget_tweaks",
 ]
@@ -183,7 +182,7 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Phone web build (Expo web export) directory
 PHONE_WEB_DIR = Path(
-    os.environ.get("PHONE_WEB_DIR", str(BASE_DIR / "static" / "phone_web"))
+    os.environ.get("PHONE_WEB_DIR", str(BASE_DIR / "ciquest_phone"))
 )
 # ============================================================
 # CORS / CSRF

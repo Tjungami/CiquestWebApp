@@ -12,7 +12,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('owner/', include('owner.urls')),
     path('operator/', include('admin_panel.urls')),
-    path('phone-django/', include('ciquest_phone.urls')),
     path('owner-entry/', views.owner_entry, name='owner_entry'),
     path('signup/', views.signup_view, name='signup'),
     path('admin-signup/', views.admin_signup_view, name='admin_signup'),

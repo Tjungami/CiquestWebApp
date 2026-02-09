@@ -375,7 +375,7 @@ def _json_error(message, status=400):
 def phone_web(request, path=""):
     base_dir = str(getattr(settings, "PHONE_WEB_DIR", ""))
     if not base_dir:
-        return redirect("ciquest_phone_home")
+        return redirect("landing")
 
     if path:
         try:
@@ -388,7 +388,7 @@ def phone_web(request, path=""):
     index_path = os.path.join(base_dir, "index.html")
     if os.path.isfile(index_path):
         return FileResponse(open(index_path, "rb"))
-    return redirect("ciquest_phone_home")
+    return redirect("landing")
 
 
 def _get_request_data(request):
