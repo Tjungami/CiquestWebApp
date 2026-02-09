@@ -39,6 +39,8 @@ urlpatterns = [
     path('api/coupons/', views.public_coupon_list, name='public_coupon_list'),
     path('api/challenges/', views.public_challenge_list, name='public_challenge_list'),
     path('api/notices/', views.public_notice_list, name='public_notice_list'),
+    re_path(r'^_expo/(?P<path>.*)$', views.phone_web, name='phone_web_expo'),
+    re_path(r'^assets/(?P<path>.*)$', views.phone_web, name='phone_web_assets'),
     re_path(r'^phone(?:/(?P<path>.*))?$', views.phone_web, name='phone_web'),
     path('', views.landing, name='landing'),
 ]

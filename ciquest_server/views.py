@@ -384,6 +384,7 @@ def phone_web(request, path=""):
             raise Http404("Invalid path.")
         if os.path.isfile(candidate):
             return FileResponse(open(candidate, "rb"))
+        raise Http404("Asset not found.")
 
     index_path = os.path.join(base_dir, "index.html")
     if os.path.isfile(index_path):
