@@ -10,17 +10,17 @@ export default function LocationRequiredScreen({ status, onRequestPermission }) 
     <AeroBackground style={styles.container}>
       <View style={styles.card}>
         <Ionicons name="location-outline" size={46} color={colors.skyDeep} />
-        <Text style={styles.title}>�ʒu���̋����K�v�ł�</Text>
+        <Text style={styles.title}>位置情報の許可が必要です</Text>
         <Text style={styles.description}>
-          �s���΍�̂��߁A�ʒu���̌�����������Ȃ��ꍇ�̓A�v���𗘗p�ł��܂���B
+          不正対策のため、位置情報の権限が許可されない場合はアプリを利用できません。
         </Text>
         <TouchableOpacity style={styles.button} onPress={onRequestPermission}>
           <Text style={styles.buttonText}>
-            {denied ? '�Ď��s' : '�ʒu����������'}
+            {denied ? '再試行' : '位置情報を許可する'}
           </Text>
         </TouchableOpacity>
         {denied ? (
-          <Text style={styles.hint}>�[���̐ݒ�ňʒu���̋���L���ɂ��Ă��������B</Text>
+          <Text style={styles.hint}>端末の設定で位置情報の許可を有効にしてください。</Text>
         ) : null}
       </View>
     </AeroBackground>

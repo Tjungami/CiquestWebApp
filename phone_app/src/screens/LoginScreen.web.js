@@ -52,7 +52,7 @@ export default function LoginScreen({ navigation, route }) {
       const idToken = response?.authentication?.idToken || '';
       const accessToken = response?.authentication?.accessToken || '';
       if (!idToken && !accessToken) {
-        setError('Google”FØ‚É¸”s‚µ‚Ü‚µ‚½B');
+        setError('Googleèªè¨¼ã«å¤±æ•—ã—ã¾ã—ãŸã€‚');
         return;
       }
       setGoogleLoading(true);
@@ -66,7 +66,7 @@ export default function LoginScreen({ navigation, route }) {
           routes: [{ name: 'Tabs' }],
         });
       } catch (err) {
-        setError(err?.message || 'GoogleƒƒOƒCƒ“‚É¸”s‚µ‚Ü‚µ‚½B');
+        setError(err?.message || 'Googleãƒ­ã‚°ã‚¤ãƒ³ã«å¤±æ•—ã—ã¾ã—ãŸã€‚');
       } finally {
         setGoogleLoading(false);
       }
@@ -79,19 +79,19 @@ export default function LoginScreen({ navigation, route }) {
     setError('');
     const trimmedEmail = email.trim();
     if (!trimmedEmail || !password) {
-      setError('ƒ[ƒ‹ƒAƒhƒŒƒX‚ÆƒpƒXƒ[ƒh‚ğ“ü—Í‚µ‚Ä‚­‚¾‚³‚¢B');
+      setError('ãƒ¡ãƒ¼ãƒ«ã‚¢ãƒ‰ãƒ¬ã‚¹ã¨ãƒ‘ã‚¹ãƒ¯ãƒ¼ãƒ‰ã‚’å…¥åŠ›ã—ã¦ãã ã•ã„ã€‚');
       return;
     }
     if (trimmedEmail.length > EMAIL_MAX) {
-      setError(`ƒ[ƒ‹ƒAƒhƒŒƒX‚Í${EMAIL_MAX}•¶šˆÈ“à‚Å“ü—Í‚µ‚Ä‚­‚¾‚³‚¢B`);
+      setError(`ãƒ¡ãƒ¼ãƒ«ã‚¢ãƒ‰ãƒ¬ã‚¹ã¯${EMAIL_MAX}æ–‡å­—ä»¥å†…ã§å…¥åŠ›ã—ã¦ãã ã•ã„ã€‚`);
       return;
     }
     if (!EMAIL_PATTERN.test(trimmedEmail)) {
-      setError('ƒ[ƒ‹ƒAƒhƒŒƒX‚ÌŒ`®‚ª³‚µ‚­‚ ‚è‚Ü‚¹‚ñB');
+      setError('ãƒ¡ãƒ¼ãƒ«ã‚¢ãƒ‰ãƒ¬ã‚¹ã®å½¢å¼ãŒæ­£ã—ãã‚ã‚Šã¾ã›ã‚“ã€‚');
       return;
     }
     if (password.length > PASSWORD_MAX) {
-      setError(`ƒpƒXƒ[ƒh‚Í${PASSWORD_MAX}•¶šˆÈ“à‚Å“ü—Í‚µ‚Ä‚­‚¾‚³‚¢B`);
+      setError(`ãƒ‘ã‚¹ãƒ¯ãƒ¼ãƒ‰ã¯${PASSWORD_MAX}æ–‡å­—ä»¥å†…ã§å…¥åŠ›ã—ã¦ãã ã•ã„ã€‚`);
       return;
     }
     setLoading(true);
@@ -104,7 +104,7 @@ export default function LoginScreen({ navigation, route }) {
         routes: [{ name: 'Tabs' }],
       });
     } catch (err) {
-      setError(err?.message || 'ƒƒOƒCƒ“‚É¸”s‚µ‚Ü‚µ‚½B');
+      setError(err?.message || 'ãƒ­ã‚°ã‚¤ãƒ³ã«å¤±æ•—ã—ã¾ã—ãŸã€‚');
     } finally {
       setLoading(false);
       setPassword('');
@@ -115,13 +115,13 @@ export default function LoginScreen({ navigation, route }) {
     if (googleLoading) return;
     setError('');
     if (!googleConfigured) {
-      setError('GoogleƒƒOƒCƒ“‚ª–¢İ’è‚Å‚·B');
+      setError('Googleãƒ­ã‚°ã‚¤ãƒ³ãŒæœªè¨­å®šã§ã™ã€‚');
       return;
     }
     try {
       await promptAsync({ useProxy: Constants.appOwnership === 'expo' });
     } catch (err) {
-      setError(err?.message || 'GoogleƒƒOƒCƒ“‚É¸”s‚µ‚Ü‚µ‚½B');
+      setError(err?.message || 'Googleãƒ­ã‚°ã‚¤ãƒ³ã«å¤±æ•—ã—ã¾ã—ãŸã€‚');
     }
   };
 
@@ -139,12 +139,12 @@ export default function LoginScreen({ navigation, route }) {
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
             <Ionicons name="chevron-back" size={20} color={colors.textPrimary} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>ƒƒOƒCƒ“</Text>
+          <Text style={styles.headerTitle}>ãƒ­ã‚°ã‚¤ãƒ³</Text>
           <View style={styles.headerSpacer} />
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.label}>ƒ[ƒ‹ƒAƒhƒŒƒXiÅ‘å{EMAIL_MAX}•¶šj</Text>
+          <Text style={styles.label}>ãƒ¡ãƒ¼ãƒ«ã‚¢ãƒ‰ãƒ¬ã‚¹ï¼ˆæœ€å¤§{EMAIL_MAX}æ–‡å­—ï¼‰</Text>
           <TextInput
             value={email}
             onChangeText={setEmail}
@@ -158,12 +158,12 @@ export default function LoginScreen({ navigation, route }) {
             style={styles.input}
           />
 
-          <Text style={styles.label}>ƒpƒXƒ[ƒhiÅ‘å{PASSWORD_MAX}•¶šj</Text>
+          <Text style={styles.label}>ãƒ‘ã‚¹ãƒ¯ãƒ¼ãƒ‰ï¼ˆæœ€å¤§{PASSWORD_MAX}æ–‡å­—ï¼‰</Text>
           <View style={styles.passwordRow}>
             <TextInput
               value={password}
               onChangeText={setPassword}
-              placeholder="ƒpƒXƒ[ƒh‚ğ“ü—Í"
+              placeholder="ãƒ‘ã‚¹ãƒ¯ãƒ¼ãƒ‰ã‚’å…¥åŠ›"
               placeholderTextColor="#8fa0b2"
               secureTextEntry={!showPassword}
               autoCapitalize="none"
@@ -175,7 +175,7 @@ export default function LoginScreen({ navigation, route }) {
             <TouchableOpacity
               style={styles.passwordToggle}
               onPress={() => setShowPassword((prev) => !prev)}
-              accessibilityLabel="ƒpƒXƒ[ƒh‚ğ•\¦"
+              accessibilityLabel="ãƒ‘ã‚¹ãƒ¯ãƒ¼ãƒ‰ã‚’è¡¨ç¤º"
             >
               <Ionicons
                 name={showPassword ? 'eye-off-outline' : 'eye-outline'}
@@ -189,7 +189,7 @@ export default function LoginScreen({ navigation, route }) {
 
           <TouchableOpacity style={styles.primaryButton} onPress={handleLogin} disabled={loading}>
             <Text style={styles.primaryButtonText}>
-              {loading ? 'ƒƒOƒCƒ“’†...' : 'ƒƒOƒCƒ“'}
+              {loading ? 'ãƒ­ã‚°ã‚¤ãƒ³ä¸­...' : 'ãƒ­ã‚°ã‚¤ãƒ³'}
             </Text>
           </TouchableOpacity>
 
@@ -200,20 +200,20 @@ export default function LoginScreen({ navigation, route }) {
             ]}
             onPress={handleGoogleLogin}
             disabled={googleLoading || !googleConfigured || !request}
-            accessibilityLabel="Google‚ÅƒƒOƒCƒ“"
+            accessibilityLabel="Googleã§ãƒ­ã‚°ã‚¤ãƒ³"
           >
             <Ionicons name="logo-google" size={18} color={colors.textPrimary} />
             <Text style={styles.googleButtonText}>
-              {googleLoading ? 'Google‚ÅƒƒOƒCƒ“’†...' : 'Google‚ÅƒƒOƒCƒ“'}
+              {googleLoading ? 'Googleã§ãƒ­ã‚°ã‚¤ãƒ³ä¸­...' : 'Googleã§ãƒ­ã‚°ã‚¤ãƒ³'}
             </Text>
           </TouchableOpacity>
 
           {!googleConfigured && (
-            <Text style={styles.notice}>GoogleƒƒOƒCƒ“‚ª–¢İ’è‚Å‚·B</Text>
+            <Text style={styles.notice}>Googleãƒ­ã‚°ã‚¤ãƒ³ãŒæœªè¨­å®šã§ã™ã€‚</Text>
           )}
 
           <TouchableOpacity style={styles.linkButton} onPress={goToRegister}>
-            <Text style={styles.linkText}>V‹K“o˜^‚Í‚±‚¿‚ç</Text>
+            <Text style={styles.linkText}>æ–°è¦ç™»éŒ²ã¯ã“ã¡ã‚‰</Text>
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>

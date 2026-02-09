@@ -37,7 +37,7 @@ let googleMapsPromise = null;
 
 const loadGoogleMaps = (apiKey) => {
   if (!apiKey || typeof window === 'undefined') {
-    return Promise.reject(new Error('Google Maps API�L�[���ݒ肳��Ă��܂���B'));
+    return Promise.reject(new Error('Google Maps APIキーが設定されていません。'));
   }
   if (window.google && window.google.maps) {
     return Promise.resolve(window.google.maps);
@@ -52,10 +52,10 @@ const loadGoogleMaps = (apiKey) => {
       if (window.google && window.google.maps) {
         resolve(window.google.maps);
       } else {
-        reject(new Error('Google Maps �̓ǂݍ��݂Ɏ��s���܂����B'));
+        reject(new Error('Google Maps の読み込みに失敗しました。'));
       }
     };
-    script.onerror = () => reject(new Error('Google Maps �̓ǂݍ��݂Ɏ��s���܂����B'));
+    script.onerror = () => reject(new Error('Google Maps の読み込みに失敗しました。'));
     document.head.appendChild(script);
   });
   return googleMapsPromise;
@@ -135,12 +135,12 @@ export default function HomeScreen() {
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
-        setLocationError('�ʒu���̋����K�v�ł��B');
+        setLocationError('位置情報の許可が必要です。');
         return false;
       }
       return true;
     } catch (error) {
-      setLocationError(error?.message || '�ʒu�����擾�ł��܂���ł����B');
+      setLocationError(error?.message || '位置情報を取得できませんでした。');
       return false;
     }
   };
@@ -165,7 +165,7 @@ export default function HomeScreen() {
         mapInstance.current.setZoom(14);
       }
     } catch (error) {
-      setLocationError(error?.message || '�ʒu�����擾�ł��܂���ł����B');
+      setLocationError(error?.message || '位置情報を取得できませんでした。');
     } finally {
       setIsLocating(false);
     }
@@ -195,7 +195,7 @@ export default function HomeScreen() {
         setFetchError('');
       } catch (error) {
         if (!active) return;
-        setFetchError(error?.message || 'API�̎擾�Ɏ��s���܂����B');
+        setFetchError(error?.message || 'APIの取得に失敗しました。');
       }
     };
     loadStores();
@@ -221,7 +221,7 @@ export default function HomeScreen() {
         setMapReady(true);
       })
       .catch((err) => {
-        setFetchError(err?.message || '�n�}�̓ǂݍ��݂Ɏ��s���܂����B');
+        setFetchError(err?.message || '地図の読み込みに失敗しました。');
       });
     return () => {
       active = false;
@@ -273,7 +273,7 @@ export default function HomeScreen() {
           onPress={() => navigation.navigate('Notices')}
         >
           <Ionicons name="notifications-outline" size={16} color="#ffffff" />
-          <Text style={styles.noticeButtonText}>���m�点</Text>
+          <Text style={styles.noticeButtonText}>お知らせ</Text>
         </TouchableOpacity>
       </View>
 
@@ -281,17 +281,17 @@ export default function HomeScreen() {
         <View style={styles.mapSurface} ref={mapRef} />
         <View style={styles.mapOverlay} pointerEvents="box-none">
           <View style={styles.mapTitleRow}>
-            <Text style={styles.mapTitle}>���X�}�b�v</Text>
+            <Text style={styles.mapTitle}>お店マップ</Text>
             <View style={styles.mapTitleActions}>
-              <Text style={styles.mapCaption}>���ݒn����̋����͉��̃f�[�^�ł��B</Text>
+              <Text style={styles.mapCaption}>現在地からの距離は仮のデータです。</Text>
             </View>
           </View>
           <View style={styles.mapBottom}>
-            <Text style={styles.mapHint}>�s�����^�b�v���ēX�܏���\��</Text>
+            <Text style={styles.mapHint}>ピンをタップして店舗情報を表示</Text>
             <View style={styles.mapActions}>
               <TouchableOpacity style={styles.actionChip} onPress={updateLocation}>
                 <Ionicons name="compass-outline" size={20} color={colors.navy} />
-                <Text style={styles.actionChipTextLarge}>���ݒn�Ɉړ�</Text>
+                <Text style={styles.actionChipTextLarge}>現在地に移動</Text>
               </TouchableOpacity>
             </View>
             {!!locationError && <Text style={styles.fetchErrorText}>{locationError}</Text>}
@@ -300,7 +300,7 @@ export default function HomeScreen() {
           {isLocating && (
             <View style={styles.loadingBadge}>
               <ActivityIndicator size="small" color={colors.skyDeep} />
-              <Text style={styles.loadingText}>�ʒu���擾��</Text>
+              <Text style={styles.loadingText}>位置情報取得中</Text>
             </View>
           )}
         </View>
@@ -314,8 +314,8 @@ export default function HomeScreen() {
             <View style={styles.sheetHandle} />
             {!selected ? (
               <>
-                <Text style={styles.infoTitle}>�s�����^�b�v����ƓX�܏�񂪕\������܂��B</Text>
-                <Text style={styles.infoSub}>Web�łł�Google Maps�𗘗p���Ă��܂��B</Text>
+                <Text style={styles.infoTitle}>ピンをタップすると店舗情報が表示されます。</Text>
+                <Text style={styles.infoSub}>Web版ではGoogle Mapsを利用しています。</Text>
               </>
             ) : (
               <>
@@ -342,21 +342,21 @@ export default function HomeScreen() {
                       }
                       style={styles.linkButton}
                     >
-                      <Text style={styles.linkText}>Google�}�b�v�ŊJ��</Text>
+                      <Text style={styles.linkText}>Googleマップで開く</Text>
                       <Ionicons name="open-outline" size={16} color={colors.skyDeep} />
                     </TouchableOpacity>
                     <TouchableOpacity
                       onPress={() => navigation.navigate('StoreDetail', { store: selected })}
                       style={styles.detailLink}
                     >
-                      <Text style={styles.detailLinkText}>�ڍ�</Text>
+                      <Text style={styles.detailLinkText}>詳細</Text>
                       <Ionicons name="chevron-forward" size={16} color={colors.skyDeep} />
                     </TouchableOpacity>
                   </View>
                 </View>
                 <TouchableOpacity style={styles.closeButton} onPress={closeSheet}>
                   <Ionicons name="chevron-down" size={18} color={colors.textSecondary} />
-                  <Text style={styles.closeText}>����</Text>
+                  <Text style={styles.closeText}>閉じる</Text>
                 </TouchableOpacity>
               </>
             )}
