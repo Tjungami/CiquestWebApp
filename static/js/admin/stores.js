@@ -24,7 +24,7 @@ function getCsrfToken() {
 
 async function loadStores(status) {
   const container = document.getElementById("store-list");
-  container.innerHTML = "<p>読み込み中です…</p>";
+  container.innerHTML = "<p>???????...</p>";
 
   try {
     const res = await fetch(`${API_BASE}/?status=${encodeURIComponent(status)}`);
@@ -32,7 +32,7 @@ async function loadStores(status) {
     const data = await res.json();
 
     if (!data.length) {
-      container.innerHTML = "<p>該当する店�Eはありません、E/p>";
+      container.innerHTML = "<p>?????????????</p>";
       return;
     }
 
@@ -42,23 +42,23 @@ async function loadStores(status) {
         <div class="store-card">
           <div class="store-info">
             <strong>${store.name}</strong><br>
-            ${store.address || "住所未登録"}<br>
-            <small>登録日: ${new Date(store.created_at).toLocaleDateString()}</small>
+            ${store.address || "?????"}<br>
+            <small>???: ${new Date(store.created_at).toLocaleDateString()}</small>
           </div>
           <div class="store-actions">
-            <a class="detail-link" href="/operator/stores/${store.store_id}/">�ڍ�</a>
+            <a class="detail-link" href="/operator/stores/${store.store_id}/">??</a>
             ${
               status === "pending"
                 ? `
-                  <button class="approve-btn" data-store="${store.store_id}" data-next="approved">承誁E/button>
-                  <button class="reject-btn" data-store="${store.store_id}" data-next="rejected">却丁E/button>
+                  <button class="approve-btn" data-store="${store.store_id}" data-next="approved">??</button>
+                  <button class="reject-btn" data-store="${store.store_id}" data-next="rejected">??</button>
                 `
                 : ""
             }
             ${
               status === "approved"
                 ? `
-                  <button class="delete-btn" data-store="${store.store_id}" data-name="${store.name}">削除</button>
+                  <button class="delete-btn" data-store="${store.store_id}" data-name="${store.name}">??</button>
                 `
                 : ""
             }
@@ -86,7 +86,7 @@ async function loadStores(status) {
     }
   } catch (err) {
     console.error(err);
-    container.innerHTML = "<p>チE�Eタの取得に失敗しました、E/p>";
+    container.innerHTML = "<p>??????????????</p>";
   }
 }
 
@@ -102,22 +102,25 @@ async function updateStatus(id, newStatus) {
     const activeTab = document.querySelector(".tab.active").dataset.status;
     loadStores(activeTab);
   } catch (err) {
-    alert("店�EスチE�Eタスの更新に失敗しました、E);
+    alert("??????????????????");
   }
 }
 
 function confirmDelete(storeName) {
-  if (!confirm(`こ�E店�Eを削除します。本当によろしいですか�E�\n${storeName}`)) {
+  if (!confirm(`??????????????????????
+${storeName}`)) {
     return false;
   }
   const typed = prompt(
-    `削除を実行するには、DELETE と入力してください、En${storeName}`
+    `??????????DELETE???????????
+${storeName}`
   );
   if (typed !== "DELETE") {
-    alert("削除を中止しました、E);
+    alert("??????????");
     return false;
   }
-  return confirm(`最終確認です。本当に削除しますか�E�\n${storeName}`);
+  return confirm(`?????????????????
+${storeName}`);
 }
 
 async function requestDelete(id, storeName) {
@@ -135,6 +138,6 @@ async function requestDelete(id, storeName) {
     const activeTab = document.querySelector(".tab.active").dataset.status;
     loadStores(activeTab);
   } catch (err) {
-    alert("削除に失敗しました。時間を置ぁE��再試行してください、E);
+    alert("??????????????????????????");
   }
 }
