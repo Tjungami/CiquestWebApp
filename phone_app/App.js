@@ -1,5 +1,5 @@
 ﻿import 'react-native-gesture-handler';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { MaterialTopTabBar, createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -120,6 +120,31 @@ export default function App() {
   const [termsAccepted, setTermsAccepted] = useState(null);
   const [locationStatus, setLocationStatus] = useState(null);
   const [locationChecked, setLocationChecked] = useState(false);
+  const backWarnRef = useRef(false);
+
+  useEffect(() => {
+    if (Platform.OS !== 'web') return;
+    const warning =
+      '戻るボタンは利用できません。画面下のメニューをご利用ください。';
+
+    const handlePopState = (event) => {
+      event.preventDefault();
+      window.history.pushState(null, '', window.location.href);
+      if (!backWarnRef.current) {
+        backWarnRef.current = true;
+        window.alert(warning);
+        setTimeout(() => {
+          backWarnRef.current = false;
+        }, 1000);
+      }
+    };
+
+    window.history.pushState(null, '', window.location.href);
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
 
   useEffect(() => {
     let mounted = true;
