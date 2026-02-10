@@ -30,7 +30,9 @@ export default function LoginScreen({ navigation, route }) {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [googleDebugInfo, setGoogleDebugInfo] = useState('');
   const [googleReady, setGoogleReady] = useState(false);
+  const [googleButtonRendered, setGoogleButtonRendered] = useState(false);
   const googleInitPromiseRef = useRef(null);
+  const googleButtonContainerRef = useRef(null);
 
   const showGoogleDebug =
     Constants.expoConfig?.extra?.showGoogleDebug === true ||
@@ -143,11 +145,23 @@ export default function LoginScreen({ navigation, route }) {
             cancel_on_tap_outside: true,
             ux_mode: 'popup',
           });
+          if (googleButtonContainerRef.current) {
+            googleButtonContainerRef.current.innerHTML = '';
+            window.google.accounts.id.renderButton(googleButtonContainerRef.current, {
+              theme: 'outline',
+              text: 'signin_with',
+              shape: 'pill',
+              logo_alignment: 'left',
+              width: 260,
+            });
+            setGoogleButtonRendered(true);
+          }
           setGoogleReady(true);
           logGoogleDebug('gis-initialize', { clientId: googleClientId ? 'set' : 'missing' });
         })
         .catch((err) => {
           setGoogleReady(false);
+          setGoogleButtonRendered(false);
           throw err;
         });
     }
@@ -185,6 +199,10 @@ export default function LoginScreen({ navigation, route }) {
               }`.trim()
             );
           } else if (dismissed) {
+            if (dismissedReason === 'tap_outside') {
+              setError('Googleログインをキャンセルしました。');
+              return;
+            }
             setError(
               `Googleログインが閉じられました。${
                 dismissedReason ? `理由: ${dismissedReason}` : ''
@@ -341,6 +359,7 @@ export default function LoginScreen({ navigation, route }) {
             style={[
               styles.googleButton,
               (googleLoading || !googleConfigured) && styles.googleButtonDisabled,
+              googleButtonRendered && styles.googleButtonHidden,
             ]}
             onPress={handleGoogleLogin}
             disabled={googleLoading || !googleConfigured}
@@ -351,6 +370,10 @@ export default function LoginScreen({ navigation, route }) {
               {googleLoading ? 'Googleでログイン中...' : 'Googleでログイン'}
             </Text>
           </TouchableOpacity>
+
+          {googleConfigured && (
+            <View style={styles.googleButtonContainer} ref={googleButtonContainerRef} />
+          )}
 
           {!googleConfigured && (
             <Text style={styles.notice}>Googleログインが未設定です。</Text>
@@ -484,6 +507,20 @@ const styles = StyleSheet.create({
   },
   googleButtonDisabled: {
     opacity: 0.6
+  },
+  googleButtonHidden: {
+    height: 0,
+    paddingVertical: 0,
+    paddingHorizontal: 0,
+    marginTop: 0,
+    borderWidth: 0,
+    opacity: 0
+  },
+  googleButtonContainer: {
+    marginTop: 12,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   googleButtonText: {
     color: colors.textPrimary,
