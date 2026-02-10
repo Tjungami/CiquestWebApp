@@ -25,9 +25,9 @@ export default function QuestClearScreen({ navigation, route }) {
     challenge.rewardCouponTitle || challenge.reward_coupon_title || reward || '';
   let rewardMessage = '';
   if (rewardType === 'coupon') {
-    rewardMessage = couponTitle ? `?????${couponTitle}????` : '???????';
+    rewardMessage = couponTitle ? `クーポン「${couponTitle}」を獲得しました` : 'クーポンを獲得しました';
   } else if (rewardType === 'service') {
-    rewardMessage = '???????';
+    rewardMessage = 'サービス特典を獲得しました';
   }
 
   return (

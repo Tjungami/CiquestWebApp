@@ -209,9 +209,9 @@ def api_admin_list_create(request):
     email = (data.get("email") or "").strip().lower()
     password = (data.get("password") or "").strip()
     if not name or not email or not password:
-        return JsonResponse({"detail": "??????????????????????"}, status=400)
+        return JsonResponse({"detail": "氏名・メールアドレス・パスワードを入力してください。"}, status=400)
     if len(password) < 8:
-        return JsonResponse({"detail": "??????8????????????"}, status=400)
+        return JsonResponse({"detail": "パスワードは8文字以上で入力してください。"}, status=400)
     hashed_password = make_password(password)
 
     existing = AdminAccount.objects.filter(email__iexact=email).first()

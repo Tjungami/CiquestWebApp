@@ -58,12 +58,12 @@ export default function StampScanScreen() {
         if (newBadges.length > 0) {
           navigation.replace('BadgeUnlock', {
             badges: newBadges,
-            title: '??????',
-            message: `${storeName}?????????????`,
+            title: 'クーポン獲得',
+            message: `${storeName}のクーポンを獲得しました。`,
           });
           return;
         }
-        Alert.alert('??????', `${storeName}?????????????`, [
+        Alert.alert('クーポン獲得', `${storeName}のクーポンを獲得しました。`, [
           {
             text: 'OK',
             onPress: () => navigation.goBack(),
@@ -74,12 +74,12 @@ export default function StampScanScreen() {
       if (newBadges.length > 0) {
         navigation.replace('BadgeUnlock', {
           badges: newBadges,
-          title: '??????',
-          message: `${storeName}?????????????`,
+          title: 'スタンプ獲得',
+          message: `${storeName}のスタンプを獲得しました。`,
         });
         return;
       }
-      Alert.alert('??????', `${storeName}?????????????`, [
+      Alert.alert('スタンプ獲得', `${storeName}のスタンプを獲得しました。`, [
         {
           text: 'OK',
           onPress: () => navigation.goBack(),

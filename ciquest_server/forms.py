@@ -84,11 +84,11 @@ class OwnerProfileForm(forms.Form):
         normalized = re.sub(r"\s+", "", normalized)
 
         if not re.fullmatch(r"[0-9-]+", normalized):
-            raise forms.ValidationError("????????????????????????")
+            raise forms.ValidationError("電話番号は数字とハイフンのみで入力してください。")
 
         digits = re.sub(r"\D", "", normalized)
         if len(digits) not in (10, 11):
-            raise forms.ValidationError("?????10????11???????????")
+            raise forms.ValidationError("電話番号は10桁または11桁で入力してください。")
 
         return normalized
 

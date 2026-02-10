@@ -479,7 +479,7 @@ class StoreApplicationForm(forms.ModelForm):
         try:
             decimal_value = Decimal(str(raw_value))
         except (InvalidOperation, ValueError):
-            self.add_error(error_field, f"??????????????: {sample}?")
+            self.add_error(error_field, f"数値を入力してください（例: {sample}）")
             return None
 
         if decimal_value < Decimal(min_value) or decimal_value > Decimal(max_value):

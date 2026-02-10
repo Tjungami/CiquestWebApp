@@ -27,7 +27,7 @@ class Rank(models.Model):
 
 # ユーザー情報
 
-# ???
+# バッジ
 class Badge(models.Model):
     badge_id = models.AutoField(primary_key=True)
     code = models.CharField(max_length=50, unique=True)
@@ -41,7 +41,7 @@ class Badge(models.Model):
         return self.name
 
 
-# ???????
+# ユーザーバッジ
 class UserBadge(models.Model):
     user = models.ForeignKey("User", on_delete=models.CASCADE)
     badge = models.ForeignKey(Badge, on_delete=models.CASCADE)

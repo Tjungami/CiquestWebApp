@@ -253,7 +253,7 @@ GOOGLE_OAUTH_MOBILE_CLIENT_IDS = [
 
 # メール送信設定（本番では環境変数で上書き）
 
-# ?????????????????????
+# メール設定
 EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")
 EMAIL_HOST = os.environ.get("EMAIL_HOST", "")
 EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
