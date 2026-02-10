@@ -1,18 +1,18 @@
-<!-- C:\Users\j_tagami\CiquestWebApp\owner\templates\owner\dashboard.html -->
+﻿<!-- C:\Users\j_tagami\CiquestWebApp\owner\templates\owner\dashboard.html -->
 {% load static %}
 <!DOCTYPE html>
 <html lang="ja">
 <head>
   <link rel="icon" href="{% static 'img/common/CIquest.ico' %}" type="image/x-icon">
   <meta charset="UTF-8">
-  <title>店舗選択 | CiQuest</title>
+  <title>オーナーダッシュボード | CiQuest</title>
   <link rel="stylesheet" href="{% static 'css/owner/dashboard.css' %}">
 </head>
 <body>
   <header class="owner-header">
-    <h1>あなたの店舗一覧</h1>
+    <h1>オーナーダッシュボード</h1>
     <div class="header-actions">
-      <a class="logout-link" href="{% url 'logout' %}">?????</a>
+      <a class="logout-link" href="{% url 'logout' %}">ログアウト</a>
     </div>
   </header>
   <main>
@@ -44,8 +44,10 @@
     {% endif %}
 
     <section class="store-application">
-      <h2>新しい店舗を申請</h2>
-      <p class="help-text">必要事項を入力して送信すると、運営が内容を確認して承認ステータスを更新します。</p>
+      <h2>店舗申請</h2>
+      <p class="help-text">
+        必要事項を入力して申請してください。運営が確認し、承認後に店舗が有効になります。
+      </p>
       <form method="post" class="application-form">
         {% csrf_token %}
         <input type="hidden" name="form_type" value="store_application">
@@ -79,17 +81,15 @@
             {% endif %}
           </div>
           <div class="form-field">
-            <label for="{{ application_form.latlng.id_for_label }}">緯度・経度（最大50文字・カンマ区切り）</label>
+            <label for="{{ application_form.latlng.id_for_label }}">緯度・経度（カンマ区切り）</label>
             {{ application_form.latlng }}
             {{ application_form.latitude }}{{ application_form.longitude }}
             {% if application_form.latlng.errors %}
               <span class="error">{{ application_form.latlng.errors.0 }}</span>
             {% endif %}
+            <p class="help-text">例: 36.558219721380816, 139.90246302270646</p>
             <p class="help-text">
-              緯度経度のコピー方法は</p>
-            <p class="help-text">
-              <a href="https://youtu.be/MeOihQEC68o" target="_blank" rel="noopener">こちらの動画</a>
-              を参照してください。
+              <a href="https://youtu.be/MeOihQEC68o" target="_blank" rel="noopener">取得方法はこちら</a>
             </p>
           </div>
           <div class="form-field">
@@ -113,7 +113,7 @@
 
     <section class="store-application">
       <h2>お問い合わせ</h2>
-      <p class="help-text">店舗に関する内容やチャレンジの確認事項を送信できます。</p>
+      <p class="help-text">店舗に関するご質問や不具合は、こちらからご連絡ください。</p>
       <form method="post" class="application-form">
         {% csrf_token %}
         <input type="hidden" name="form_type" value="inquiry">
@@ -129,15 +129,15 @@
           </div>
           <div class="form-field">
             <label for="inquiryCategory">カテゴリ（最大50文字）</label>
-            <input id="inquiryCategory" type="text" name="category" placeholder="例：審査/掲載/QR" maxlength="50" required>
+            <input id="inquiryCategory" type="text" name="category" placeholder="例: 表示/QR" maxlength="50" required>
           </div>
           <div class="form-field full">
             <label for="inquiryMessage">内容（最大500文字）</label>
             <textarea id="inquiryMessage" name="message" rows="4" maxlength="500" required></textarea>
           </div>
           <div class="form-field">
-            <label for="inquiryChallenge">関連チャレンジID（任意・最大10文字）</label>
-            <input id="inquiryChallenge" type="text" name="related_challenge_id" placeholder="任意" maxlength="10">
+            <label for="inquiryChallenge">関連チャレンジID（任意）</label>
+            <input id="inquiryChallenge" type="text" name="related_challenge_id" placeholder="例: 123" maxlength="10">
           </div>
         </div>
         <button type="submit" class="btn submit-btn">送信</button>
@@ -150,13 +150,13 @@
           <div class="store-card">
             <h2>{{ store.name }}</h2>
             <p>{{ store.address }}</p>
-            <p>ステータス: 
+            <p>ステータス:
               {% if store.status == "approved" %}
-                <span class="approved">承認済み ✅</span>
+                <span class="approved">承認済み</span>
               {% elif store.status == "pending" %}
-                <span class="pending">審査中 ⏳</span>
+                <span class="pending">申請中</span>
               {% else %}
-                <span class="rejected">却下 ❌</span>
+                <span class="rejected">却下</span>
               {% endif %}
             </p>
             <a href="{% url 'owner_store_home' store.store_id %}" class="btn">この店舗を管理</a>
@@ -164,7 +164,7 @@
         {% endfor %}
       </div>
     {% else %}
-      <p>まだ登録された店舗がありません。</p>
+      <p>登録済みの店舗がありません。</p>
     {% endif %}
   </main>
 </body>
