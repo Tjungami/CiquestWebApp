@@ -67,6 +67,7 @@ def owner_entry(request):
 
 def unified_login(request):
     error = None
+    role = (request.GET.get("role") or "").strip().lower()
     if request.method == "POST":
         identifier = (request.POST.get("identifier") or "").strip()
         password = request.POST.get("password") or ""
@@ -124,7 +125,8 @@ def unified_login(request):
             else:
                 error = "Email address or password is incorrect."
 
-    return render(request, "common/login.html", {"error": error})
+    template_name = "common/login_admin.html" if role == "admin" else "common/login.html"
+    return render(request, template_name, {"error": error, "role": role})
 
 
 def unified_logout(request):

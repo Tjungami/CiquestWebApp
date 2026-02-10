@@ -49,7 +49,7 @@ def _ensure_admin(request):
 
 def _redirect_if_not_admin(request):
     if not _ensure_admin(request):
-        return redirect("login")
+        return redirect(f"{reverse('login')}?role=admin")
     return None
 
 
