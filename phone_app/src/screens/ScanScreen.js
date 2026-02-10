@@ -1,5 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { Alert, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  Alert,
+  Modal,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import NfcManager, { Ndef, NfcTech } from 'react-native-nfc-manager';
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
@@ -17,6 +26,7 @@ export default function ScanScreen({ navigation, route }) {
   const [nfcSupported, setNfcSupported] = useState(null);
   const [nfcBusy, setNfcBusy] = useState(false);
   const [selectedChallenge, setSelectedChallenge] = useState(null);
+  const isWeb = Platform.OS === 'web';
   const inProgressChallenges = activeChallenges.filter(
     (challenge) => challenge.status === 'in_progress'
   );
@@ -166,6 +176,9 @@ export default function ScanScreen({ navigation, route }) {
   };
 
   useEffect(() => {
+    if (isWeb) {
+      return;
+    }
     let mounted = true;
     const prepare = async () => {
       try {
@@ -184,7 +197,7 @@ export default function ScanScreen({ navigation, route }) {
       mounted = false;
       NfcManager.cancelTechnologyRequest().catch(() => {});
     };
-  }, []);
+  }, [isWeb]);
 
   useEffect(() => {
     const scannedData = route?.params?.scannedData;
@@ -223,17 +236,19 @@ export default function ScanScreen({ navigation, route }) {
           </View>
         </View>
 
-        <View style={styles.nfcSection}>
-          <Text style={styles.nfcLabel}>NFCスキャン</Text>
-          <Text style={styles.nfcHint}>
-            {nfcSupported === false
-              ? 'この端末はNFCに対応していません。'
-              : 'タグをスマホに近づけてください。'}
-          </Text>
-          <TouchableOpacity style={styles.nfcBtn} onPress={startNfcScan} disabled={nfcBusy}>
-            <Text style={styles.nfcText}>{nfcBusy ? 'スキャン中...' : 'NFCスキャンを開始'}</Text>
-          </TouchableOpacity>
-        </View>
+        {!isWeb && (
+          <View style={styles.nfcSection}>
+            <Text style={styles.nfcLabel}>NFCスキャン</Text>
+            <Text style={styles.nfcHint}>
+              {nfcSupported === false
+                ? 'この端末はNFCに対応していません。'
+                : 'タグをスマホに近づけてください。'}
+            </Text>
+            <TouchableOpacity style={styles.nfcBtn} onPress={startNfcScan} disabled={nfcBusy}>
+              <Text style={styles.nfcText}>{nfcBusy ? 'スキャン中...' : 'NFCスキャンを開始'}</Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
         <View style={styles.challengeSection}>
           <Text style={styles.challengeTitle}>チャレンジ中クエスト</Text>
