@@ -47,6 +47,7 @@ export default {
         iosClientId: process.env.GOOGLE_IOS_CLIENT_ID,
         webClientId: process.env.GOOGLE_WEB_CLIENT_ID,
       },
+      showGoogleDebug: process.env.SHOW_GOOGLE_DEBUG,
       eas: {
         projectId: 'd8b7a881-8745-4643-963d-ab57d00cbb9b',
       },

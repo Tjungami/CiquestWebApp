@@ -31,6 +31,11 @@ export default function LoginScreen({ navigation, route }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [googleDebugInfo, setGoogleDebugInfo] = useState('');
+
+  const showGoogleDebug =
+    Constants.expoConfig?.extra?.showGoogleDebug === true ||
+    Constants.expoConfig?.extra?.showGoogleDebug === '1';
 
   const googleAuthConfig = Constants.expoConfig?.extra?.googleAuth || {};
   const googleConfigured = Boolean(
@@ -46,13 +51,55 @@ export default function LoginScreen({ navigation, route }) {
     scopes: ['profile', 'email'],
   });
 
+  const logGoogleDebug = (label, payload) => {
+    let message = label;
+    try {
+      message += `: ${JSON.stringify(payload, null, 2)}`;
+    } catch (err) {
+      message += `: ${String(err?.message || err)}`;
+    }
+    if (showGoogleDebug || __DEV__) {
+      setGoogleDebugInfo(message);
+    }
+    if (console && console.info) {
+      console.info('[GoogleAuth]', message);
+    }
+  };
+
+  const logGoogleError = (label, err, extra = {}) => {
+    const payload = {
+      label,
+      message: err?.message || '',
+      name: err?.name || '',
+      stack: err?.stack || '',
+      ...extra,
+    };
+    if (console && console.error) {
+      console.error('[GoogleAuth]', payload);
+    }
+    if (showGoogleDebug || __DEV__) {
+      logGoogleDebug(label, payload);
+    }
+  };
+
   useEffect(() => {
     if (response?.type !== 'success') return;
     const authenticate = async () => {
       const idToken = response?.authentication?.idToken || '';
       const accessToken = response?.authentication?.accessToken || '';
+      logGoogleDebug('auth-response', {
+        type: response?.type,
+        params: response?.params,
+        authentication: {
+          accessToken: Boolean(accessToken),
+          idToken: Boolean(idToken),
+          expiresIn: response?.authentication?.expiresIn ?? null,
+          tokenType: response?.authentication?.tokenType ?? null,
+        },
+      });
       if (!idToken && !accessToken) {
         setError('Google認証に失敗しました。');
+        logGoogleError('missing-tokens', null);
         return;
       }
       setGoogleLoading(true);
@@ -67,6 +114,7 @@ export default function LoginScreen({ navigation, route }) {
         });
       } catch (err) {
         setError(err?.message || 'Googleログインに失敗しました。');
+        logGoogleError('login-with-google-failed', err);
       } finally {
         setGoogleLoading(false);
       }
@@ -116,12 +164,18 @@ export default function LoginScreen({ navigation, route }) {
     setError('');
     if (!googleConfigured) {
       setError('Googleログインが未設定です。');
+      logGoogleError('google-not-configured', null, {
+        hasAndroidClientId: Boolean(googleAuthConfig.androidClientId),
+        hasIosClientId: Boolean(googleAuthConfig.iosClientId),
+        hasWebClientId: Boolean(googleAuthConfig.webClientId),
+      });
       return;
     }
     try {
       await promptAsync({ useProxy: Constants.appOwnership === 'expo' });
     } catch (err) {
       setError(err?.message || 'Googleログインに失敗しました。');
+      logGoogleError('prompt-async-failed', err);
     }
   };
 
@@ -211,6 +265,13 @@ export default function LoginScreen({ navigation, route }) {
           {!googleConfigured && (
             <Text style={styles.notice}>Googleログインが未設定です。</Text>
           )}
+
+          {(showGoogleDebug || __DEV__) && googleDebugInfo ? (
+            <View style={styles.debugBox}>
+              <Text style={styles.debugTitle}>Google Auth Debug</Text>
+              <Text style={styles.debugText}>{googleDebugInfo}</Text>
+            </View>
+          ) : null}
 
           <TouchableOpacity style={styles.linkButton} onPress={goToRegister}>
             <Text style={styles.linkText}>新規登録はこちら</Text>
@@ -352,4 +413,23 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 18
   },
+  debugBox: {
+    marginTop: 12,
+    padding: 12,
+    borderRadius: 12,
+    backgroundColor: '#0f172a',
+    borderWidth: 1,
+    borderColor: 'rgba(148, 163, 184, 0.35)'
+  },
+  debugTitle: {
+    color: '#f8fafc',
+    fontSize: 12,
+    fontWeight: '700',
+    marginBottom: 6
+  },
+  debugText: {
+    color: '#e2e8f0',
+    fontSize: 11,
+    lineHeight: 16
+  }
 });
