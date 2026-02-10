@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>???? | Ciquest</title>
+  <title>店舗承認 | Ciquest</title>
   <link rel="stylesheet" href="{% static 'css/base/base.css' %}">
   <link rel="stylesheet" href="{% static 'css/admin/sunset.css' %}">
   <link rel="stylesheet" href="{% static 'css/admin/stores.css' %}">
@@ -12,34 +12,34 @@
 </head>
 <body>
   <header class="admin-header">
-    <h1>????</h1>
+    <h1>店舗承認</h1>
     <nav>
-      <a href="{% url 'admin_dashboard' %}" {% if active_page == 'dashboard' %}class="active"{% endif %}>???????</a>
-      <a href="{% url 'admin_stores' %}" {% if active_page == 'stores' %}class="active"{% endif %}>????</a>
-      <a href="{% url 'admin_challenges' %}" {% if active_page == 'challenges' %}class="active"{% endif %}>???????</a>
-      <a href="{% url 'admin_coupons' %}" {% if active_page == 'coupons' %}class="active"{% endif %}>??????</a>
-      <a href="{% url 'admin_users' %}" {% if active_page == 'users' %}class="active"{% endif %}>????</a>
-      <a href="{% url 'admin_inquiries' %}" {% if active_page == 'inquiries' %}class="active"{% endif %}>??????</a>
-      <a href="{% url 'admin_notices' %}" {% if active_page == 'notices' %}class="active"{% endif %}>????</a>
+      <a href="{% url 'admin_dashboard' %}" {% if active_page == 'dashboard' %}class="active"{% endif %}>ダッシュボード</a>
+      <a href="{% url 'admin_stores' %}" {% if active_page == 'stores' %}class="active"{% endif %}>店舗承認</a>
+      <a href="{% url 'admin_challenges' %}" {% if active_page == 'challenges' %}class="active"{% endif %}>チャレンジ承認</a>
+      <a href="{% url 'admin_coupons' %}" {% if active_page == 'coupons' %}class="active"{% endif %}>クーポン承認</a>
+      <a href="{% url 'admin_users' %}" {% if active_page == 'users' %}class="active"{% endif %}>ユーザー</a>
+      <a href="{% url 'admin_inquiries' %}" {% if active_page == 'inquiries' %}class="active"{% endif %}>お問い合わせ</a>
+      <a href="{% url 'admin_notices' %}" {% if active_page == 'notices' %}class="active"{% endif %}>お知らせ</a>
     </nav>
-    <a class="logout-btn" href="{% url 'logout' %}">?????</a>
+    <a class="logout-btn" href="{% url 'logout' %}">ログアウト</a>
   </header>
 
   <main class="stores-page">
     <section class="store-approvals">
       <header class="store-approvals__header">
         <div>
-          <h2>????</h2>
-          <p>?????????????????????????</p>
+          <h2>店舗承認</h2>
+          <p>申請中の店舗を確認し、承認・却下を行ってください。</p>
         </div>
       </header>
       <div class="tab-menu">
-        <button class="tab active" data-status="pending">???</button>
-        <button class="tab" data-status="approved">????</button>
-        <button class="tab" data-status="rejected">????</button>
+        <button class="tab active" data-status="pending">申請中</button>
+        <button class="tab" data-status="approved">承認済み</button>
+        <button class="tab" data-status="rejected">却下済み</button>
       </div>
       <div id="store-list" class="store-list">
-        <p>?????????????...</p>
+        <p>店舗データを読み込み中です...</p>
       </div>
     </section>
   </main>

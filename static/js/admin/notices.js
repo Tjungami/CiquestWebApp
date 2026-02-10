@@ -2,13 +2,14 @@ const API_BASE = "/operator/api/notices";
 const CSRF_TOKEN = getCsrfToken();
 
 document.addEventListener("DOMContentLoaded", () => {
-  loadNotices();
-
   const form = document.getElementById("noticeForm");
-  form.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    await addNotice();
-  });
+  if (form) {
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      await createNotice();
+    });
+  }
+  loadNotices();
 });
 
 function getCsrfToken() {
@@ -20,8 +21,9 @@ function getCsrfToken() {
 }
 
 async function loadNotices() {
-  const container = document.getElementById("noticeContainer");
-  container.innerHTML = "<p>読み込み中です…</p>";
+  const container = document.getElementById("noticeList");
+  if (!container) return;
+  container.innerHTML = "<p>読み込み中です...</p>";
 
   try {
     const res = await fetch(`${API_BASE}/`);
@@ -29,31 +31,26 @@ async function loadNotices() {
     const data = await res.json();
 
     if (!data.length) {
-      container.innerHTML = "<p>お知らせはまだ登録されていません。</p>";
+      container.innerHTML = "<p>お知らせはありません。</p>";
       return;
     }
 
     container.innerHTML = data
       .map(
         (notice) => `
-        <article class="notice-card">
-          <header>
-            <div>
-              <h3>${escapeHtml(notice.title)}</h3>
-              <div class="notice-meta">
-                <span class="badge">${targetLabel(notice.target)}</span>
-                <span>${formatPeriod(notice.start_at, notice.end_at)}</span>
-              </div>
+        <div class="notice-card">
+          <div class="notice-info">
+            <strong>${notice.title}</strong>
+            <p>${notice.body_md || ""}</p>
+            <div class="notice-meta">
+              <span>対象: ${notice.target}</span>
+              <span>期間: ${formatDate(notice.start_at)} - ${formatDate(notice.end_at)}</span>
             </div>
-            <div class="notice-actions">
-              <span class="status ${notice.is_published ? "published" : "draft"}">
-                ${notice.is_published ? "公開中" : "下書き"}
-              </span>
-              <button class="delete-btn" data-id="${notice.notice_id}">削除</button>
-            </div>
-          </header>
-          <div class="notice-body">${notice.body_html || ""}</div>
-        </article>
+          </div>
+          <div class="notice-actions">
+            <button class="delete-btn" data-id="${notice.notice_id}">削除</button>
+          </div>
+        </div>
       `
       )
       .join("");
@@ -65,20 +62,24 @@ async function loadNotices() {
     });
   } catch (err) {
     console.error(err);
-    container.innerHTML = "<p>取得に失敗しました。</p>";
+    container.innerHTML = "<p>データの取得に失敗しました。</p>";
   }
 }
 
-async function addNotice() {
-  const title = document.getElementById("noticeTitle").value.trim();
-  const bodyMd = document.getElementById("noticeBody").value.trim();
-  const target = document.getElementById("noticeTarget").value;
-  const startAt = document.getElementById("noticeStart").value;
-  const endAt = document.getElementById("noticeEnd").value;
-  const isPublished = document.getElementById("noticePublished").checked;
+function formatDate(value) {
+  if (!value) return "-";
+  return new Date(value).toLocaleString();
+}
 
-  if (!title || !bodyMd || !target || !startAt || !endAt) {
-    alert("必須項目を入力してください。");
+async function createNotice() {
+  const title = document.getElementById("title")?.value.trim();
+  const body = document.getElementById("body_md")?.value.trim();
+  const target = document.getElementById("target")?.value;
+  const startAt = document.getElementById("start_at")?.value;
+  const endAt = document.getElementById("end_at")?.value;
+
+  if (!title || !body || !startAt || !endAt) {
+    alert("必要項目を入力してください。");
     return;
   }
 
@@ -91,18 +92,17 @@ async function addNotice() {
       },
       body: JSON.stringify({
         title,
-        body_md: bodyMd,
+        body_md: body,
         target,
         start_at: startAt,
         end_at: endAt,
-        is_published: isPublished,
       }),
     });
     if (!res.ok) throw new Error();
-    document.getElementById("noticeForm").reset();
+    document.getElementById("noticeForm")?.reset();
     loadNotices();
   } catch (err) {
-    alert("お知らせの追加に失敗しました。");
+    alert("お知らせの作成に失敗しました。");
   }
 }
 
@@ -118,27 +118,6 @@ async function deleteNotice(id) {
     if (!res.ok) throw new Error();
     loadNotices();
   } catch (err) {
-    alert("削除に失敗しました。");
+    alert("お知らせの削除に失敗しました。");
   }
-}
-
-function targetLabel(target) {
-  if (target === "owner") return "オーナー";
-  if (target === "user") return "ユーザー";
-  return "全員";
-}
-
-function formatPeriod(startAt, endAt) {
-  const start = startAt ? new Date(startAt).toLocaleString() : "-";
-  const end = endAt ? new Date(endAt).toLocaleString() : "-";
-  return `${start} 〜 ${end}`;
-}
-
-function escapeHtml(value) {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/\"/g, "&quot;")
-    .replace(/'/g, "&#39;");
 }

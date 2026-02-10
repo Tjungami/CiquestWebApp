@@ -3,17 +3,22 @@ const CSRF_TOKEN = getCsrfToken();
 
 document.addEventListener("DOMContentLoaded", () => {
   const filter = document.getElementById("couponFilter");
-  loadCoupons(filter.value);
-
-  filter.addEventListener("change", (event) => {
-    loadCoupons(event.target.value);
-  });
+  if (filter) {
+    loadCoupons(filter.value);
+    filter.addEventListener("change", (event) => {
+      loadCoupons(event.target.value);
+    });
+  } else {
+    loadCoupons();
+  }
 
   const form = document.getElementById("couponForm");
-  form.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    await addCoupon();
-  });
+  if (form) {
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      await addCoupon();
+    });
+  }
 });
 
 function getCsrfToken() {
@@ -26,7 +31,8 @@ function getCsrfToken() {
 
 async function loadCoupons(type = "all") {
   const container = document.getElementById("couponContainer");
-  container.innerHTML = "<p>読み込み中です…</p>";
+  if (!container) return;
+  container.innerHTML = "<p>読み込み中です...</p>";
 
   try {
     const query =
@@ -36,7 +42,7 @@ async function loadCoupons(type = "all") {
     const data = await res.json();
 
     if (!data.length) {
-      container.innerHTML = "<p>該当するクーポンはまだ登録されていません。</p>";
+      container.innerHTML = "<p>該当するクーポンがありません。</p>";
       return;
     }
 
@@ -47,7 +53,7 @@ async function loadCoupons(type = "all") {
           <div class="coupon-info">
             <div class="coupon-meta">
               <span class="type-badge type-${coupon.type}">
-                ${coupon.type === "store_specific" ? "店舗独自" : "共通"}
+                ${coupon.type === "store_specific" ? "店舗限定" : "共通"}
               </span>
               <span class="store-label">
                 ${
@@ -61,7 +67,7 @@ async function loadCoupons(type = "all") {
             <p class="coupon-desc">${coupon.description || "説明なし"}</p>
             <div class="coupon-fields">
               <label>
-                必要ポイント:
+                必要ポイント
                 <input type="number" min="1" value="${coupon.required_points}" data-id="${coupon.coupon_id}" class="points-input">
               </label>
               <span>
@@ -99,13 +105,13 @@ async function loadCoupons(type = "all") {
 }
 
 async function addCoupon() {
-  const title = document.getElementById("title").value.trim();
-  const description = document.getElementById("description").value.trim();
+  const title = document.getElementById("title")?.value.trim();
+  const description = document.getElementById("description")?.value.trim();
   const requiredPoints = parseInt(
-    document.getElementById("required_points").value,
+    document.getElementById("required_points")?.value,
     10
   );
-  const expiresAt = document.getElementById("expires_at").value;
+  const expiresAt = document.getElementById("expires_at")?.value;
 
   if (!title || !description || !requiredPoints || !expiresAt) {
     alert("すべての項目を入力してください。");
@@ -128,17 +134,17 @@ async function addCoupon() {
       }),
     });
     if (!res.ok) throw new Error();
-    document.getElementById("couponForm").reset();
+    document.getElementById("couponForm")?.reset();
     loadCoupons();
   } catch (err) {
-    alert("クーポンの追加に失敗しました。");
+    alert("クーポンの作成に失敗しました。");
   }
 }
 
 async function updatePoints(id, newPoints) {
   const parsed = parseInt(newPoints, 10);
   if (!parsed || parsed < 1) {
-    alert("ポイントは1以上の整数を入力してください。");
+    alert("ポイントは1以上の数値を入力してください。");
     return;
   }
   try {

@@ -24,7 +24,8 @@ function getCsrfToken() {
 
 async function loadInquiries(status) {
   const container = document.getElementById("inquiryList");
-  container.innerHTML = "<p>読み込み中です…</p>";
+  if (!container) return;
+  container.innerHTML = "<p>読み込み中です...</p>";
 
   try {
     const res = await fetch(`${API_BASE}/?status=${encodeURIComponent(status)}`);
@@ -32,7 +33,7 @@ async function loadInquiries(status) {
     const data = await res.json();
 
     if (!data.length) {
-      container.innerHTML = "<p>該当するお問い合わせはありません。</p>";
+      container.innerHTML = "<p>該当するお問い合わせがありません。</p>";
       return;
     }
 
@@ -104,6 +105,6 @@ async function updateStatus(id, newStatus) {
     const active = document.querySelector(".tab.active").dataset.status;
     loadInquiries(active);
   } catch (err) {
-    alert("状態変更に失敗しました。");
+    alert("ステータス更新に失敗しました。");
   }
 }

@@ -5,10 +5,12 @@ document.addEventListener("DOMContentLoaded", () => {
   loadAdmins();
 
   const form = document.getElementById("adminCreateForm");
-  form.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    await createAdmin();
-  });
+  if (form) {
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      await createAdmin();
+    });
+  }
 });
 
 function getCsrfToken() {
@@ -21,7 +23,8 @@ function getCsrfToken() {
 
 async function loadAdmins() {
   const container = document.getElementById("adminContainer");
-  container.innerHTML = "<p>読み込み中です…</p>";
+  if (!container) return;
+  container.innerHTML = "<p>読み込み中です...</p>";
 
   try {
     const res = await fetch(`${API_BASE}/`);
@@ -29,7 +32,7 @@ async function loadAdmins() {
     const data = await res.json();
 
     if (!data.length) {
-      container.innerHTML = '<p class="admin-empty">運営ユーザーがまだ登録されていません。</p>';
+      container.innerHTML = '<p class="admin-empty">管理者アカウントがありません。</p>';
       return;
     }
 
@@ -48,7 +51,7 @@ async function loadAdmins() {
           ? new Date(admin.approved_at).toLocaleString()
           : "-";
         const deletedBadge = admin.is_deleted
-          ? `<span class="status-badge status-deleted">削除済み(復元可)</span>`
+          ? '<span class="status-badge status-deleted">削除済み(復元不可)</span>'
           : "";
 
         return `
@@ -62,10 +65,10 @@ async function loadAdmins() {
             ${deletedBadge}
           </div>
           <div class="admin-meta">
-            <span>申請者: ${admin.created_by || "―"}</span>
-            <span>承認者: ${admin.approved_by || "―"}</span>
-            <span>申請日: ${createdAt}</span>
-            <span>承認日: ${approvedAt}</span>
+            <span>登録者: ${admin.created_by || "—"}</span>
+            <span>承認者: ${admin.approved_by || "—"}</span>
+            <span>登録日時: ${createdAt}</span>
+            <span>承認日時: ${approvedAt}</span>
           </div>
           <div class="admin-actions">
             <button class="delete-btn" data-id="${admin.admin_id}" data-name="${admin.name}">削除</button>
@@ -82,14 +85,14 @@ async function loadAdmins() {
     });
   } catch (err) {
     console.error(err);
-    container.innerHTML = "<p class=\"admin-empty\">データの取得に失敗しました。</p>";
+    container.innerHTML = '<p class="admin-empty">データの取得に失敗しました。</p>';
   }
 }
 
 async function createAdmin() {
-  const name = document.getElementById("adminName").value.trim();
-  const email = document.getElementById("adminEmail").value.trim();
-  const password = document.getElementById("adminPassword").value.trim();
+  const name = document.getElementById("adminName")?.value.trim();
+  const email = document.getElementById("adminEmail")?.value.trim();
+  const password = document.getElementById("adminPassword")?.value.trim();
 
   if (!name || !email || !password) {
     alert("氏名・メールアドレス・パスワードを入力してください。");
@@ -113,16 +116,16 @@ async function createAdmin() {
       const err = await res.json().catch(() => ({}));
       throw new Error(err.detail || "failed");
     }
-    document.getElementById("adminCreateForm").reset();
-    alert("運営ユーザーを作成しました。");
+    document.getElementById("adminCreateForm")?.reset();
+    alert("管理者アカウントを作成しました。");
     loadAdmins();
   } catch (err) {
-    alert("申請の登録に失敗しました。 " + (err.message || ""));
+    alert(`登録に失敗しました。${err.message || ""}`);
   }
 }
 
 async function deleteAdmin(id, name) {
-  const confirmMsg = `本当に${name}様のアカウントを削除しますか？`;
+  const confirmMsg = `本当に ${name} を削除しますか？`;
   if (!confirm(confirmMsg)) return;
 
   try {
@@ -139,6 +142,6 @@ async function deleteAdmin(id, name) {
     alert("削除しました。");
     loadAdmins();
   } catch (err) {
-    alert("削除に失敗しました。 " + (err.message || ""));
+    alert(`削除に失敗しました。${err.message || ""}`);
   }
 }

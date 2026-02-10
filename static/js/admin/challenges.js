@@ -5,16 +5,18 @@ document.addEventListener("DOMContentLoaded", () => {
   const searchBtn = document.getElementById("searchBtn");
   const searchInput = document.getElementById("searchInput");
 
-  searchBtn.addEventListener("click", () => {
-    loadChallenges(searchInput.value.trim());
-  });
-
-  searchInput.addEventListener("keypress", (event) => {
-    if (event.key === "Enter") {
-      event.preventDefault();
+  if (searchBtn && searchInput) {
+    searchBtn.addEventListener("click", () => {
       loadChallenges(searchInput.value.trim());
-    }
-  });
+    });
+
+    searchInput.addEventListener("keypress", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        loadChallenges(searchInput.value.trim());
+      }
+    });
+  }
 
   loadChallenges();
 });
@@ -29,7 +31,8 @@ function getCsrfToken() {
 
 async function loadChallenges(keyword = "") {
   const container = document.getElementById("challengeList");
-  container.innerHTML = "<p>読み込み中です…</p>";
+  if (!container) return;
+  container.innerHTML = "<p>読み込み中です...</p>";
 
   try {
     const url = `${API_BASE}/?search=${encodeURIComponent(keyword)}`;
@@ -38,7 +41,7 @@ async function loadChallenges(keyword = "") {
     const data = await res.json();
 
     if (!data.length) {
-      container.innerHTML = "<p>該当するチャレンジはありません。</p>";
+      container.innerHTML = "<p>該当するチャレンジがありません。</p>";
       return;
     }
 
@@ -48,13 +51,9 @@ async function loadChallenges(keyword = "") {
         <div class="challenge-card">
           <div class="challenge-info">
             <strong>${ch.title}</strong><br>
-            店舗: ${ch.store_name || "不明"}<br>
-            獲得ポイント: ${ch.reward_points} pt
-            ${
-              ch.is_banned
-                ? "<span class='banned-label'>BAN中</span>"
-                : ""
-            }
+            店舗: ${ch.store_name || "指定なし"}<br>
+            報酬ポイント: ${ch.reward_points} pt
+            ${ch.is_banned ? "<span class='banned-label'>BAN中</span>" : ""}
           </div>
           <div>
             ${
@@ -81,7 +80,7 @@ async function loadChallenges(keyword = "") {
 }
 
 async function banChallenge(id, keyword) {
-  if (!confirm("このチャレンジをBAN状態にしますか？")) return;
+  if (!confirm("このチャレンジをBANしますか？")) return;
   try {
     const res = await fetch(`${API_BASE}/${id}/ban/`, {
       method: "POST",
@@ -92,6 +91,6 @@ async function banChallenge(id, keyword) {
     if (!res.ok) throw new Error();
     loadChallenges(keyword);
   } catch (err) {
-    alert("BAN処理に失敗しました。");
+    alert("BANの更新に失敗しました。");
   }
 }
