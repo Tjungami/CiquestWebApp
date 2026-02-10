@@ -1,4 +1,4 @@
-{% load static %}
+﻿{% load static %}
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -27,8 +27,10 @@
 
   <main class="admins-page">
     <section class="admin-form">
-      <h2>新規運営ユーザー作成</h2>
-      <p class="hint">現在ログイン中の運営ユーザーが直接メールアドレスとパスワードを登録します。</p>
+      <h2>運営ユーザー作成</h2>
+      <p class="hint">
+        運営ユーザーを追加します。メールアドレスとパスワードは必須です。
+      </p>
       <form id="adminCreateForm">
         <input type="text" id="adminName" placeholder="氏名" required>
         <input type="email" id="adminEmail" placeholder="メールアドレス" required>
@@ -40,7 +42,7 @@
     <section class="admin-list">
       <div class="admin-list-header">
         <h2>運営ユーザー一覧</h2>
-        <p class="hint">追加したユーザーは即時有効になります。</p>
+        <p class="hint">削除済みのユーザーも履歴として表示されます。</p>
       </div>
       <div id="adminContainer"></div>
     </section>

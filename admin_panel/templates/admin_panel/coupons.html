@@ -1,4 +1,4 @@
-{% load static %}
+﻿{% load static %}
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -27,13 +27,13 @@
 
   <main class="coupons-page">
     <section class="coupon-form">
-      <h2>新しい共通クーポンを追加</h2>
+      <h2>共通クーポン作成</h2>
       <form id="couponForm">
         <input type="text" id="title" placeholder="タイトル" required>
         <input type="number" id="required_points" placeholder="必要ポイント" min="1" required>
         <textarea id="description" placeholder="説明" required></textarea>
         <input type="date" id="expires_at" required>
-        <button type="submit">追加する</button>
+        <button type="submit">作成する</button>
       </form>
     </section>
 
@@ -45,7 +45,7 @@
           <select id="couponFilter">
             <option value="all">すべて</option>
             <option value="common">共通のみ</option>
-            <option value="store_specific">店舗独自のみ</option>
+            <option value="store_specific">店舗限定のみ</option>
           </select>
         </label>
       </div>

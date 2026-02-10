@@ -1,4 +1,4 @@
-const API_BASE = "/operator/api/inquiries";
+﻿const API_BASE = "/operator/api/inquiries";
 const CSRF_TOKEN = getCsrfToken();
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -33,7 +33,7 @@ async function loadInquiries(status) {
     const data = await res.json();
 
     if (!data.length) {
-      container.innerHTML = "<p>該当するお問い合わせがありません。</p>";
+      container.innerHTML = "<p>該当するお問い合わせはありません。</p>";
       return;
     }
 
@@ -88,7 +88,7 @@ function nextStatus(current) {
 function nextStatusLabel(current) {
   if (current === "unread") return "対応中にする";
   if (current === "in_progress") return "対応済みにする";
-  return "完了";
+  return "更新";
 }
 
 async function updateStatus(id, newStatus) {
@@ -105,6 +105,6 @@ async function updateStatus(id, newStatus) {
     const active = document.querySelector(".tab.active").dataset.status;
     loadInquiries(active);
   } catch (err) {
-    alert("ステータス更新に失敗しました。");
+    alert("ステータスの更新に失敗しました。");
   }
 }

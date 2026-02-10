@@ -1,4 +1,4 @@
-const API_BASE = "/operator/api/admins";
+﻿const API_BASE = "/operator/api/admins";
 const CSRF_TOKEN = getCsrfToken();
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -21,6 +21,12 @@ function getCsrfToken() {
   return value ? decodeURIComponent(value.split("=")[1]) : "";
 }
 
+function statusLabel(status) {
+  if (status === "approved") return "承認済み";
+  if (status === "rejected") return "却下";
+  return "申請中";
+}
+
 async function loadAdmins() {
   const container = document.getElementById("adminContainer");
   if (!container) return;
@@ -32,18 +38,12 @@ async function loadAdmins() {
     const data = await res.json();
 
     if (!data.length) {
-      container.innerHTML = '<p class="admin-empty">管理者アカウントがありません。</p>';
+      container.innerHTML = '<p class="admin-empty">運営ユーザーが見つかりません。</p>';
       return;
     }
 
     container.innerHTML = data
       .map((admin) => {
-        const statusLabel =
-          admin.approval_status === "approved"
-            ? "承認済み"
-            : admin.approval_status === "rejected"
-            ? "却下"
-            : "申請中";
         const createdAt = admin.created_at
           ? new Date(admin.created_at).toLocaleString()
           : "-";
@@ -51,7 +51,7 @@ async function loadAdmins() {
           ? new Date(admin.approved_at).toLocaleString()
           : "-";
         const deletedBadge = admin.is_deleted
-          ? '<span class="status-badge status-deleted">削除済み(復元不可)</span>'
+          ? '<span class="status-badge status-deleted">削除済み（復旧可能）</span>'
           : "";
 
         return `
@@ -61,13 +61,15 @@ async function loadAdmins() {
               <strong>${admin.name}</strong><br>
               <span>${admin.email}</span>
             </div>
-            <span class="status-badge status-${admin.approval_status}">${statusLabel}</span>
+            <span class="status-badge status-${admin.approval_status}">${statusLabel(
+              admin.approval_status
+            )}</span>
             ${deletedBadge}
           </div>
           <div class="admin-meta">
-            <span>登録者: ${admin.created_by || "—"}</span>
-            <span>承認者: ${admin.approved_by || "—"}</span>
-            <span>登録日時: ${createdAt}</span>
+            <span>作成者: ${admin.created_by || "-"}</span>
+            <span>承認者: ${admin.approved_by || "-"}</span>
+            <span>作成日時: ${createdAt}</span>
             <span>承認日時: ${approvedAt}</span>
           </div>
           <div class="admin-actions">
@@ -77,6 +79,7 @@ async function loadAdmins() {
       `;
       })
       .join("");
+
     container.querySelectorAll(".delete-btn").forEach((btn) => {
       btn.addEventListener("click", async (event) => {
         const { id, name } = event.currentTarget.dataset;
@@ -99,7 +102,7 @@ async function createAdmin() {
     return;
   }
   if (password.length < 8) {
-    alert("パスワードは8文字以上にしてください。");
+    alert("パスワードは8文字以上で入力してください。");
     return;
   }
 
@@ -114,19 +117,18 @@ async function createAdmin() {
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      throw new Error(err.detail || "failed");
+      throw new Error(err.detail || "作成に失敗しました");
     }
     document.getElementById("adminCreateForm")?.reset();
-    alert("管理者アカウントを作成しました。");
+    alert("運営ユーザーを作成しました。");
     loadAdmins();
   } catch (err) {
-    alert(`登録に失敗しました。${err.message || ""}`);
+    alert(`作成に失敗しました。${err.message ? `\n${err.message}` : ""}`);
   }
 }
 
 async function deleteAdmin(id, name) {
-  const confirmMsg = `本当に ${name} を削除しますか？`;
-  if (!confirm(confirmMsg)) return;
+  if (!confirm(`${name} を削除しますか？`)) return;
 
   try {
     const res = await fetch(`${API_BASE}/${id}/delete/`, {
@@ -137,11 +139,11 @@ async function deleteAdmin(id, name) {
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      throw new Error(err.detail || "failed");
+      throw new Error(err.detail || "削除に失敗しました");
     }
     alert("削除しました。");
     loadAdmins();
   } catch (err) {
-    alert(`削除に失敗しました。${err.message || ""}`);
+    alert(`削除に失敗しました。${err.message ? `\n${err.message}` : ""}`);
   }
 }

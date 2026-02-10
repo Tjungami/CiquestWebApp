@@ -1,4 +1,4 @@
-const API_BASE = "/operator/api/challenges";
+﻿const API_BASE = "/operator/api/challenges";
 const CSRF_TOKEN = getCsrfToken();
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -51,7 +51,7 @@ async function loadChallenges(keyword = "") {
         <div class="challenge-card">
           <div class="challenge-info">
             <strong>${ch.title}</strong><br>
-            店舗: ${ch.store_name || "指定なし"}<br>
+            店舗: ${ch.store_name || "店舗未設定"}<br>
             報酬ポイント: ${ch.reward_points} pt
             ${ch.is_banned ? "<span class='banned-label'>BAN中</span>" : ""}
           </div>
@@ -91,6 +91,6 @@ async function banChallenge(id, keyword) {
     if (!res.ok) throw new Error();
     loadChallenges(keyword);
   } catch (err) {
-    alert("BANの更新に失敗しました。");
+    alert("BANに失敗しました。");
   }
 }

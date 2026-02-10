@@ -1,4 +1,4 @@
-const API_BASE = "/operator/api/coupons";
+﻿const API_BASE = "/operator/api/coupons";
 const CSRF_TOKEN = getCsrfToken();
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -35,14 +35,13 @@ async function loadCoupons(type = "all") {
   container.innerHTML = "<p>読み込み中です...</p>";
 
   try {
-    const query =
-      type && type !== "all" ? `?type=${encodeURIComponent(type)}` : "";
+    const query = type && type !== "all" ? `?type=${encodeURIComponent(type)}` : "";
     const res = await fetch(`${API_BASE}/${query}`);
     if (!res.ok) throw new Error();
     const data = await res.json();
 
     if (!data.length) {
-      container.innerHTML = "<p>該当するクーポンがありません。</p>";
+      container.innerHTML = "<p>クーポンがありません。</p>";
       return;
     }
 
@@ -71,10 +70,10 @@ async function loadCoupons(type = "all") {
                 <input type="number" min="1" value="${coupon.required_points}" data-id="${coupon.coupon_id}" class="points-input">
               </label>
               <span>
-                有効期限: ${
+                期限: ${
                   coupon.expires_at
                     ? new Date(coupon.expires_at).toLocaleDateString()
-                    : "未設定"
+                    : "期限なし"
                 }
               </span>
             </div>
@@ -144,7 +143,7 @@ async function addCoupon() {
 async function updatePoints(id, newPoints) {
   const parsed = parseInt(newPoints, 10);
   if (!parsed || parsed < 1) {
-    alert("ポイントは1以上の数値を入力してください。");
+    alert("ポイントは1以上の数値で入力してください。");
     return;
   }
   try {
@@ -158,7 +157,7 @@ async function updatePoints(id, newPoints) {
     });
     if (!res.ok) throw new Error();
   } catch (err) {
-    alert("ポイント更新に失敗しました。");
+    alert("ポイントの更新に失敗しました。");
   }
 }
 

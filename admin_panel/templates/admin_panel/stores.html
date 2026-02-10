@@ -1,4 +1,4 @@
-{% load static %}
+﻿{% load static %}
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -16,9 +16,9 @@
     <nav>
       <a href="{% url 'admin_dashboard' %}" {% if active_page == 'dashboard' %}class="active"{% endif %}>ダッシュボード</a>
       <a href="{% url 'admin_stores' %}" {% if active_page == 'stores' %}class="active"{% endif %}>店舗承認</a>
-      <a href="{% url 'admin_challenges' %}" {% if active_page == 'challenges' %}class="active"{% endif %}>チャレンジ承認</a>
-      <a href="{% url 'admin_coupons' %}" {% if active_page == 'coupons' %}class="active"{% endif %}>クーポン承認</a>
-      <a href="{% url 'admin_users' %}" {% if active_page == 'users' %}class="active"{% endif %}>ユーザー</a>
+      <a href="{% url 'admin_challenges' %}" {% if active_page == 'challenges' %}class="active"{% endif %}>チャレンジ管理</a>
+      <a href="{% url 'admin_coupons' %}" {% if active_page == 'coupons' %}class="active"{% endif %}>クーポン管理</a>
+      <a href="{% url 'admin_users' %}" {% if active_page == 'users' %}class="active"{% endif %}>ユーザー管理</a>
       <a href="{% url 'admin_inquiries' %}" {% if active_page == 'inquiries' %}class="active"{% endif %}>お問い合わせ</a>
       <a href="{% url 'admin_notices' %}" {% if active_page == 'notices' %}class="active"{% endif %}>お知らせ</a>
     </nav>
@@ -30,7 +30,7 @@
       <header class="store-approvals__header">
         <div>
           <h2>店舗承認</h2>
-          <p>申請中の店舗を確認し、承認・却下を行ってください。</p>
+          <p>申請中の店舗を確認し、承認または却下できます。</p>
         </div>
       </header>
       <div class="tab-menu">
@@ -39,7 +39,7 @@
         <button class="tab" data-status="rejected">却下済み</button>
       </div>
       <div id="store-list" class="store-list">
-        <p>店舗データを読み込み中です...</p>
+        <p>読み込み中です...</p>
       </div>
     </section>
   </main>

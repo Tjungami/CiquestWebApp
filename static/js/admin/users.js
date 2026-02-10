@@ -1,4 +1,4 @@
-const API_BASE = "/operator/api/users";
+﻿const API_BASE = "/operator/api/users";
 const CSRF_TOKEN = getCsrfToken();
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -74,6 +74,6 @@ async function deleteUser(id, name) {
     if (!res.ok) throw new Error();
     loadUsers();
   } catch (err) {
-    alert("ユーザー削除に失敗しました。");
+    alert("ユーザーの削除に失敗しました。");
   }
 }

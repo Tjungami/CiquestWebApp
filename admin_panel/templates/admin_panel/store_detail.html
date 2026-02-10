@@ -1,4 +1,4 @@
-{% load static %}
+﻿{% load static %}
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -30,9 +30,9 @@
       <header class="store-approvals__header">
         <div>
           <h2>{{ store.name }}</h2>
-          <p>申請内容の詳細</p>
+          <p>申請中または承認済みの店舗情報を確認できます。</p>
         </div>
-        <a class="detail-link detail-link--back" href="{% url 'admin_stores' %}">← 一覧へ戻る</a>
+        <a class="detail-link detail-link--back" href="{% url 'admin_stores' %}">一覧に戻る</a>
       </header>
 
       <div class="detail-grid">
@@ -53,7 +53,7 @@
               {% endif %}
             </dd>
             <dt>QRコード</dt><dd>{{ store.qr_code|default:"-" }}</dd>
-            <dt>状態</dt><dd>{{ store.get_status_display }}</dd>
+            <dt>ステータス</dt><dd>{{ store.get_status_display }}</dd>
             <dt>申請日</dt><dd>{{ store.created_at|date:"Y/m/d H:i" }}</dd>
             <dt>更新日</dt><dd>{{ store.updated_at|date:"Y/m/d H:i" }}</dd>
           </dl>
@@ -64,15 +64,15 @@
           {% if owner %}
             <dl>
               <dt>氏名</dt><dd>{{ owner.name|default:"-" }}</dd>
-              <dt>事業名</dt><dd>{{ owner.business_name|default:"-" }}</dd>
+              <dt>事業者名</dt><dd>{{ owner.business_name|default:"-" }}</dd>
               <dt>メール</dt><dd>{{ owner.email|default:"-" }}</dd>
-              <dt>連絡先電話</dt><dd>{{ owner.contact_phone|default:"-" }}</dd>
-              <dt>承認済み</dt><dd>{% if owner.approved %}Yes{% else %}No{% endif %}</dd>
-              <dt>メール確認</dt><dd>{% if owner.is_verified %}Yes{% else %}No{% endif %}</dd>
+              <dt>連絡先</dt><dd>{{ owner.contact_phone|default:"-" }}</dd>
+              <dt>承認済み</dt><dd>{% if owner.approved %}はい{% else %}いいえ{% endif %}</dd>
+              <dt>メール認証済み</dt><dd>{% if owner.is_verified %}はい{% else %}いいえ{% endif %}</dd>
               <dt>登録日</dt><dd>{{ owner.created_at|date:"Y/m/d H:i" }}</dd>
             </dl>
           {% else %}
-            <p>オーナー情報が見つかりません。</p>
+            <p>オーナー情報がありません。</p>
           {% endif %}
         </div>
       </div>

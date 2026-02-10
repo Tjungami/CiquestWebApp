@@ -1,4 +1,4 @@
-const API_BASE = "/operator/api/stores";
+﻿const API_BASE = "/operator/api/stores";
 const STORES_CSRF_TOKEN = getCsrfToken();
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -24,7 +24,8 @@ function getCsrfToken() {
 
 async function loadStores(status) {
   const container = document.getElementById("store-list");
-  container.innerHTML = "<p>???????...</p>";
+  if (!container) return;
+  container.innerHTML = "<p>読み込み中です...</p>";
 
   try {
     const res = await fetch(`${API_BASE}/?status=${encodeURIComponent(status)}`);
@@ -32,7 +33,7 @@ async function loadStores(status) {
     const data = await res.json();
 
     if (!data.length) {
-      container.innerHTML = "<p>?????????????</p>";
+      container.innerHTML = "<p>該当する店舗がありません。</p>";
       return;
     }
 
@@ -42,23 +43,23 @@ async function loadStores(status) {
         <div class="store-card">
           <div class="store-info">
             <strong>${store.name}</strong><br>
-            ${store.address || "?????"}<br>
-            <small>???: ${new Date(store.created_at).toLocaleDateString()}</small>
+            ${store.address || "住所未設定"}<br>
+            <small>申請日: ${new Date(store.created_at).toLocaleDateString()}</small>
           </div>
           <div class="store-actions">
-            <a class="detail-link" href="/operator/stores/${store.store_id}/">??</a>
+            <a class="detail-link" href="/operator/stores/${store.store_id}/">詳細</a>
             ${
               status === "pending"
                 ? `
-                  <button class="approve-btn" data-store="${store.store_id}" data-next="approved">??</button>
-                  <button class="reject-btn" data-store="${store.store_id}" data-next="rejected">??</button>
+                  <button class="approve-btn" data-store="${store.store_id}" data-next="approved">承認</button>
+                  <button class="reject-btn" data-store="${store.store_id}" data-next="rejected">却下</button>
                 `
                 : ""
             }
             ${
               status === "approved"
                 ? `
-                  <button class="delete-btn" data-store="${store.store_id}" data-name="${store.name}">??</button>
+                  <button class="delete-btn" data-store="${store.store_id}" data-name="${store.name}">削除</button>
                 `
                 : ""
             }
@@ -86,7 +87,7 @@ async function loadStores(status) {
     }
   } catch (err) {
     console.error(err);
-    container.innerHTML = "<p>??????????????</p>";
+    container.innerHTML = "<p>データの取得に失敗しました。</p>";
   }
 }
 
@@ -102,25 +103,22 @@ async function updateStatus(id, newStatus) {
     const activeTab = document.querySelector(".tab.active").dataset.status;
     loadStores(activeTab);
   } catch (err) {
-    alert("??????????????????");
+    alert("ステータスの更新に失敗しました。");
   }
 }
 
 function confirmDelete(storeName) {
-  if (!confirm(`??????????????????????
-${storeName}`)) {
+  if (!confirm(`本当に削除しますか？\n${storeName}`)) {
     return false;
   }
   const typed = prompt(
-    `??????????DELETE???????????
-${storeName}`
+    `削除するには DELETE と入力してください。\n${storeName}`
   );
   if (typed !== "DELETE") {
-    alert("??????????");
+    alert("削除をキャンセルしました。");
     return false;
   }
-  return confirm(`?????????????????
-${storeName}`);
+  return confirm(`削除を確定しますか？\n${storeName}`);
 }
 
 async function requestDelete(id, storeName) {
@@ -138,6 +136,6 @@ async function requestDelete(id, storeName) {
     const activeTab = document.querySelector(".tab.active").dataset.status;
     loadStores(activeTab);
   } catch (err) {
-    alert("??????????????????????????");
+    alert("削除に失敗しました。");
   }
 }

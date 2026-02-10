@@ -1,4 +1,4 @@
-{% load static %}
+﻿{% load static %}
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -27,7 +27,7 @@
 
   <main class="notices-page">
     <section class="notice-form">
-      <h2>お知らせを追加</h2>
+      <h2>お知らせを作成</h2>
       <form id="noticeForm">
         <input type="text" id="noticeTitle" placeholder="タイトル" required>
         <div class="notice-form-row">
@@ -52,8 +52,8 @@
             公開する
           </label>
         </div>
-        <textarea id="noticeBody" placeholder="本文（マークダウン）" rows="6" required></textarea>
-        <button type="submit">追加する</button>
+        <textarea id="noticeBody" placeholder="本文（Markdown）" rows="6" required></textarea>
+        <button type="submit">作成する</button>
       </form>
     </section>
 
