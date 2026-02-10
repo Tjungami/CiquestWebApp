@@ -9,8 +9,11 @@
   <link rel="stylesheet" href="{% static 'css/owner/dashboard.css' %}">
 </head>
 <body>
-  <header>
+  <header class="owner-header">
     <h1>あなたの店舗一覧</h1>
+    <div class="header-actions">
+      <a class="logout-link" href="{% url 'logout' %}">?????</a>
+    </div>
   </header>
   <main>
     {% if messages %}

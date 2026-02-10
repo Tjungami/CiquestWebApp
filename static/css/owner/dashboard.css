@@ -12,12 +12,40 @@ body {
 }
 
 /* --- ヘッダー --- */
-header {
+header,
+.owner-header {
   background: linear-gradient(90deg, #A7CEE6 0%, #89BDDE 100%);
   color: #fff;
   text-align: center;
   padding: 18px 0;
   box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.owner-header {
+  position: relative;
+}
+
+.header-actions {
+  position: absolute;
+  top: 16px;
+  right: 24px;
+}
+
+.logout-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.25);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.logout-link:hover {
+  background: rgba(255, 255, 255, 0.35);
 }
 
 header h1 {
@@ -273,8 +301,13 @@ main p {
 
 /* --- レスポンシブ --- */
 @media (max-width: 600px) {
-  header h1 {
+  header h1,
+  .owner-header h1 {
     font-size: 1.4rem;
+  }
+  .header-actions {
+    position: static;
+    margin-top: 10px;
   }
   .store-card {
     padding: 16px;
