@@ -43,6 +43,7 @@ export default function LoginScreen({ navigation, route }) {
   const googleConfigured = Boolean(googleClientId);
   const googleClientIdValid =
     !googleClientId || googleClientId.endsWith('.apps.googleusercontent.com');
+  const GoogleButtonContainer = Platform.OS === 'web' ? 'div' : View;
 
   const logGoogleDebug = (label, payload) => {
     let message = label;
@@ -278,7 +279,8 @@ export default function LoginScreen({ navigation, route }) {
     }
     try {
       setGoogleLoading(true);
-      await ensureGoogleIdentity(true);
+      await ensureGoogleIdentity(false);
+      setError('Googleログインを準備中です。表示された公式ボタンを押してください。');
     } catch (err) {
       setError(err?.message || 'Googleログインに失敗しました。');
       logGoogleError('prompt-async-failed', err);
@@ -355,25 +357,31 @@ export default function LoginScreen({ navigation, route }) {
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={[
-              styles.googleButton,
-              (googleLoading || !googleConfigured) && styles.googleButtonDisabled,
-              googleButtonRendered && styles.googleButtonHidden,
-            ]}
-            onPress={handleGoogleLogin}
-            disabled={googleLoading || !googleConfigured}
-            accessibilityLabel="Googleでログイン"
-          >
-            <Ionicons name="logo-google" size={18} color={colors.textPrimary} />
-            <Text style={styles.googleButtonText}>
-              {googleLoading ? 'Googleでログイン中...' : 'Googleでログイン'}
-            </Text>
-          </TouchableOpacity>
+          {googleConfigured ? (
+            <>
+              {!googleButtonRendered && (
+                <TouchableOpacity
+                  style={[
+                    styles.googleButton,
+                    (googleLoading || !googleConfigured) && styles.googleButtonDisabled,
+                  ]}
+                  onPress={handleGoogleLogin}
+                  disabled={googleLoading || !googleConfigured}
+                  accessibilityLabel="Googleでログイン"
+                >
+                  <Ionicons name="logo-google" size={18} color={colors.textPrimary} />
+                  <Text style={styles.googleButtonText}>
+                    {googleLoading ? 'Googleログイン準備中...' : 'Googleログインを準備'}
+                  </Text>
+                </TouchableOpacity>
+              )}
 
-          {googleConfigured && (
-            <View style={styles.googleButtonContainer} ref={googleButtonContainerRef} />
-          )}
+              <GoogleButtonContainer
+                style={styles.googleButtonContainer}
+                ref={googleButtonContainerRef}
+              />
+            </>
+          ) : null}
 
           {!googleConfigured && (
             <Text style={styles.notice}>Googleログインが未設定です。</Text>
@@ -507,14 +515,6 @@ const styles = StyleSheet.create({
   },
   googleButtonDisabled: {
     opacity: 0.6
-  },
-  googleButtonHidden: {
-    height: 0,
-    paddingVertical: 0,
-    paddingHorizontal: 0,
-    marginTop: 0,
-    borderWidth: 0,
-    opacity: 0
   },
   googleButtonContainer: {
     marginTop: 12,
