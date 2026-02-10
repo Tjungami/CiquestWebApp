@@ -53,6 +53,9 @@ if ENV == "production" or HTTPS_ONLY:
     SECURE_HSTS_PRELOAD = True
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
+# Allow Google Identity Services popups to communicate with the opener window.
+SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin-allow-popups"
+
 
 # ============================================================
 # APPLICATIONS
