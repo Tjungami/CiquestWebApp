@@ -9,8 +9,6 @@ import {
   View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import * as WebBrowser from 'expo-web-browser';
-import * as Google from 'expo-auth-session/providers/google';
 import Constants from 'expo-constants';
 import colors from '../theme/colors';
 import { loginUser, loginWithGoogle } from '../api/auth';
@@ -20,8 +18,7 @@ import AeroBackground from '../components/AeroBackground';
 const EMAIL_MAX = 100;
 const PASSWORD_MAX = 64;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-WebBrowser.maybeCompleteAuthSession();
+const GOOGLE_SCRIPT_SRC = 'https://accounts.google.com/gsi/client';
 
 export default function LoginScreen({ navigation, route }) {
   const { login } = useAuth();
@@ -32,24 +29,15 @@ export default function LoginScreen({ navigation, route }) {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [googleDebugInfo, setGoogleDebugInfo] = useState('');
+  const [googleReady, setGoogleReady] = useState(false);
 
   const showGoogleDebug =
     Constants.expoConfig?.extra?.showGoogleDebug === true ||
     Constants.expoConfig?.extra?.showGoogleDebug === '1';
 
   const googleAuthConfig = Constants.expoConfig?.extra?.googleAuth || {};
-  const googleConfigured = Boolean(
-    googleAuthConfig.androidClientId ||
-      googleAuthConfig.iosClientId ||
-      googleAuthConfig.webClientId
-  );
-
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    androidClientId: googleAuthConfig.androidClientId,
-    iosClientId: googleAuthConfig.iosClientId,
-    webClientId: googleAuthConfig.webClientId,
-    scopes: ['profile', 'email'],
-  });
+  const googleClientId = googleAuthConfig.webClientId || '';
+  const googleConfigured = Boolean(googleClientId);
 
   const logGoogleDebug = (label, payload) => {
     let message = label;
@@ -82,45 +70,94 @@ export default function LoginScreen({ navigation, route }) {
     }
   };
 
-  useEffect(() => {
-    if (response?.type !== 'success') return;
-    const authenticate = async () => {
-      const idToken = response?.authentication?.idToken || '';
-      const accessToken = response?.authentication?.accessToken || '';
-      logGoogleDebug('auth-response', {
-        type: response?.type,
-        params: response?.params,
-        authentication: {
-          accessToken: Boolean(accessToken),
-          idToken: Boolean(idToken),
-          expiresIn: response?.authentication?.expiresIn ?? null,
-          tokenType: response?.authentication?.tokenType ?? null,
-        },
+  const handleGoogleCredential = async (credentialResponse) => {
+    const idToken = credentialResponse?.credential || '';
+    logGoogleDebug('gis-credential', {
+      hasCredential: Boolean(idToken),
+      selectBy: credentialResponse?.select_by || '',
+      clientId: googleClientId ? `${googleClientId.slice(0, 12)}...` : '',
+    });
+    if (!idToken) {
+      setError('Google認証に失敗しました。');
+      logGoogleError('missing-credential', null, credentialResponse || {});
+      return;
+    }
+    setGoogleLoading(true);
+    setError('');
+    try {
+      const data = await loginWithGoogle({ idToken, accessToken: '' });
+      const userData = data?.user ?? data ?? null;
+      login(userData, { access: data?.access, refresh: data?.refresh });
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Tabs' }],
       });
-      if (!idToken && !accessToken) {
-        setError('Google認証に失敗しました。');
-        logGoogleError('missing-tokens', null);
-        return;
-      }
-      setGoogleLoading(true);
-      setError('');
-      try {
-        const data = await loginWithGoogle({ idToken, accessToken });
-        const userData = data?.user ?? data ?? null;
-        login(userData, { access: data?.access, refresh: data?.refresh });
-        navigation.reset({
-          index: 0,
-          routes: [{ name: 'Tabs' }],
+    } catch (err) {
+      setError(err?.message || 'Googleログインに失敗しました。');
+      logGoogleError('login-with-google-failed', err);
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!googleConfigured) return;
+    if (typeof window === 'undefined') return;
+    let cancelled = false;
+
+    const loadScript = () =>
+      new Promise((resolve, reject) => {
+        if (window.google?.accounts?.id) {
+          resolve();
+          return;
+        }
+        const existing = document.getElementById('google-identity-service');
+        if (existing) {
+          existing.addEventListener('load', () => resolve(), { once: true });
+          existing.addEventListener(
+            'error',
+            () => reject(new Error('Google script load failed.')),
+            { once: true }
+          );
+          return;
+        }
+        const script = document.createElement('script');
+        script.id = 'google-identity-service';
+        script.src = GOOGLE_SCRIPT_SRC;
+        script.async = true;
+        script.defer = true;
+        script.onload = () => resolve();
+        script.onerror = () => reject(new Error('Google script load failed.'));
+        document.head.appendChild(script);
+      });
+
+    loadScript()
+      .then(() => {
+        if (cancelled) return;
+        if (!window.google?.accounts?.id) {
+          throw new Error('Google Identity Services is unavailable.');
+        }
+        window.google.accounts.id.initialize({
+          client_id: googleClientId,
+          callback: handleGoogleCredential,
+          auto_select: false,
+          cancel_on_tap_outside: true,
+          ux_mode: 'popup',
         });
-      } catch (err) {
-        setError(err?.message || 'Googleログインに失敗しました。');
-        logGoogleError('login-with-google-failed', err);
-      } finally {
-        setGoogleLoading(false);
-      }
+        setGoogleReady(true);
+        logGoogleDebug('gis-initialize', { clientId: googleClientId ? 'set' : 'missing' });
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setError('Googleログインの初期化に失敗しました。');
+        logGoogleError('gis-init-failed', err);
+        setGoogleReady(false);
+      });
+
+    return () => {
+      cancelled = true;
     };
-    void authenticate();
-  }, [login, navigation, response]);
+  }, [googleClientId, googleConfigured]);
 
   const handleLogin = async () => {
     if (loading) return;
@@ -165,14 +202,15 @@ export default function LoginScreen({ navigation, route }) {
     if (!googleConfigured) {
       setError('Googleログインが未設定です。');
       logGoogleError('google-not-configured', null, {
-        hasAndroidClientId: Boolean(googleAuthConfig.androidClientId),
-        hasIosClientId: Boolean(googleAuthConfig.iosClientId),
-        hasWebClientId: Boolean(googleAuthConfig.webClientId),
+        hasWebClientId: Boolean(googleClientId),
       });
       return;
     }
     try {
-      await promptAsync({ useProxy: Constants.appOwnership === 'expo' });
+      if (typeof window === 'undefined' || !googleReady || !window.google?.accounts?.id) {
+        throw new Error('Googleログインの準備ができていません。');
+      }
+      window.google.accounts.id.prompt();
     } catch (err) {
       setError(err?.message || 'Googleログインに失敗しました。');
       logGoogleError('prompt-async-failed', err);
@@ -250,10 +288,10 @@ export default function LoginScreen({ navigation, route }) {
           <TouchableOpacity
             style={[
               styles.googleButton,
-              (googleLoading || !googleConfigured || !request) && styles.googleButtonDisabled,
+              (googleLoading || !googleConfigured || !googleReady) && styles.googleButtonDisabled,
             ]}
             onPress={handleGoogleLogin}
-            disabled={googleLoading || !googleConfigured || !request}
+            disabled={googleLoading || !googleConfigured || !googleReady}
             accessibilityLabel="Googleでログイン"
           >
             <Ionicons name="logo-google" size={18} color={colors.textPrimary} />
