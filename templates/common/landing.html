@@ -124,6 +124,15 @@
         color: var(--ink);
       }
 
+      .cta.admin {
+        background: #111827;
+        color: #fff;
+      }
+
+      .is-hidden {
+        display: none;
+      }
+
       .note {
         margin-top: 36px;
         padding: 14px 18px;
@@ -145,7 +154,7 @@
     <main class="shell">
       <section class="hero">
         <div>
-          <h1>Ciquest はじめに</h1>
+          <h1 data-secret-trigger>Ciquest はじめに</h1>
           <p>
             ユーザー向けスマホ体験と、オーナー向け管理画面を分けてご案内します。
             目的に合わせて入口を選択してください。
@@ -173,8 +182,49 @@
           ユーザー向け画面はブラウザ版です。位置情報の権限が許可されない場合はアプリを利用できません。
           不正対策のため必須となります。
         </div>
+        <div class="note">
+          <a
+            id="admin-link"
+            class="cta admin is-hidden"
+            href="/operator/"
+            aria-hidden="true"
+          >
+            運営ログイン
+          </a>
+        </div>
       </section>
     </main>
+
+    <script>
+      (() => {
+        const trigger = document.querySelector('[data-secret-trigger]');
+        const adminLink = document.getElementById('admin-link');
+        if (!trigger || !adminLink) return;
+
+        let tapCount = 0;
+        let timer = null;
+
+        const reset = () => {
+          tapCount = 0;
+          if (timer) {
+            clearTimeout(timer);
+            timer = null;
+          }
+        };
+
+        trigger.addEventListener('click', () => {
+          tapCount += 1;
+          if (tapCount === 1) {
+            timer = setTimeout(reset, 2000);
+          }
+          if (tapCount >= 7) {
+            adminLink.classList.remove('is-hidden');
+            adminLink.setAttribute('aria-hidden', 'false');
+            reset();
+          }
+        });
+      })();
+    </script>
   </body>
-</html>
+</html>
 
