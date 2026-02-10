@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -30,6 +30,7 @@ export default function LoginScreen({ navigation, route }) {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [googleDebugInfo, setGoogleDebugInfo] = useState('');
   const [googleReady, setGoogleReady] = useState(false);
+  const googleInitPromiseRef = useRef(null);
 
   const showGoogleDebug =
     Constants.expoConfig?.extra?.showGoogleDebug === true ||
@@ -100,13 +101,12 @@ export default function LoginScreen({ navigation, route }) {
     }
   };
 
-  useEffect(() => {
-    if (!googleConfigured) return;
-    if (typeof window === 'undefined') return;
-    let cancelled = false;
-
-    const loadScript = () =>
-      new Promise((resolve, reject) => {
+  const ensureGoogleIdentity = (promptOnReady = false) => {
+    if (typeof window === 'undefined') {
+      return Promise.reject(new Error('Googleログインはブラウザでのみ利用できます。'));
+    }
+    if (!googleInitPromiseRef.current) {
+      googleInitPromiseRef.current = new Promise((resolve, reject) => {
         if (window.google?.accounts?.id) {
           resolve();
           return;
@@ -129,34 +129,49 @@ export default function LoginScreen({ navigation, route }) {
         script.onload = () => resolve();
         script.onerror = () => reject(new Error('Google script load failed.'));
         document.head.appendChild(script);
-      });
-
-    loadScript()
-      .then(() => {
-        if (cancelled) return;
-        if (!window.google?.accounts?.id) {
-          throw new Error('Google Identity Services is unavailable.');
-        }
-        window.google.accounts.id.initialize({
-          client_id: googleClientId,
-          callback: handleGoogleCredential,
-          auto_select: false,
-          cancel_on_tap_outside: true,
-          ux_mode: 'popup',
-        });
-        setGoogleReady(true);
-        logGoogleDebug('gis-initialize', { clientId: googleClientId ? 'set' : 'missing' });
       })
-      .catch((err) => {
-        if (cancelled) return;
-        setError('Googleログインの初期化に失敗しました。');
-        logGoogleError('gis-init-failed', err);
-        setGoogleReady(false);
-      });
+        .then(() => {
+          if (!window.google?.accounts?.id) {
+            throw new Error('Google Identity Services is unavailable.');
+          }
+          window.google.accounts.id.initialize({
+            client_id: googleClientId,
+            callback: handleGoogleCredential,
+            auto_select: false,
+            cancel_on_tap_outside: true,
+            ux_mode: 'popup',
+          });
+          setGoogleReady(true);
+          logGoogleDebug('gis-initialize', { clientId: googleClientId ? 'set' : 'missing' });
+        })
+        .catch((err) => {
+          setGoogleReady(false);
+          throw err;
+        });
+    }
 
-    return () => {
-      cancelled = true;
-    };
+    return googleInitPromiseRef.current.then(() => {
+      if (promptOnReady && window.google?.accounts?.id) {
+        window.google.accounts.id.prompt((notification) => {
+          logGoogleDebug('gis-prompt', {
+            displayed: notification.isDisplayed?.(),
+            skipped: notification.isSkippedMoment?.(),
+            dismissed: notification.isDismissedMoment?.(),
+            reason: notification.getDismissedReason?.(),
+            skippedReason: notification.getSkippedReason?.(),
+            notDisplayedReason: notification.getNotDisplayedReason?.(),
+          });
+        });
+      }
+    });
+  };
+
+  useEffect(() => {
+    if (!googleConfigured) return;
+    ensureGoogleIdentity(false).catch((err) => {
+      setError('Googleログインの初期化に失敗しました。');
+      logGoogleError('gis-init-failed', err);
+    });
   }, [googleClientId, googleConfigured]);
 
   const handleLogin = async () => {
@@ -207,13 +222,13 @@ export default function LoginScreen({ navigation, route }) {
       return;
     }
     try {
-      if (typeof window === 'undefined' || !googleReady || !window.google?.accounts?.id) {
-        throw new Error('Googleログインの準備ができていません。');
-      }
-      window.google.accounts.id.prompt();
+      setGoogleLoading(true);
+      await ensureGoogleIdentity(true);
     } catch (err) {
       setError(err?.message || 'Googleログインに失敗しました。');
       logGoogleError('prompt-async-failed', err);
+    } finally {
+      setGoogleLoading(false);
     }
   };
 
@@ -288,10 +303,10 @@ export default function LoginScreen({ navigation, route }) {
           <TouchableOpacity
             style={[
               styles.googleButton,
-              (googleLoading || !googleConfigured || !googleReady) && styles.googleButtonDisabled,
+              (googleLoading || !googleConfigured) && styles.googleButtonDisabled,
             ]}
             onPress={handleGoogleLogin}
-            disabled={googleLoading || !googleConfigured || !googleReady}
+            disabled={googleLoading || !googleConfigured}
             accessibilityLabel="Googleでログイン"
           >
             <Ionicons name="logo-google" size={18} color={colors.textPrimary} />
