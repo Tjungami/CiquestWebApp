@@ -153,7 +153,7 @@ export default function LoginScreen({ navigation, route }) {
               text: 'signin_with',
               shape: 'pill',
               logo_alignment: 'left',
-              width: 260,
+              width: 320,
             });
             setGoogleButtonRendered(true);
           }
@@ -511,7 +511,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     paddingVertical: 12,
-    paddingHorizontal: 16
+    paddingHorizontal: 16,
+    width: '100%',
+    maxWidth: 320,
+    alignSelf: 'center'
   },
   googleButtonDisabled: {
     opacity: 0.6
@@ -519,6 +522,7 @@ const styles = StyleSheet.create({
   googleButtonContainer: {
     marginTop: 12,
     minHeight: 44,
+    width: '100%',
     alignItems: 'center',
     justifyContent: 'center'
   },

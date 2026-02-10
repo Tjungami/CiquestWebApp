@@ -83,7 +83,7 @@ function Tabs() {
       tabBarPosition="bottom"
       screenOptions={({ route }) => ({
         headerShown: false,
-        swipeEnabled: true,
+        swipeEnabled: false,
         animationEnabled: true,
         tabBarActiveTintColor: colors.skyDeep,
         tabBarInactiveTintColor: '#7f8fa3',
