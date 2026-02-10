@@ -39,6 +39,8 @@ export default function LoginScreen({ navigation, route }) {
   const googleAuthConfig = Constants.expoConfig?.extra?.googleAuth || {};
   const googleClientId = googleAuthConfig.webClientId || '';
   const googleConfigured = Boolean(googleClientId);
+  const googleClientIdValid =
+    !googleClientId || googleClientId.endsWith('.apps.googleusercontent.com');
 
   const logGoogleDebug = (label, payload) => {
     let message = label;
@@ -153,14 +155,42 @@ export default function LoginScreen({ navigation, route }) {
     return googleInitPromiseRef.current.then(() => {
       if (promptOnReady && window.google?.accounts?.id) {
         window.google.accounts.id.prompt((notification) => {
+          const notDisplayed = notification.isNotDisplayed?.();
+          const skipped = notification.isSkippedMoment?.();
+          const dismissed = notification.isDismissedMoment?.();
+          const notDisplayedReason = notification.getNotDisplayedReason?.() || '';
+          const skippedReason = notification.getSkippedReason?.() || '';
+          const dismissedReason = notification.getDismissedReason?.() || '';
+
           logGoogleDebug('gis-prompt', {
             displayed: notification.isDisplayed?.(),
-            skipped: notification.isSkippedMoment?.(),
-            dismissed: notification.isDismissedMoment?.(),
-            reason: notification.getDismissedReason?.(),
-            skippedReason: notification.getSkippedReason?.(),
-            notDisplayedReason: notification.getNotDisplayedReason?.(),
+            skipped,
+            dismissed,
+            reason: dismissedReason,
+            skippedReason,
+            notDisplayedReason,
           });
+
+          if (notDisplayed) {
+            setError(
+              `Googleログインを表示できませんでした。${
+                notDisplayedReason ? `理由: ${notDisplayedReason}` : ''
+              }`.trim()
+            );
+            logGoogleError('gis-not-displayed', null, { notDisplayedReason });
+          } else if (skipped) {
+            setError(
+              `Googleログインがスキップされました。${
+                skippedReason ? `理由: ${skippedReason}` : ''
+              }`.trim()
+            );
+          } else if (dismissed) {
+            setError(
+              `Googleログインが閉じられました。${
+                dismissedReason ? `理由: ${dismissedReason}` : ''
+              }`.trim()
+            );
+          }
         });
       }
     });
@@ -218,6 +248,13 @@ export default function LoginScreen({ navigation, route }) {
       setError('Googleログインが未設定です。');
       logGoogleError('google-not-configured', null, {
         hasWebClientId: Boolean(googleClientId),
+      });
+      return;
+    }
+    if (!googleClientIdValid) {
+      setError('Googleログイン設定が不正です。管理者に確認してください。');
+      logGoogleError('invalid-client-id', null, {
+        googleClientId,
       });
       return;
     }
