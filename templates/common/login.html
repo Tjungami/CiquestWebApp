@@ -31,6 +31,14 @@
       <input type="password" name="password" id="password" autocomplete="current-password" required>
       <button type="submit">ログイン</button>
     </form>
+    <div class="oauth-divider"><span>or</span></div>
+    <a class="google-login" href="{% url 'google_owner_login' %}">
+      <img
+        src="{% static 'img/common/web_light_rd_SI@2x.png' %}"
+        alt="Googleでログイン"
+        class="google-btn"
+      >
+    </a>
     <div class="signup-button-wrapper">
       <a href="{% url 'signup' %}" class="signup-button">オーナー新規登録</a>
     </div>
