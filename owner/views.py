@@ -128,14 +128,31 @@ def dashboard(request):
     notices = _get_active_owner_notices()
     latest_notice = notices.first()
 
-    if request.method == "POST" and request.POST.get("form_type") == "inquiry":
-        return redirect("owner_inquiries")
+    return render(
+        request,
+        "owner/dashboard.html",
+        {
+            "owner": owner,
+            "store_count": stores.count(),
+            "approved_store_count": stores.filter(status="approved").count(),
+            "pending_store_count": stores.filter(status="pending").count(),
+            "notice_count": notices.count(),
+            "latest_notice": latest_notice,
+        },
+    )
 
-    # Store application form (default dashboard POST).
-    if request.method == "POST" and request.POST.get("form_type") != "inquiry":
+
+def owner_store_application(request):
+    owner_id = request.session.get("owner_id")
+    if not owner_id:
+        return redirect("login")
+
+    owner = get_object_or_404(StoreOwner, pk=owner_id)
+    if request.method == "POST":
         if not owner.contact_phone:
             messages.error(request, "店舗申請には連絡先電話番号が必要です。先にオーナー情報で電話番号を登録してください。")
             return redirect("owner_onboarding")
+
         application_form = StoreApplicationForm(request.POST)
         if application_form.is_valid():
             new_store = application_form.save(commit=False)
@@ -144,20 +161,34 @@ def dashboard(request):
             new_store.qr_code = _generate_unique_store_qr_code()
             new_store.save()
             messages.success(request, "店舗申請を受け付けました。審査結果をお待ちください。")
-            return redirect("owner_dashboard")
+            return redirect("owner_store_application")
         messages.error(request, f"Store application failed: {application_form.errors}")
     else:
         application_form = StoreApplicationForm()
 
     return render(
         request,
-        "owner/dashboard.html",
+        "owner/store_application.html",
+        {
+            "owner": owner,
+            "application_form": application_form,
+        },
+    )
+
+
+def owner_stores(request):
+    owner_id = request.session.get("owner_id")
+    if not owner_id:
+        return redirect("login")
+
+    owner = get_object_or_404(StoreOwner, pk=owner_id)
+    stores = Store.objects.filter(owner=owner).order_by("-created_at")
+    return render(
+        request,
+        "owner/stores.html",
         {
             "owner": owner,
             "stores": stores,
-            "application_form": application_form,
-            "notice_count": notices.count(),
-            "latest_notice": latest_notice,
         },
     )
 

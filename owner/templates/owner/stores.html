@@ -1,0 +1,59 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <link rel="icon" href="{% static 'img/common/CIquest.ico' %}" type="image/x-icon">
+  <meta charset="UTF-8">
+  <title>店舗一覧 | CiQuest</title>
+  <link rel="stylesheet" href="{% static 'css/owner/dashboard.css' %}">
+</head>
+<body>
+  <header class="owner-header">
+    <h1>店舗一覧</h1>
+    <div class="header-actions">
+      <a class="logout-link" href="{% url 'logout' %}">ログアウト</a>
+    </div>
+  </header>
+
+  <nav class="owner-menu" aria-label="オーナーメニュー">
+    <a class="owner-menu__link" href="{% url 'owner_dashboard' %}">ダッシュボード</a>
+    <a class="owner-menu__link" href="{% url 'owner_store_application' %}">店舗申請</a>
+    <a class="owner-menu__link is-active" href="{% url 'owner_stores' %}">店舗一覧</a>
+    <a class="owner-menu__link" href="{% url 'owner_notices' %}">お知らせ</a>
+    <a class="owner-menu__link" href="{% url 'owner_inquiries' %}">お問い合わせ</a>
+  </nav>
+
+  <main>
+    {% if messages %}
+      <ul class="messages">
+        {% for message in messages %}
+          <li class="{{ message.tags }}">{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    {% if stores %}
+      <div class="store-list">
+        {% for store in stores %}
+          <div class="store-card">
+            <h2>{{ store.name }}</h2>
+            <p>{{ store.address }}</p>
+            <p>ステータス:
+              {% if store.status == "approved" %}
+                <span class="approved">承認済み</span>
+              {% elif store.status == "pending" %}
+                <span class="pending">申請中</span>
+              {% else %}
+                <span class="rejected">却下</span>
+              {% endif %}
+            </p>
+            <a href="{% url 'owner_store_home' store.store_id %}" class="btn">この店舗を管理</a>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="empty-text">登録済みの店舗がありません。</p>
+    {% endif %}
+  </main>
+</body>
+</html>

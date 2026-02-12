@@ -1,4 +1,3 @@
-﻿<!-- C:\Users\j_tagami\CiquestWebApp\owner\templates\owner\dashboard.html -->
 {% load static %}
 <!DOCTYPE html>
 <html lang="ja">
@@ -15,6 +14,15 @@
       <a class="logout-link" href="{% url 'logout' %}">ログアウト</a>
     </div>
   </header>
+
+  <nav class="owner-menu" aria-label="オーナーメニュー">
+    <a class="owner-menu__link is-active" href="{% url 'owner_dashboard' %}">ダッシュボード</a>
+    <a class="owner-menu__link" href="{% url 'owner_store_application' %}">店舗申請</a>
+    <a class="owner-menu__link" href="{% url 'owner_stores' %}">店舗一覧</a>
+    <a class="owner-menu__link" href="{% url 'owner_notices' %}">お知らせ</a>
+    <a class="owner-menu__link" href="{% url 'owner_inquiries' %}">お問い合わせ</a>
+  </nav>
+
   <main>
     {% if messages %}
       <ul class="messages">
@@ -25,8 +33,14 @@
     {% endif %}
 
     <section class="shortcut-section">
-      <h2>メニュー</h2>
+      <h2>概要</h2>
       <div class="shortcut-grid">
+        <article class="shortcut-card">
+          <h3>店舗</h3>
+          <p class="shortcut-meta">{{ store_count }} 件</p>
+          <p class="shortcut-text">承認済み: {{ approved_store_count }} 件 / 申請中: {{ pending_store_count }} 件</p>
+          <a href="{% url 'owner_stores' %}" class="btn">店舗一覧へ</a>
+        </article>
         <article class="shortcut-card">
           <h3>お知らせ</h3>
           {% if latest_notice %}
@@ -39,102 +53,16 @@
         </article>
         <article class="shortcut-card">
           <h3>お問い合わせ</h3>
-          <p class="shortcut-text">質問や不具合報告は専用ページから送信できます。</p>
+          <p class="shortcut-text">運営への連絡は専用ページから送信できます。</p>
           <a href="{% url 'owner_inquiries' %}" class="btn">お問い合わせページへ</a>
+        </article>
+        <article class="shortcut-card">
+          <h3>店舗申請</h3>
+          <p class="shortcut-text">新規店舗の申請は専用フォームで行えます。</p>
+          <a href="{% url 'owner_store_application' %}" class="btn">店舗申請ページへ</a>
         </article>
       </div>
     </section>
-
-    <section class="store-application">
-      <h2>店舗申請</h2>
-      <p class="help-text">
-        必要事項を入力して申請してください。運営が確認し、承認後に店舗が有効になります。
-      </p>
-      <form method="post" class="application-form">
-        {% csrf_token %}
-        <input type="hidden" name="form_type" value="store_application">
-        {% if application_form.non_field_errors %}
-          <div class="form-errors">
-            {% for error in application_form.non_field_errors %}
-              <p>{{ error }}</p>
-            {% endfor %}
-          </div>
-        {% endif %}
-        <div class="form-grid">
-          <div class="form-field">
-            <label for="{{ application_form.name.id_for_label }}">店舗名（最大100文字）</label>
-            {{ application_form.name }}
-            {% if application_form.name.errors %}
-              <span class="error">{{ application_form.name.errors.0 }}</span>
-            {% endif %}
-          </div>
-          <div class="form-field">
-            <label for="{{ application_form.address.id_for_label }}">住所（最大255文字）</label>
-            {{ application_form.address }}
-            {% if application_form.address.errors %}
-              <span class="error">{{ application_form.address.errors.0 }}</span>
-            {% endif %}
-          </div>
-          <div class="form-field">
-            <label for="{{ application_form.phone.id_for_label }}">電話番号（最大30文字）</label>
-            {{ application_form.phone }}
-            {% if application_form.phone.errors %}
-              <span class="error">{{ application_form.phone.errors.0 }}</span>
-            {% endif %}
-          </div>
-          <div class="form-field">
-            <label for="{{ application_form.latlng.id_for_label }}">緯度・経度（カンマ区切り）</label>
-            {{ application_form.latlng }}
-            {{ application_form.latitude }}{{ application_form.longitude }}
-            {% if application_form.latlng.errors %}
-              <span class="error">{{ application_form.latlng.errors.0 }}</span>
-            {% endif %}
-            <p class="help-text">例: 36.558219721380816, 139.90246302270646</p>
-            <p class="help-text">
-              <a href="https://youtu.be/MeOihQEC68o" target="_blank" rel="noopener">取得方法はこちら</a>
-            </p>
-          </div>
-          <div class="form-field">
-            <label for="{{ application_form.business_hours.id_for_label }}">営業時間（最大100文字）</label>
-            {{ application_form.business_hours }}
-            {% if application_form.business_hours.errors %}
-              <span class="error">{{ application_form.business_hours.errors.0 }}</span>
-            {% endif %}
-          </div>
-          <div class="form-field full">
-            <label for="{{ application_form.store_description.id_for_label }}">店舗説明（最大500文字）</label>
-            {{ application_form.store_description }}
-            {% if application_form.store_description.errors %}
-              <span class="error">{{ application_form.store_description.errors.0 }}</span>
-            {% endif %}
-          </div>
-        </div>
-        <button type="submit" class="btn submit-btn">申請する</button>
-      </form>
-    </section>
-
-    {% if stores %}
-      <div class="store-list">
-        {% for store in stores %}
-          <div class="store-card">
-            <h2>{{ store.name }}</h2>
-            <p>{{ store.address }}</p>
-            <p>ステータス:
-              {% if store.status == "approved" %}
-                <span class="approved">承認済み</span>
-              {% elif store.status == "pending" %}
-                <span class="pending">申請中</span>
-              {% else %}
-                <span class="rejected">却下</span>
-              {% endif %}
-            </p>
-            <a href="{% url 'owner_store_home' store.store_id %}" class="btn">この店舗を管理</a>
-          </div>
-        {% endfor %}
-      </div>
-    {% else %}
-      <p>登録済みの店舗がありません。</p>
-    {% endif %}
   </main>
 </body>
 </html>

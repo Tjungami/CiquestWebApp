@@ -11,10 +11,18 @@
   <header class="owner-header">
     <h1>お問い合わせ</h1>
     <div class="header-actions">
-      <a class="header-link" href="{% url 'owner_dashboard' %}">ダッシュボードへ戻る</a>
       <a class="logout-link" href="{% url 'logout' %}">ログアウト</a>
     </div>
   </header>
+
+  <nav class="owner-menu" aria-label="オーナーメニュー">
+    <a class="owner-menu__link" href="{% url 'owner_dashboard' %}">ダッシュボード</a>
+    <a class="owner-menu__link" href="{% url 'owner_store_application' %}">店舗申請</a>
+    <a class="owner-menu__link" href="{% url 'owner_stores' %}">店舗一覧</a>
+    <a class="owner-menu__link" href="{% url 'owner_notices' %}">お知らせ</a>
+    <a class="owner-menu__link is-active" href="{% url 'owner_inquiries' %}">お問い合わせ</a>
+  </nav>
+
   <main>
     {% if messages %}
       <ul class="messages">

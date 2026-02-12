@@ -1,7 +1,4 @@
 /* C:\Users\j_tagami\CiquestWebApp\static\css\owner\dashboard.css */
-/* ==============================
-   店舗ダッシュボード画面
-   ============================== */
 
 body {
   font-family: "Helvetica Neue", Arial, sans-serif;
@@ -11,14 +8,13 @@ body {
   color: #333;
 }
 
-/* --- ヘッダー --- */
 header,
 .owner-header {
-  background: linear-gradient(90deg, #A7CEE6 0%, #89BDDE 100%);
+  background: linear-gradient(90deg, #a7cee6 0%, #89bdde 100%);
   color: #fff;
   text-align: center;
   padding: 18px 0;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 .owner-header {
@@ -33,7 +29,6 @@ header,
   right: 24px;
 }
 
-.header-link,
 .logout-link {
   display: inline-flex;
   align-items: center;
@@ -47,21 +42,53 @@ header,
   border: 1px solid rgba(255, 255, 255, 0.35);
 }
 
-.header-link:hover,
 .logout-link:hover {
   background: rgba(255, 255, 255, 0.35);
 }
 
-header h1 {
+header h1,
+.owner-header h1 {
   margin: 0;
   font-size: 1.8rem;
   letter-spacing: 0.03em;
 }
 
-/* --- メインコンテンツ --- */
+.owner-menu {
+  display: flex;
+  gap: 10px;
+  max-width: 1000px;
+  margin: 16px auto 0;
+  padding: 0 20px;
+  flex-wrap: wrap;
+}
+
+.owner-menu__link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 14px;
+  border-radius: 8px;
+  text-decoration: none;
+  border: 1px solid #d0dbe7;
+  background: #fff;
+  color: #275173;
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+
+.owner-menu__link:hover {
+  background: #eef5fb;
+}
+
+.owner-menu__link.is-active {
+  border-color: #0078d7;
+  background: #0078d7;
+  color: #fff;
+}
+
 main {
   max-width: 1000px;
-  margin: 40px auto;
+  margin: 24px auto 40px;
   padding: 0 20px;
 }
 
@@ -88,15 +115,19 @@ main {
   color: #c0392b;
 }
 
-.shortcut-section {
-  background: #ffffff;
+.shortcut-section,
+.notice-section,
+.store-application {
+  background: #fff;
   border-radius: 12px;
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
   padding: 24px;
   margin-bottom: 32px;
 }
 
-.shortcut-section h2 {
+.shortcut-section h2,
+.notice-section h2,
+.store-application h2 {
   margin-top: 0;
   color: #1f4e79;
 }
@@ -127,19 +158,7 @@ main {
 .shortcut-text {
   margin: 0;
   color: #4b5563;
-}
-
-.notice-section {
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
-  padding: 24px;
-  margin-bottom: 32px;
-}
-
-.notice-section h2 {
-  margin-top: 0;
-  color: #1f4e79;
+  line-height: 1.5;
 }
 
 .notice-list {
@@ -171,28 +190,14 @@ main {
 }
 
 .notice-body p {
-  text-align: left;
   margin: 0 0 10px;
+  text-align: left;
 }
 
 .notice-body h1,
 .notice-body h2,
 .notice-body h3 {
   margin-top: 16px;
-}
-
-.store-application {
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
-  padding: 24px;
-  margin-bottom: 32px;
-}
-
-.store-application h2 {
-  margin-top: 0;
-  margin-bottom: 8px;
-  color: #1f4e79;
 }
 
 .store-application .help-text {
@@ -239,7 +244,8 @@ main {
 }
 
 .form-field input:focus,
-.form-field textarea:focus {
+.form-field textarea:focus,
+.form-field select:focus {
   border-color: #89bdde;
   outline: none;
   box-shadow: 0 0 0 3px rgba(137, 189, 222, 0.3);
@@ -260,7 +266,6 @@ main {
   font-size: 0.9rem;
 }
 
-/* --- 店舗リスト --- */
 .empty-text {
   margin: 0;
   color: #6b7280;
@@ -274,7 +279,6 @@ main {
   gap: 24px;
 }
 
-/* --- 店舗カード --- */
 .store-card {
   background: #fff;
   border-radius: 12px;
@@ -303,23 +307,21 @@ main {
   color: #555;
 }
 
-/* --- ステータス表示 --- */
 .approved {
-  color: #27ae60; /* 緑 */
+  color: #27ae60;
   font-weight: bold;
 }
 
 .pending {
-  color: #f39c12; /* ゴールド */
+  color: #f39c12;
   font-weight: bold;
 }
 
 .rejected {
-  color: #e74c3c; /* 赤 */
+  color: #e74c3c;
   font-weight: bold;
 }
 
-/* --- ボタン --- */
 .btn {
   display: inline-block;
   text-align: center;
@@ -331,6 +333,8 @@ main {
   font-size: 1rem;
   text-decoration: none;
   transition: background 0.2s, transform 0.1s;
+  border: none;
+  cursor: pointer;
 }
 
 .btn:hover {
@@ -343,27 +347,30 @@ main {
   padding: 12px 24px;
 }
 
-/* --- 空リスト時 --- */
-main p {
-  text-align: center;
-  color: #777;
-  font-size: 1rem;
-  margin-top: 60px;
-}
-
-/* --- レスポンシブ --- */
 @media (max-width: 600px) {
   header h1,
   .owner-header h1 {
     font-size: 1.4rem;
   }
+
+  .owner-menu {
+    gap: 8px;
+  }
+
+  .owner-menu__link {
+    flex: 1 1 calc(50% - 8px);
+  }
+
   .header-actions {
     position: static;
+    justify-content: center;
     margin-top: 10px;
   }
+
   .store-card {
     padding: 16px;
   }
+
   .btn {
     font-size: 0.9rem;
   }

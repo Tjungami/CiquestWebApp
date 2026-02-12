@@ -1,0 +1,102 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <link rel="icon" href="{% static 'img/common/CIquest.ico' %}" type="image/x-icon">
+  <meta charset="UTF-8">
+  <title>店舗申請 | CiQuest</title>
+  <link rel="stylesheet" href="{% static 'css/owner/dashboard.css' %}">
+</head>
+<body>
+  <header class="owner-header">
+    <h1>店舗申請</h1>
+    <div class="header-actions">
+      <a class="logout-link" href="{% url 'logout' %}">ログアウト</a>
+    </div>
+  </header>
+
+  <nav class="owner-menu" aria-label="オーナーメニュー">
+    <a class="owner-menu__link" href="{% url 'owner_dashboard' %}">ダッシュボード</a>
+    <a class="owner-menu__link is-active" href="{% url 'owner_store_application' %}">店舗申請</a>
+    <a class="owner-menu__link" href="{% url 'owner_stores' %}">店舗一覧</a>
+    <a class="owner-menu__link" href="{% url 'owner_notices' %}">お知らせ</a>
+    <a class="owner-menu__link" href="{% url 'owner_inquiries' %}">お問い合わせ</a>
+  </nav>
+
+  <main>
+    {% if messages %}
+      <ul class="messages">
+        {% for message in messages %}
+          <li class="{{ message.tags }}">{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    <section class="store-application">
+      <p class="help-text">
+        必要事項を入力して申請してください。運営が確認し、承認後に店舗が有効になります。
+      </p>
+      <form method="post" class="application-form">
+        {% csrf_token %}
+        {% if application_form.non_field_errors %}
+          <div class="form-errors">
+            {% for error in application_form.non_field_errors %}
+              <p>{{ error }}</p>
+            {% endfor %}
+          </div>
+        {% endif %}
+        <div class="form-grid">
+          <div class="form-field">
+            <label for="{{ application_form.name.id_for_label }}">店舗名（最大100文字）</label>
+            {{ application_form.name }}
+            {% if application_form.name.errors %}
+              <span class="error">{{ application_form.name.errors.0 }}</span>
+            {% endif %}
+          </div>
+          <div class="form-field">
+            <label for="{{ application_form.address.id_for_label }}">住所（最大255文字）</label>
+            {{ application_form.address }}
+            {% if application_form.address.errors %}
+              <span class="error">{{ application_form.address.errors.0 }}</span>
+            {% endif %}
+          </div>
+          <div class="form-field">
+            <label for="{{ application_form.phone.id_for_label }}">電話番号（最大30文字）</label>
+            {{ application_form.phone }}
+            {% if application_form.phone.errors %}
+              <span class="error">{{ application_form.phone.errors.0 }}</span>
+            {% endif %}
+          </div>
+          <div class="form-field">
+            <label for="{{ application_form.latlng.id_for_label }}">緯度・経度（カンマ区切り）</label>
+            {{ application_form.latlng }}
+            {{ application_form.latitude }}{{ application_form.longitude }}
+            {% if application_form.latlng.errors %}
+              <span class="error">{{ application_form.latlng.errors.0 }}</span>
+            {% endif %}
+            <p class="help-text">例: 36.558219721380816, 139.90246302270646</p>
+            <p class="help-text">
+              <a href="https://youtu.be/MeOihQEC68o" target="_blank" rel="noopener">取得方法はこちら</a>
+            </p>
+          </div>
+          <div class="form-field">
+            <label for="{{ application_form.business_hours.id_for_label }}">営業時間（最大100文字）</label>
+            {{ application_form.business_hours }}
+            {% if application_form.business_hours.errors %}
+              <span class="error">{{ application_form.business_hours.errors.0 }}</span>
+            {% endif %}
+          </div>
+          <div class="form-field full">
+            <label for="{{ application_form.store_description.id_for_label }}">店舗説明（最大500文字）</label>
+            {{ application_form.store_description }}
+            {% if application_form.store_description.errors %}
+              <span class="error">{{ application_form.store_description.errors.0 }}</span>
+            {% endif %}
+          </div>
+        </div>
+        <button type="submit" class="btn submit-btn">申請する</button>
+      </form>
+    </section>
+  </main>
+</body>
+</html>
