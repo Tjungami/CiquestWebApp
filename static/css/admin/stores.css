@@ -81,6 +81,10 @@
   background: linear-gradient(120deg, #ff5f6d, #ffc371);
 }
 
+.pending-btn {
+  background: linear-gradient(120deg, #6dd5ed, #2193b0);
+}
+
 .delete-btn {
   background: linear-gradient(120deg, #ff5f5f, #ff9b9b);
 }

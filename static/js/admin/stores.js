@@ -51,8 +51,16 @@ async function loadStores(status) {
             ${
               status === "pending"
                 ? `
-                  <button class="approve-btn" data-store="${store.store_id}" data-next="approved">承認</button>
-                  <button class="reject-btn" data-store="${store.store_id}" data-next="rejected">却下</button>
+                  <button class="status-btn approve-btn" data-store="${store.store_id}" data-next="approved">承認</button>
+                  <button class="status-btn reject-btn" data-store="${store.store_id}" data-next="rejected">却下</button>
+                `
+                : ""
+            }
+            ${
+              status === "rejected"
+                ? `
+                  <button class="status-btn approve-btn" data-store="${store.store_id}" data-next="approved">承認</button>
+                  <button class="status-btn pending-btn" data-store="${store.store_id}" data-next="pending">申請に戻す</button>
                 `
                 : ""
             }
@@ -69,14 +77,12 @@ async function loadStores(status) {
       )
       .join("");
 
-    if (status === "pending") {
-      document.querySelectorAll(".store-actions button").forEach((btn) => {
-        btn.addEventListener("click", (event) => {
-          const target = event.currentTarget;
-          updateStatus(target.dataset.store, target.dataset.next);
-        });
+    document.querySelectorAll(".status-btn").forEach((btn) => {
+      btn.addEventListener("click", (event) => {
+        const target = event.currentTarget;
+        updateStatus(target.dataset.store, target.dataset.next);
       });
-    }
+    });
     if (status === "approved") {
       document.querySelectorAll(".delete-btn").forEach((btn) => {
         btn.addEventListener("click", (event) => {
