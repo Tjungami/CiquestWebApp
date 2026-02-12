@@ -52,18 +52,7 @@ def _generate_unique_store_qr_code():
             return code
 
 
-
-def login_view(request):
-    return redirect('login')
-
-def dashboard(request):
-    """オーナーダッシュボード"""
-    owner_id = request.session.get("owner_id")
-    if not owner_id:
-        return redirect("login")
-
-    owner = get_object_or_404(StoreOwner, pk=owner_id)
-    stores = Store.objects.filter(owner=owner).order_by("-created_at")
+def _get_active_owner_notices():
     now = timezone.now()
     notices = (
         Notice.objects.filter(
@@ -76,50 +65,71 @@ def dashboard(request):
     )
     for notice in notices:
         notice.body_html = mark_safe(render_markdown(notice.body_md))
+    return notices
 
-    # Inquiry form submission lives on the dashboard page.
-    if request.method == "POST" and request.POST.get("form_type") == "inquiry":
-        store_id = (request.POST.get("store_id") or "").strip()
-        category = (request.POST.get("category") or "").strip()
-        message = (request.POST.get("message") or "").strip()
-        related_challenge_id = (request.POST.get("related_challenge_id") or "").strip()
 
-        has_error = False
-        if not store_id or not category or not message:
-            messages.error(request, "お問い合わせは店舗・カテゴリ・内容が必須です。")
-            has_error = True
-        elif not store_id.isdigit():
-            messages.error(request, "店舗IDが不正です。")
+def _submit_owner_inquiry(request, owner):
+    store_id = (request.POST.get("store_id") or "").strip()
+    category = (request.POST.get("category") or "").strip()
+    message = (request.POST.get("message") or "").strip()
+    related_challenge_id = (request.POST.get("related_challenge_id") or "").strip()
+
+    has_error = False
+    if not store_id or not category or not message:
+        messages.error(request, "お問い合わせは店舗・カテゴリ・内容が必須です。")
+        has_error = True
+    elif not store_id.isdigit():
+        messages.error(request, "店舗IDが不正です。")
+        has_error = True
+    else:
+        store = Store.objects.filter(pk=int(store_id), owner=owner).first()
+        if not store:
+            messages.error(request, "指定した店舗が見つかりません。")
             has_error = True
         else:
-            store = Store.objects.filter(pk=int(store_id), owner=owner).first()
-            if not store:
-                messages.error(request, "指定した店舗が見つかりません。")
-                has_error = True
-            else:
-                related_challenge = None
-                if related_challenge_id:
-                    if not related_challenge_id.isdigit():
-                        messages.error(request, "関連チャレンジIDが不正です。")
-                        has_error = True
-                    else:
-                        related_challenge_id = int(related_challenge_id)
-                        related_challenge = Challenge.objects.filter(
-                            pk=related_challenge_id,
-                            store=store,
-                        ).first()
-                        if not related_challenge:
-                            messages.error(request, "指定したチャレンジが見つかりません。")
-                            has_error = True
-                if not has_error:
-                    AdminInquiry.objects.create(
+            related_challenge = None
+            if related_challenge_id:
+                if not related_challenge_id.isdigit():
+                    messages.error(request, "関連チャレンジIDが不正です。")
+                    has_error = True
+                else:
+                    related_challenge_id = int(related_challenge_id)
+                    related_challenge = Challenge.objects.filter(
+                        pk=related_challenge_id,
                         store=store,
-                        related_challenge=related_challenge,
-                        category=category,
-                        message=message,
-                    )
-                    messages.success(request, "お問い合わせを送信しました。")
-                    return redirect("owner_dashboard")
+                    ).first()
+                    if not related_challenge:
+                        messages.error(request, "指定したチャレンジが見つかりません。")
+                        has_error = True
+            if not has_error:
+                AdminInquiry.objects.create(
+                    store=store,
+                    related_challenge=related_challenge,
+                    category=category,
+                    message=message,
+                )
+                messages.success(request, "お問い合わせを送信しました。")
+                return True
+    return False
+
+
+
+def login_view(request):
+    return redirect('login')
+
+def dashboard(request):
+    """オーナーダッシュボード"""
+    owner_id = request.session.get("owner_id")
+    if not owner_id:
+        return redirect("login")
+
+    owner = get_object_or_404(StoreOwner, pk=owner_id)
+    stores = Store.objects.filter(owner=owner).order_by("-created_at")
+    notices = _get_active_owner_notices()
+    latest_notice = notices.first()
+
+    if request.method == "POST" and request.POST.get("form_type") == "inquiry":
+        return redirect("owner_inquiries")
 
     # Store application form (default dashboard POST).
     if request.method == "POST" and request.POST.get("form_type") != "inquiry":
@@ -146,7 +156,47 @@ def dashboard(request):
             "owner": owner,
             "stores": stores,
             "application_form": application_form,
+            "notice_count": notices.count(),
+            "latest_notice": latest_notice,
+        },
+    )
+
+
+def owner_notices(request):
+    owner_id = request.session.get("owner_id")
+    if not owner_id:
+        return redirect("login")
+
+    owner = get_object_or_404(StoreOwner, pk=owner_id)
+    notices = _get_active_owner_notices()
+
+    return render(
+        request,
+        "owner/notices.html",
+        {
+            "owner": owner,
             "notices": notices,
+        },
+    )
+
+
+def owner_inquiries(request):
+    owner_id = request.session.get("owner_id")
+    if not owner_id:
+        return redirect("login")
+
+    owner = get_object_or_404(StoreOwner, pk=owner_id)
+    stores = Store.objects.filter(owner=owner).order_by("-created_at")
+    if request.method == "POST":
+        if _submit_owner_inquiry(request, owner):
+            return redirect("owner_inquiries")
+
+    return render(
+        request,
+        "owner/inquiries.html",
+        {
+            "owner": owner,
+            "stores": stores,
         },
     )
 
@@ -628,7 +678,7 @@ def stats(request):
 
     ranking_qs = (
         cleared_qs.values("challenge__title")
-        .annotate(count=Count("id"))
+        .annotate(count=Count("pk"))
         .order_by("-count", "challenge__title")[:5]
     )
     ranking = [f"{item['challenge__title']}（{item['count']}件）" for item in ranking_qs]
@@ -639,7 +689,7 @@ def stats(request):
     history_qs = (
         StoreStampHistory.objects.filter(store=store, stamp_date__range=(start_date, today))
         .values("stamp_date")
-        .annotate(count=Count("id"))
+        .annotate(count=Count("pk"))
     )
     history_map = {item["stamp_date"]: item["count"] for item in history_qs}
     chart_labels = []

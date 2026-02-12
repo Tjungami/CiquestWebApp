@@ -1,0 +1,63 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <link rel="icon" href="{% static 'img/common/CIquest.ico' %}" type="image/x-icon">
+  <meta charset="UTF-8">
+  <title>お問い合わせ | CiQuest</title>
+  <link rel="stylesheet" href="{% static 'css/owner/dashboard.css' %}">
+</head>
+<body>
+  <header class="owner-header">
+    <h1>お問い合わせ</h1>
+    <div class="header-actions">
+      <a class="header-link" href="{% url 'owner_dashboard' %}">ダッシュボードへ戻る</a>
+      <a class="logout-link" href="{% url 'logout' %}">ログアウト</a>
+    </div>
+  </header>
+  <main>
+    {% if messages %}
+      <ul class="messages">
+        {% for message in messages %}
+          <li class="{{ message.tags }}">{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    <section class="store-application">
+      <p class="help-text">店舗に関するご質問や不具合は、こちらからご連絡ください。</p>
+      {% if stores %}
+        <form method="post" class="application-form">
+          {% csrf_token %}
+          <div class="form-grid">
+            <div class="form-field">
+              <label for="inquiryStore">店舗</label>
+              <select id="inquiryStore" name="store_id" required>
+                <option value="">店舗を選択</option>
+                {% for store in stores %}
+                  <option value="{{ store.store_id }}">{{ store.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-field">
+              <label for="inquiryCategory">カテゴリ（最大50文字）</label>
+              <input id="inquiryCategory" type="text" name="category" placeholder="例: 表示/QR" maxlength="50" required>
+            </div>
+            <div class="form-field full">
+              <label for="inquiryMessage">内容（最大500文字）</label>
+              <textarea id="inquiryMessage" name="message" rows="4" maxlength="500" required></textarea>
+            </div>
+            <div class="form-field">
+              <label for="inquiryChallenge">関連チャレンジID（任意）</label>
+              <input id="inquiryChallenge" type="text" name="related_challenge_id" placeholder="例: 123" maxlength="10">
+            </div>
+          </div>
+          <button type="submit" class="btn submit-btn">送信</button>
+        </form>
+      {% else %}
+        <p class="empty-text">お問い合わせ対象の店舗がありません。</p>
+      {% endif %}
+    </section>
+  </main>
+</body>
+</html>

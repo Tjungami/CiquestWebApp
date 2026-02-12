@@ -24,24 +24,26 @@
       </ul>
     {% endif %}
 
-    {% if notices %}
-      <section class="notice-section">
-        <h2>お知らせ</h2>
-        <div class="notice-list">
-          {% for notice in notices %}
-            <article class="notice-card">
-              <header>
-                <h3>{{ notice.title }}</h3>
-                <p class="notice-period">
-                  {{ notice.start_at|date:"Y/m/d H:i" }} 〜 {{ notice.end_at|date:"Y/m/d H:i" }}
-                </p>
-              </header>
-              <div class="notice-body">{{ notice.body_html }}</div>
-            </article>
-          {% endfor %}
-        </div>
-      </section>
-    {% endif %}
+    <section class="shortcut-section">
+      <h2>メニュー</h2>
+      <div class="shortcut-grid">
+        <article class="shortcut-card">
+          <h3>お知らせ</h3>
+          {% if latest_notice %}
+            <p class="shortcut-meta">公開中 {{ notice_count }} 件</p>
+            <p class="shortcut-text">{{ latest_notice.title }}</p>
+          {% else %}
+            <p class="shortcut-text">現在公開中のお知らせはありません。</p>
+          {% endif %}
+          <a href="{% url 'owner_notices' %}" class="btn">お知らせページへ</a>
+        </article>
+        <article class="shortcut-card">
+          <h3>お問い合わせ</h3>
+          <p class="shortcut-text">質問や不具合報告は専用ページから送信できます。</p>
+          <a href="{% url 'owner_inquiries' %}" class="btn">お問い合わせページへ</a>
+        </article>
+      </div>
+    </section>
 
     <section class="store-application">
       <h2>店舗申請</h2>
@@ -108,39 +110,6 @@
           </div>
         </div>
         <button type="submit" class="btn submit-btn">申請する</button>
-      </form>
-    </section>
-
-    <section class="store-application">
-      <h2>お問い合わせ</h2>
-      <p class="help-text">店舗に関するご質問や不具合は、こちらからご連絡ください。</p>
-      <form method="post" class="application-form">
-        {% csrf_token %}
-        <input type="hidden" name="form_type" value="inquiry">
-        <div class="form-grid">
-          <div class="form-field">
-            <label for="inquiryStore">店舗</label>
-            <select id="inquiryStore" name="store_id" required>
-              <option value="">店舗を選択</option>
-              {% for store in stores %}
-                <option value="{{ store.store_id }}">{{ store.name }}</option>
-              {% endfor %}
-            </select>
-          </div>
-          <div class="form-field">
-            <label for="inquiryCategory">カテゴリ（最大50文字）</label>
-            <input id="inquiryCategory" type="text" name="category" placeholder="例: 表示/QR" maxlength="50" required>
-          </div>
-          <div class="form-field full">
-            <label for="inquiryMessage">内容（最大500文字）</label>
-            <textarea id="inquiryMessage" name="message" rows="4" maxlength="500" required></textarea>
-          </div>
-          <div class="form-field">
-            <label for="inquiryChallenge">関連チャレンジID（任意）</label>
-            <input id="inquiryChallenge" type="text" name="related_challenge_id" placeholder="例: 123" maxlength="10">
-          </div>
-        </div>
-        <button type="submit" class="btn submit-btn">送信</button>
       </form>
     </section>
 
