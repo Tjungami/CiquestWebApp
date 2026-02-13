@@ -129,13 +129,13 @@ export default function App() {
     if (Platform.OS !== 'web') return;
     const warning =
       'もう一度戻るとログイン選択画面に戻ります。';
+    const exitUrl = new URL('/', window.location.origin).toString();
 
     const handlePopState = () => {
       const now = Date.now();
       if (now - webBackPressedAtRef.current <= 1800) {
         webBackPressedAtRef.current = 0;
-        window.removeEventListener('popstate', handlePopState);
-        window.history.back();
+        window.location.assign(exitUrl);
         return;
       }
       webBackPressedAtRef.current = now;
