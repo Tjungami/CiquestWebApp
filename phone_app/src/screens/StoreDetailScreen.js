@@ -18,10 +18,21 @@ import { useChallenges } from '../contexts/ChallengeContext';
 import { useAuth } from '../contexts/AuthContext';
 import AeroBackground from '../components/AeroBackground';
 
+function isSameLocalDay(value, now = new Date()) {
+  if (!value) return false;
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return false;
+  return (
+    parsed.getFullYear() === now.getFullYear() &&
+    parsed.getMonth() === now.getMonth() &&
+    parsed.getDate() === now.getDate()
+  );
+}
+
 export default function StoreDetailScreen({ navigation, route }) {
   const isFocused = useIsFocused();
   const { loggedIn } = useAuth();
-  const { startChallenge, clearedChallenges } = useChallenges();
+  const { startChallenge, activeChallenges, clearedChallenges } = useChallenges();
   const store = route?.params?.store ?? {};
   const name = store.name || '店舗名未設定';
   const description = store.description || '説明はまだありません。';
@@ -76,8 +87,8 @@ export default function StoreDetailScreen({ navigation, route }) {
       Alert.alert('確認', 'すでに受注中です。');
       return;
     }
-    if (result.reason === 'already_cleared') {
-      Alert.alert('確認', 'すでにクリア済みです。');
+    if (result.reason === 'already_cleared_today') {
+      Alert.alert('確認', 'このクエストは本日クリア済みのため、今日は受注できません。');
       return;
     }
     Alert.alert('エラー', 'クエストの受注に失敗しました。');
@@ -346,20 +357,41 @@ export default function StoreDetailScreen({ navigation, route }) {
           ) : (
             <View style={styles.challengeList}>
               {challenges.map((challenge) => {
+                const isInProgress = activeChallenges.some(
+                  (item) => String(item.id) === String(challenge.id)
+                );
+                const isClearedToday = clearedChallenges.some(
+                  (item) =>
+                    String(item.id) === String(challenge.id) &&
+                    isSameLocalDay(item.clearedAt)
+                );
                 const isCleared = clearedChallenges.some(
                   (item) => String(item.id) === String(challenge.id)
                 );
                 return (
                   <TouchableOpacity
                     key={challenge.id}
-                    style={[styles.challengeCard, isCleared && styles.challengeCardDisabled]}
+                    style={[
+                      styles.challengeCard,
+                      (isInProgress || isClearedToday) && styles.challengeCardDisabled,
+                    ]}
                     activeOpacity={0.85}
-                    disabled={isCleared}
+                    disabled={isInProgress || isClearedToday}
                     onPress={() => handleStartChallenge(challenge)}
                   >
                   <View style={styles.challengeHeader}>
                     <Text style={styles.challengeTitle}>{challenge.title}</Text>
-                    {isCleared && (
+                    {isInProgress && (
+                      <View style={styles.activePill}>
+                        <Text style={styles.activeText}>受注中</Text>
+                      </View>
+                    )}
+                    {!isInProgress && isClearedToday && (
+                      <View style={styles.clearedPill}>
+                        <Text style={styles.clearedText}>本日クリア済み</Text>
+                      </View>
+                    )}
+                    {!isInProgress && !isClearedToday && isCleared && (
                       <View style={styles.clearedPill}>
                         <Text style={styles.clearedText}>クリア済み</Text>
                       </View>
@@ -822,6 +854,17 @@ const styles = StyleSheet.create({
     backgroundColor: colors.skyDeep,
   },
   pointsText: {
+    color: '#fff',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  activePill: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 999,
+    backgroundColor: colors.skyDeep,
+  },
+  activeText: {
     color: '#fff',
     fontSize: 11,
     fontWeight: '700',

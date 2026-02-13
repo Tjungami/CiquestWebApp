@@ -2,6 +2,17 @@ import React, { createContext, useContext, useMemo, useState } from 'react';
 
 const ChallengeContext = createContext(null);
 
+function isSameLocalDay(dateA, dateB = new Date()) {
+  if (!dateA) return false;
+  const parsed = new Date(dateA);
+  if (Number.isNaN(parsed.getTime())) return false;
+  return (
+    parsed.getFullYear() === dateB.getFullYear() &&
+    parsed.getMonth() === dateB.getMonth() &&
+    parsed.getDate() === dateB.getDate()
+  );
+}
+
 function normalizeChallenge(input) {
   if (!input) return null;
   const id = String(input.id ?? input.challenge_id ?? input.challengeId ?? '');
@@ -50,12 +61,14 @@ export function ChallengeProvider({ children }) {
         };
         return prev;
       }
-      const clearedExisting = clearedChallenges.find((item) => item.id === normalized.id);
-      if (clearedExisting) {
+      const clearedToday = clearedChallenges.find(
+        (item) => item.id === normalized.id && isSameLocalDay(item.clearedAt)
+      );
+      if (clearedToday) {
         result = {
           created: false,
-          reason: 'already_cleared',
-          challenge: clearedExisting,
+          reason: 'already_cleared_today',
+          challenge: clearedToday,
         };
         return prev;
       }
