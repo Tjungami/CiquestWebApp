@@ -128,7 +128,7 @@ export default function App() {
   useEffect(() => {
     if (Platform.OS !== 'web') return;
     const warning =
-      'もう一度戻るとログイン選択画面に戻ります。';
+      '戻るボタンを押すとデータが初期化される可能性があります。もう一度戻るとログイン選択画面に戻ります。';
     const exitUrl = new URL('/', window.location.origin).toString();
 
     const handlePopState = () => {
