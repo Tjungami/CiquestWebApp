@@ -128,21 +128,22 @@ export default function App() {
   useEffect(() => {
     if (Platform.OS !== 'web') return;
     const warning =
-      'もう一度押すと前の画面に戻ります。';
+      'もう一度戻るとログイン選択画面に戻ります。';
 
-    const handlePopState = (event) => {
+    const handlePopState = () => {
       const now = Date.now();
       if (now - webBackPressedAtRef.current <= 1800) {
         webBackPressedAtRef.current = 0;
+        window.removeEventListener('popstate', handlePopState);
+        window.history.back();
         return;
       }
-      event.preventDefault();
-      window.history.pushState(null, '', window.location.href);
       webBackPressedAtRef.current = now;
       window.alert(warning);
+      window.history.pushState({ ciquestBackGuard: true }, '', window.location.href);
     };
 
-    window.history.pushState(null, '', window.location.href);
+    window.history.pushState({ ciquestBackGuard: true }, '', window.location.href);
     window.addEventListener('popstate', handlePopState);
     return () => {
       window.removeEventListener('popstate', handlePopState);
