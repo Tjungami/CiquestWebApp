@@ -5,14 +5,16 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import colors from '../theme/colors';
 import AeroBackground from '../components/AeroBackground';
+import { useDoubleBackPress } from '../hooks/useDoubleBackPress';
 
 export default function FullScanScreen() {
   const navigation = useNavigation();
+  const confirmBack = useDoubleBackPress();
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
 
   const handleClose = () => {
-    navigation.goBack();
+    confirmBack(() => navigation.goBack());
   };
 
   const handleBarcodeScanned = ({ data, type }) => {

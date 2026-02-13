@@ -5,15 +5,17 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import colors from '../theme/colors';
 import AeroBackground from '../components/AeroBackground';
+import { useDoubleBackPress } from '../hooks/useDoubleBackPress';
 
 export default function CouponUseScanScreen() {
   const navigation = useNavigation();
   const route = useRoute();
+  const confirmBack = useDoubleBackPress();
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
 
   const handleClose = () => {
-    navigation.goBack();
+    confirmBack(() => navigation.goBack());
   };
 
   const handleBarcodeScanned = ({ data }) => {

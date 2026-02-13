@@ -17,6 +17,7 @@ import { fetchChallenges, fetchStampSetting } from '../api/public';
 import { useChallenges } from '../contexts/ChallengeContext';
 import { useAuth } from '../contexts/AuthContext';
 import AeroBackground from '../components/AeroBackground';
+import { useDoubleBackPress } from '../hooks/useDoubleBackPress';
 
 function isSameLocalDay(value, now = new Date()) {
   if (!value) return false;
@@ -31,6 +32,7 @@ function isSameLocalDay(value, now = new Date()) {
 
 export default function StoreDetailScreen({ navigation, route }) {
   const isFocused = useIsFocused();
+  const confirmBack = useDoubleBackPress();
   const { loggedIn } = useAuth();
   const { startChallenge, activeChallenges, clearedChallenges } = useChallenges();
   const store = route?.params?.store ?? {};
@@ -159,6 +161,10 @@ export default function StoreDetailScreen({ navigation, route }) {
     Linking.openURL(website);
   };
 
+  const handleBackPress = () => {
+    confirmBack(() => navigation.goBack());
+  };
+
   useEffect(() => {
     let active = true;
 
@@ -232,7 +238,7 @@ export default function StoreDetailScreen({ navigation, route }) {
   return (
     <AeroBackground style={styles.container}>
       <View style={styles.headerRow}>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+        <TouchableOpacity style={styles.backButton} onPress={handleBackPress}>
           <Ionicons name="chevron-back" size={22} color={colors.textPrimary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>店舗詳細</Text>

@@ -4,11 +4,13 @@ import { Ionicons } from '@expo/vector-icons';
 import colors from '../theme/colors';
 import AeroBackground from '../components/AeroBackground';
 import { submitInquiry } from '../api/inquiries';
+import { useDoubleBackPress } from '../hooks/useDoubleBackPress';
 
 const SUBJECT_MAX = 50;
 const MESSAGE_MAX = 500;
 
 export default function SupportScreen({ navigation }) {
+  const confirmBack = useDoubleBackPress();
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
   const [sending, setSending] = useState(false);
@@ -35,10 +37,14 @@ export default function SupportScreen({ navigation }) {
     }
   };
 
+  const handleBackPress = () => {
+    confirmBack(() => navigation.goBack());
+  };
+
   return (
     <AeroBackground style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
+        <TouchableOpacity style={styles.backBtn} onPress={handleBackPress}>
           <Ionicons name="chevron-back" size={20} color={colors.textPrimary} />
           <Text style={styles.backText}>戻る</Text>
         </TouchableOpacity>

@@ -5,6 +5,7 @@ import { MaterialTopTabBar, createMaterialTopTabNavigator } from '@react-navigat
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
+import { Alert, BackHandler, Platform } from 'react-native';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { enableScreens } from 'react-native-screens';
 import * as SecureStore from 'expo-secure-store';
@@ -120,29 +121,59 @@ export default function App() {
   const [termsAccepted, setTermsAccepted] = useState(null);
   const [locationStatus, setLocationStatus] = useState(null);
   const [locationChecked, setLocationChecked] = useState(false);
-  const backWarnRef = useRef(false);
+  const navigationRef = useRef(null);
+  const webBackPressedAtRef = useRef(0);
+  const androidBackPressedAtRef = useRef(0);
 
   useEffect(() => {
     if (Platform.OS !== 'web') return;
     const warning =
-      '戻るボタンは利用できません。画面下のメニューをご利用ください。';
+      'もう一度押すと前の画面に戻ります。';
 
     const handlePopState = (event) => {
+      const now = Date.now();
+      if (now - webBackPressedAtRef.current <= 1800) {
+        webBackPressedAtRef.current = 0;
+        return;
+      }
       event.preventDefault();
       window.history.pushState(null, '', window.location.href);
-      if (!backWarnRef.current) {
-        backWarnRef.current = true;
-        window.alert(warning);
-        setTimeout(() => {
-          backWarnRef.current = false;
-        }, 1000);
-      }
+      webBackPressedAtRef.current = now;
+      window.alert(warning);
     };
 
     window.history.pushState(null, '', window.location.href);
     window.addEventListener('popstate', handlePopState);
     return () => {
       window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (Platform.OS !== 'android') return;
+
+    const handleHardwareBackPress = () => {
+      const navigation = navigationRef.current;
+      if (!navigation || !navigation.canGoBack()) {
+        return false;
+      }
+      const now = Date.now();
+      if (now - androidBackPressedAtRef.current <= 1800) {
+        androidBackPressedAtRef.current = 0;
+        navigation.goBack();
+        return true;
+      }
+      androidBackPressedAtRef.current = now;
+      Alert.alert('確認', 'もう一度押すと前の画面に戻ります。');
+      return true;
+    };
+
+    const subscription = BackHandler.addEventListener(
+      'hardwareBackPress',
+      handleHardwareBackPress
+    );
+    return () => {
+      subscription.remove();
     };
   }, []);
 
@@ -232,7 +263,7 @@ export default function App() {
     <SafeAreaProvider>
       <AuthProvider>
         <ChallengeProvider>
-          <NavigationContainer theme={navTheme}>
+          <NavigationContainer ref={navigationRef} theme={navTheme}>
             <StatusBar style="dark" />
             <Stack.Navigator
               screenOptions={{

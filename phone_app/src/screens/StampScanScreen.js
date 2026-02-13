@@ -7,16 +7,18 @@ import colors from '../theme/colors';
 import { isStampCooldownError, scanStoreStamp } from '../api/stamps';
 import { useAuth } from '../contexts/AuthContext';
 import AeroBackground from '../components/AeroBackground';
+import { useDoubleBackPress } from '../hooks/useDoubleBackPress';
 
 export default function StampScanScreen() {
   const navigation = useNavigation();
   const route = useRoute();
+  const confirmBack = useDoubleBackPress();
   const { loggedIn, addUserCoupon } = useAuth();
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
 
   const handleClose = () => {
-    navigation.goBack();
+    confirmBack(() => navigation.goBack());
   };
 
   const handleBarcodeScanned = async ({ data }) => {

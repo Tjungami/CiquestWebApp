@@ -17,6 +17,7 @@ import colors from '../theme/colors';
 import { loginUser, loginWithGoogle } from '../api/auth';
 import { useAuth } from '../contexts/AuthContext';
 import AeroBackground from '../components/AeroBackground';
+import { useDoubleBackPress } from '../hooks/useDoubleBackPress';
 
 const EMAIL_MAX = 100;
 const PASSWORD_MAX = 64;
@@ -27,6 +28,7 @@ WebBrowser.maybeCompleteAuthSession();
 
 export default function LoginScreen({ navigation, route }) {
   const { login } = useAuth();
+  const confirmBack = useDoubleBackPress();
   const [email, setEmail] = useState(route?.params?.email ?? '');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -131,6 +133,10 @@ export default function LoginScreen({ navigation, route }) {
     navigation.navigate('Register', { email: email.trim() });
   };
 
+  const handleBackPress = () => {
+    confirmBack(() => navigation.goBack());
+  };
+
   return (
     <AeroBackground style={styles.container}>
       <KeyboardAvoidingView
@@ -138,7 +144,7 @@ export default function LoginScreen({ navigation, route }) {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <View style={styles.header}>
-          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+          <TouchableOpacity style={styles.backButton} onPress={handleBackPress}>
             <Ionicons name="chevron-back" size={20} color={colors.textPrimary} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>ログイン</Text>

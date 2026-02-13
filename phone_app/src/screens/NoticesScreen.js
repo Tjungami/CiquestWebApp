@@ -12,6 +12,7 @@ import { useNavigation } from '@react-navigation/native';
 import colors from '../theme/colors';
 import { fetchNotices } from '../api/public';
 import AeroBackground from '../components/AeroBackground';
+import { useDoubleBackPress } from '../hooks/useDoubleBackPress';
 
 function formatDateTime(value) {
   if (!value) return '-';
@@ -32,6 +33,7 @@ function stripHtml(value) {
 
 export default function NoticesScreen() {
   const navigation = useNavigation();
+  const confirmBack = useDoubleBackPress();
   const [notices, setNotices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -55,10 +57,14 @@ export default function NoticesScreen() {
     loadNotices();
   }, [loadNotices]);
 
+  const handleBackPress = () => {
+    confirmBack(() => navigation.goBack());
+  };
+
   return (
     <AeroBackground style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+        <TouchableOpacity style={styles.backButton} onPress={handleBackPress}>
           <Ionicons name="chevron-back" size={20} color={colors.textPrimary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>お知らせ</Text>

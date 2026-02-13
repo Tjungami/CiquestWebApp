@@ -13,6 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import colors from '../theme/colors';
 import { registerUser } from '../api/auth';
 import AeroBackground from '../components/AeroBackground';
+import { useDoubleBackPress } from '../hooks/useDoubleBackPress';
 
 const USERNAME_MAX = 50;
 const EMAIL_MAX = 100;
@@ -20,6 +21,7 @@ const PASSWORD_MAX = 64;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function RegisterScreen({ navigation, route }) {
+  const confirmBack = useDoubleBackPress();
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState(route?.params?.email ?? '');
   const [password, setPassword] = useState('');
@@ -91,6 +93,10 @@ export default function RegisterScreen({ navigation, route }) {
     }
   };
 
+  const handleBackPress = () => {
+    confirmBack(() => navigation.goBack());
+  };
+
   return (
     <AeroBackground style={styles.container}>
       <KeyboardAvoidingView
@@ -98,7 +104,7 @@ export default function RegisterScreen({ navigation, route }) {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+        <TouchableOpacity style={styles.backButton} onPress={handleBackPress}>
           <Ionicons name="chevron-back" size={20} color={colors.textPrimary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>新規登録</Text>

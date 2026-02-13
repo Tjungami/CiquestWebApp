@@ -3,10 +3,15 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import colors from '../theme/colors';
 import AeroBackground from '../components/AeroBackground';
+import { useDoubleBackPress } from '../hooks/useDoubleBackPress';
 
 export default function StampRewardScreen({ navigation, route }) {
+  const confirmBack = useDoubleBackPress();
   const storeName = route?.params?.storeName || '店舗';
   const rewardDetail = route?.params?.rewardDetail || 'サービス';
+  const handleBackPress = () => {
+    confirmBack(() => navigation.goBack());
+  };
 
   return (
     <AeroBackground style={styles.container}>
@@ -23,7 +28,7 @@ export default function StampRewardScreen({ navigation, route }) {
 
       <TouchableOpacity
         style={styles.primaryButton}
-        onPress={() => navigation.goBack()}
+        onPress={handleBackPress}
       >
         <Text style={styles.primaryText}>閉じる</Text>
       </TouchableOpacity>
